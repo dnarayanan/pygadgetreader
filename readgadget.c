@@ -139,6 +139,42 @@ assign_type()
   */
 }
 
+
+char* Value;
+int value;
+/*######################### READ HEADER ########################################*/
+static PyObject *
+readhead(PyObject *self, PyObject *args)
+{
+ if(!PyArg_ParseTuple(args,"sii",&filename,&NumFiles,&Value)){
+    PyErr_Format(PyExc_TypeError,"incorrect number of arguments - correct syntax is (filename,# of Files,'value'(time,redshift,flag_sfr,flag_feedback,flag_cooling,boxsize,O0,Ol,H,flagage,flagmetals)");
+    return NULL;
+  }
+
+ j=0;
+ read_header();
+ fclose(infp);
+
+ value=Value;
+
+ if(value==1) return Py_BuildValue("d",header.time);
+ if(value==5) return Py_BuildValue("d",header.redshift);
+ /*
+ return Py_BuildValue("i",header.flag_sfr);
+ return Py_BuildValue("i",header.flag_feedback);
+ return Py_BuildValue("i",header.flag_cooling);
+ return Py_BuildValue("d",header.BoxSize);
+ */
+ if(value==2) return Py_BuildValue("d",header.Omega0);
+ if(value==3) return Py_BuildValue("d",header.OmegaLambda);
+ if(value==4) return Py_BuildValue("d",header.HubbleParam);
+ /*
+ return Py_BuildValue("d",header.flag_stellarage);
+ return Py_BuildValue("d",header.flag_metals);
+ */
+}
+
+
 /*######################### POS ########################################*/
 static PyObject *
 readpos(PyObject *self, PyObject *args)
@@ -1132,7 +1168,8 @@ PyMethodDef methods[] = {
   {"readHSML",readHSML,METH_VARARGS, "reads smoothing length of SPH particles from gadget snapshot"},
   {"readSFR",readSFR,METH_VARARGS, "reads SFR of gas particles from gadget snapshot"},
   {"readage",readage,METH_VARARGS, "reads scale factor for each star @ formation time from gadget snapshot"},
-  {"readZ",readZ,METH_VARARGS, "reads metallicity of gas & star particles from gadget snapshot"} 
+  {"readZ",readZ,METH_VARARGS, "reads metallicity of gas & star particles from gadget snapshot"}, 
+  {"readhead",readhead,METH_VARARGS, "reads and returns requested header info from gadget snapshot"} 
 };
 
 PyMODINIT_FUNC
