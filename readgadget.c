@@ -349,7 +349,7 @@ readmass(PyObject *self, PyObject *args)
     Skip; //skip before MASS
     //seek past particle groups not interested in
     for(i=1;i<=type;i++){
-      if(header.mass[i]==0.0){
+      if(header.mass[i]==0.0 && header.npart[i]>0){
       fseek(infp,header.npart[i-1]*sizeof(float),SEEK_CUR);
       }
     }
@@ -444,13 +444,695 @@ readu(PyObject *self, PyObject *args)
 }
 
 
+/*######################### RHO ########################################*/
+static PyObject *
+readrho(PyObject *self, PyObject *args)
+{  
+  PyArrayObject *array;
+  float *data;
+  int ndim = 1;
+
+  if(!PyArg_ParseTuple(args,"sis",&filename,&NumFiles,&Type)){
+    PyErr_Format(PyExc_TypeError,"incorrect number of arguments - correct syntax is (filename,# of Files,'particle type' (gas,dm,disk,bulge,stars,bndry)");
+    return NULL;
+  }
+  int i;
+  int n;
+  int pc = 0;
+  //  int index = 0;
+  //int count = 0;
+  for(j=0;j<NumFiles;j++){
+    read_header();
+    if(Ngas==0){
+      PyErr_Format(PyExc_IndexError,"Ngas=0 - No density to read!");
+      return NULL;
+    }
+    if(j==0){
+      assign_type();
+      if(type!=0){
+	PyErr_Format(PyExc_IndexError,"Density can only be read for gas!!");
+	return NULL;
+      }
+      npy_intp dims[1]={header.npartTotal[type]};
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_FLOAT);
+    }
+
+    data=(float*)malloc(header.npart[type]*sizeof(float));
+
+    //skip positions
+    Skip;
+    fseek(infp,Ntotal_local*sizeof(float)*3,SEEK_CUR);
+    Skip;
+
+    //skip velocities
+    Skip;
+    fseek(infp,Ntotal_local*sizeof(float)*3,SEEK_CUR);
+    Skip;
+    
+    //skip PIDs
+    Skip;
+    fseek(infp,Ntotal_local*sizeof(int),SEEK_CUR);
+    Skip;
+
+    //skip MASS 
+    Skip;
+    for(i=0;i<6;i++){
+      if(header.npart[i]>0 && header.mass[i]==0.0){
+	fseek(infp,header.npart[i]*sizeof(float),SEEK_CUR);
+      }
+    }
+    Skip;
+
+    //skip U
+    Skip;
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    Skip;
+
+    Skip; //skip before RHO
+    fread(data,header.npart[type]*sizeof(float),1,infp);
+    Skip; //skip after RHO
+    fclose(infp);
+
+    //count = count + header.npart[type];
+    for(n=0;n<header.npart[type];n++)
+      {
+	MDATA(array,pc) = data[n];
+	pc++;
+      }
+  }
+  return PyArray_Return(array);
+}
+
+
+
+/*######################### NE ########################################*/
+static PyObject *
+readNE(PyObject *self, PyObject *args)
+{  
+  PyArrayObject *array;
+  float *data;
+  int ndim = 1;
+
+  if(!PyArg_ParseTuple(args,"sis",&filename,&NumFiles,&Type)){
+    PyErr_Format(PyExc_TypeError,"incorrect number of arguments - correct syntax is (filename,# of Files,'particle type' (gas,dm,disk,bulge,stars,bndry)");
+    return NULL;
+  }
+  int i;
+  int n;
+  int pc = 0;
+  //  int index = 0;
+  //int count = 0;
+  for(j=0;j<NumFiles;j++){
+    read_header();
+    if(Ngas==0){
+      PyErr_Format(PyExc_IndexError,"Ngas=0 - No NE to read!");
+      return NULL;
+    }
+    if(j==0){
+      assign_type();
+      if(type!=0){
+	PyErr_Format(PyExc_IndexError,"NE can only be read for gas!!");
+	return NULL;
+      }
+      npy_intp dims[1]={header.npartTotal[type]};
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_FLOAT);
+    }
+
+    data=(float*)malloc(header.npart[type]*sizeof(float));
+
+    //skip positions
+    Skip;
+    fseek(infp,Ntotal_local*sizeof(float)*3,SEEK_CUR);
+    Skip;
+
+    //skip velocities
+    Skip;
+    fseek(infp,Ntotal_local*sizeof(float)*3,SEEK_CUR);
+    Skip;
+    
+    //skip PIDs
+    Skip;
+    fseek(infp,Ntotal_local*sizeof(int),SEEK_CUR);
+    Skip;
+
+    //skip MASS 
+    Skip;
+    for(i=0;i<6;i++){
+      if(header.npart[i]>0 && header.mass[i]==0.0){
+	fseek(infp,header.npart[i]*sizeof(float),SEEK_CUR);
+      }
+    }
+    Skip;
+
+    //skip U
+    Skip;
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    Skip;
+
+    //skip RHO
+    Skip;
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    Skip;
+
+    Skip; //skip before NE
+    fread(data,header.npart[type]*sizeof(float),1,infp);
+    Skip; //skip after NE
+    fclose(infp);
+
+    //count = count + header.npart[type];
+    for(n=0;n<header.npart[type];n++)
+      {
+	MDATA(array,pc) = data[n];
+	pc++;
+      }
+  }
+  return PyArray_Return(array);
+}
+
+
+/*######################### NH ########################################*/
+static PyObject *
+readNH(PyObject *self, PyObject *args)
+{  
+  PyArrayObject *array;
+  float *data;
+  int ndim = 1;
+
+  if(!PyArg_ParseTuple(args,"sis",&filename,&NumFiles,&Type)){
+    PyErr_Format(PyExc_TypeError,"incorrect number of arguments - correct syntax is (filename,# of Files,'particle type' (gas,dm,disk,bulge,stars,bndry)");
+    return NULL;
+  }
+  int i;
+  int n;
+  int pc = 0;
+  //  int index = 0;
+  //int count = 0;
+  for(j=0;j<NumFiles;j++){
+    read_header();
+    if(Ngas==0){
+      PyErr_Format(PyExc_IndexError,"Ngas=0 - No NH to read!");
+      return NULL;
+    }
+    if(j==0){
+      assign_type();
+      if(type!=0){
+	PyErr_Format(PyExc_IndexError,"NH can only be read for gas!!");
+	return NULL;
+      }
+      npy_intp dims[1]={header.npartTotal[type]};
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_FLOAT);
+    }
+
+    data=(float*)malloc(header.npart[type]*sizeof(float));
+
+    //skip positions
+    Skip;
+    fseek(infp,Ntotal_local*sizeof(float)*3,SEEK_CUR);
+    Skip;
+
+    //skip velocities
+    Skip;
+    fseek(infp,Ntotal_local*sizeof(float)*3,SEEK_CUR);
+    Skip;
+    
+    //skip PIDs
+    Skip;
+    fseek(infp,Ntotal_local*sizeof(int),SEEK_CUR);
+    Skip;
+
+    //skip MASS 
+    Skip;
+    for(i=0;i<6;i++){
+      if(header.npart[i]>0 && header.mass[i]==0.0){
+	fseek(infp,header.npart[i]*sizeof(float),SEEK_CUR);
+      }
+    }
+    Skip;
+
+    //skip U
+    Skip;
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    Skip;
+
+    //skip RHO
+    Skip;
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    Skip;
+
+    //skip NE
+    Skip;
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    Skip;
+
+    Skip; //skip before NH
+    fread(data,header.npart[type]*sizeof(float),1,infp);
+    Skip; //skip after NH
+    fclose(infp);
+
+    //count = count + header.npart[type];
+    for(n=0;n<header.npart[type];n++)
+      {
+	MDATA(array,pc) = data[n];
+	pc++;
+      }
+  }
+  return PyArray_Return(array);
+}
+
+
+/*######################### HSML ########################################*/
+static PyObject *
+readHSML(PyObject *self, PyObject *args)
+{  
+  PyArrayObject *array;
+  float *data;
+  int ndim = 1;
+
+  if(!PyArg_ParseTuple(args,"sis",&filename,&NumFiles,&Type)){
+    PyErr_Format(PyExc_TypeError,"incorrect number of arguments - correct syntax is (filename,# of Files,'particle type' (gas,dm,disk,bulge,stars,bndry)");
+    return NULL;
+  }
+  int i;
+  int n;
+  int pc = 0;
+  //  int index = 0;
+  //int count = 0;
+  for(j=0;j<NumFiles;j++){
+    read_header();
+    if(Ngas==0){
+      PyErr_Format(PyExc_IndexError,"Ngas=0 - No HSML to read!");
+      return NULL;
+    }
+    if(j==0){
+      assign_type();
+      if(type!=0){
+	PyErr_Format(PyExc_IndexError,"HSML can only be read for gas!!");
+	return NULL;
+      }
+      npy_intp dims[1]={header.npartTotal[type]};
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_FLOAT);
+    }
+
+    data=(float*)malloc(header.npart[type]*sizeof(float));
+
+    //skip positions
+    Skip;
+    fseek(infp,Ntotal_local*sizeof(float)*3,SEEK_CUR);
+    Skip;
+
+    //skip velocities
+    Skip;
+    fseek(infp,Ntotal_local*sizeof(float)*3,SEEK_CUR);
+    Skip;
+    
+    //skip PIDs
+    Skip;
+    fseek(infp,Ntotal_local*sizeof(int),SEEK_CUR);
+    Skip;
+
+    //skip MASS 
+    Skip;
+    for(i=0;i<6;i++){
+      if(header.npart[i]>0 && header.mass[i]==0.0){
+	fseek(infp,header.npart[i]*sizeof(float),SEEK_CUR);
+      }
+    }
+    Skip;
+
+    //skip U
+    Skip;
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    Skip;
+
+    //skip RHO
+    Skip;
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    Skip;
+
+    //skip NE
+    Skip;
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    Skip;
+
+    //skip NH
+    Skip;
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    Skip;
+
+    Skip; //skip before HSML
+    fread(data,header.npart[type]*sizeof(float),1,infp);
+    Skip; //skip after HSML
+    fclose(infp);
+
+    //count = count + header.npart[type];
+    for(n=0;n<header.npart[type];n++)
+      {
+	MDATA(array,pc) = data[n];
+	pc++;
+      }
+  }
+  return PyArray_Return(array);
+}
+
+
+/*######################### SFR ########################################*/
+static PyObject *
+readSFR(PyObject *self, PyObject *args)
+{  
+  PyArrayObject *array;
+  float *data;
+  int ndim = 1;
+
+  if(!PyArg_ParseTuple(args,"sis",&filename,&NumFiles,&Type)){
+    PyErr_Format(PyExc_TypeError,"incorrect number of arguments - correct syntax is (filename,# of Files,'particle type' (gas,dm,disk,bulge,stars,bndry)");
+    return NULL;
+  }
+  int i;
+  int n;
+  int pc = 0;
+  //  int index = 0;
+  //int count = 0;
+  for(j=0;j<NumFiles;j++){
+    read_header();
+    if(Ngas==0){
+      PyErr_Format(PyExc_IndexError,"Ngas=0 - No SFR to read!");
+      return NULL;
+    }
+    if(j==0){
+      assign_type();
+      if(type!=0){
+	PyErr_Format(PyExc_IndexError,"SFR can only be read for gas!!");
+	return NULL;
+      }
+      npy_intp dims[1]={header.npartTotal[type]};
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_FLOAT);
+    }
+
+    data=(float*)malloc(header.npart[type]*sizeof(float));
+
+    //skip positions
+    Skip;
+    fseek(infp,Ntotal_local*sizeof(float)*3,SEEK_CUR);
+    Skip;
+
+    //skip velocities
+    Skip;
+    fseek(infp,Ntotal_local*sizeof(float)*3,SEEK_CUR);
+    Skip;
+    
+    //skip PIDs
+    Skip;
+    fseek(infp,Ntotal_local*sizeof(int),SEEK_CUR);
+    Skip;
+
+    //skip MASS 
+    Skip;
+    for(i=0;i<6;i++){
+      if(header.npart[i]>0 && header.mass[i]==0.0){
+	fseek(infp,header.npart[i]*sizeof(float),SEEK_CUR);
+      }
+    }
+    Skip;
+
+    //skip U
+    Skip;
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    Skip;
+
+    //skip RHO
+    Skip;
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    Skip;
+
+    //skip NE
+    Skip;
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    Skip;
+
+    //skip NH
+    Skip;
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    Skip;
+
+    //skip HSML
+    Skip;
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    Skip;
+
+    Skip; //skip before SFR
+    fread(data,header.npart[type]*sizeof(float),1,infp);
+    Skip; //skip after SFR
+    fclose(infp);
+
+    //count = count + header.npart[type];
+    for(n=0;n<header.npart[type];n++)
+      {
+	MDATA(array,pc) = data[n];
+	pc++;
+      }
+  }
+  return PyArray_Return(array);
+}
+
+
+/*######################### AGE ########################################*/
+static PyObject *
+readage(PyObject *self, PyObject *args)
+{  
+  PyArrayObject *array;
+  float *data;
+  int ndim = 1;
+
+  if(!PyArg_ParseTuple(args,"sis",&filename,&NumFiles,&Type)){
+    PyErr_Format(PyExc_TypeError,"incorrect number of arguments - correct syntax is (filename,# of Files,'particle type' (gas,dm,disk,bulge,stars,bndry)");
+    return NULL;
+  }
+  int i;
+  int n;
+  int pc = 0;
+  //  int index = 0;
+  //int count = 0;
+  for(j=0;j<NumFiles;j++){
+    read_header();
+    if(Nstar==0){
+      PyErr_Format(PyExc_IndexError,"Nstar=0 - No stars to read!");
+      return NULL;
+    }
+    if(j==0){
+      assign_type();
+      if(type!=4){
+	PyErr_Format(PyExc_IndexError,"Age can only be read for stars!!");
+	return NULL;
+      }
+      npy_intp dims[1]={header.npartTotal[type]};
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_FLOAT);
+    }
+
+    data=(float*)malloc(header.npart[type]*sizeof(float));
+
+    //skip positions
+    Skip;
+    fseek(infp,Ntotal_local*sizeof(float)*3,SEEK_CUR);
+    Skip;
+
+    //skip velocities
+    Skip;
+    fseek(infp,Ntotal_local*sizeof(float)*3,SEEK_CUR);
+    Skip;
+    
+    //skip PIDs
+    Skip;
+    fseek(infp,Ntotal_local*sizeof(int),SEEK_CUR);
+    Skip;
+
+    //skip MASS 
+    Skip;
+    for(i=0;i<6;i++){
+      if(header.npart[i]>0 && header.mass[i]==0.0){
+	fseek(infp,header.npart[i]*sizeof(float),SEEK_CUR);
+      }
+    }
+    Skip;
+
+    //skip U
+    Skip;
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    Skip;
+
+    //skip RHO
+    Skip;
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    Skip;
+
+    //skip NE
+    Skip;
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    Skip;
+
+    //skip NH
+    Skip;
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    Skip;
+
+    //skip HSML
+    Skip;
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    Skip;
+
+    //skip SFR
+    Skip;
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    Skip;
+
+    Skip; //skip before AGE
+    fread(data,header.npart[type]*sizeof(float),1,infp);
+    Skip; //skip after AGE
+    fclose(infp);
+
+    //count = count + header.npart[type];
+    for(n=0;n<header.npart[type];n++)
+      {
+	MDATA(array,pc) = data[n];
+	pc++;
+      }
+  }
+  return PyArray_Return(array);
+}
+
+
+/*######################### Z ########################################*/
+static PyObject *
+readZ(PyObject *self, PyObject *args)
+{  
+  PyArrayObject *array;
+  float *data;
+  int ndim = 1;
+
+  if(!PyArg_ParseTuple(args,"sis",&filename,&NumFiles,&Type)){
+    PyErr_Format(PyExc_TypeError,"incorrect number of arguments - correct syntax is (filename,# of Files,'particle type' (gas,dm,disk,bulge,stars,bndry)");
+    return NULL;
+  }
+  int i;
+  int n;
+  int pc = 0;
+  //  int index = 0;
+  //int count = 0;
+  for(j=0;j<NumFiles;j++){
+    read_header();
+    if(Ngas==0 && Nstar==0){
+      PyErr_Format(PyExc_IndexError,"Nstar=0 and Ngas=0 - No metallicity to read!");
+      return NULL;
+    }
+    if(j==0){
+      assign_type();
+      if(type!=0 && type!=4){
+	PyErr_Format(PyExc_IndexError,"Z can only be read for gas & stars!!");
+	return NULL;
+      }
+      npy_intp dims[1]={header.npartTotal[type]};
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_FLOAT);
+    }
+
+    data=(float*)malloc(header.npart[type]*sizeof(float));
+
+    //skip positions
+    Skip;
+    fseek(infp,Ntotal_local*sizeof(float)*3,SEEK_CUR);
+    Skip;
+
+    //skip velocities
+    Skip;
+    fseek(infp,Ntotal_local*sizeof(float)*3,SEEK_CUR);
+    Skip;
+    
+    //skip PIDs
+    Skip;
+    fseek(infp,Ntotal_local*sizeof(int),SEEK_CUR);
+    Skip;
+
+    //skip MASS 
+    Skip;
+    for(i=0;i<6;i++){
+      if(header.npart[i]>0 && header.mass[i]==0.0){
+	fseek(infp,header.npart[i]*sizeof(float),SEEK_CUR);
+      }
+    }
+    Skip;
+
+    //skip U
+    Skip;
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    Skip;
+
+    //skip RHO
+    Skip;
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    Skip;
+
+    //skip NE
+    Skip;
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    Skip;
+
+    //skip NH
+    Skip;
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    Skip;
+
+    //skip HSML
+    Skip;
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    Skip;
+
+    //skip SFR
+    Skip;
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    Skip;
+
+    //skip AGE if stars exist
+    if(Nstar>0){
+      Skip;
+      fseek(infp,header.npart[4]*sizeof(float),SEEK_CUR);
+      Skip;
+    }
+
+    Skip; //skip before Z
+    if(type==0){
+      fread(data,header.npart[type]*sizeof(float),1,infp);
+    }
+    else{
+      fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+      fread(data,header.npart[type]*sizeof(float),1,infp);
+    }
+    Skip; //skip after Z
+    fclose(infp);
+
+    //count = count + header.npart[type];
+    for(n=0;n<header.npart[type];n++)
+      {
+	MDATA(array,pc) = data[n];
+	pc++;
+      }
+  }
+  return PyArray_Return(array);
+}
+
+
+
 PyMethodDef methods[] = {
   //  {"readheader",readheader,METH_VARARGS, "reads gadget snap header"},
   {"readpos",readpos,METH_VARARGS, "reads particle position data from gadget snapshot"},
   {"readvel",readvel,METH_VARARGS, "reads particle velocity data from gadget snapshot"},
   {"readpid",readpid,METH_VARARGS, "reads particle ID data from gadget snapshot"},
   {"readmass",readmass,METH_VARARGS, "reads particle mass data from gadget snapshot"},
-  {"readu",readu,METH_VARARGS, "reads particle internal energy data from gadget snapshot"}
+  {"readu",readu,METH_VARARGS, "reads particle internal energy data from gadget snapshot"},
+  {"readrho",readrho,METH_VARARGS, "reads particle density data from gadget snapshot"},
+  {"readNE",readNE,METH_VARARGS, "reads number density of free electrons from gadget snapshot"},
+  {"readNH",readNH,METH_VARARGS, "reads number density of neutral hydrogen atoms from gadget snapshot"},
+  {"readHSML",readHSML,METH_VARARGS, "reads smoothing length of SPH particles from gadget snapshot"},
+  {"readSFR",readSFR,METH_VARARGS, "reads SFR of gas particles from gadget snapshot"},
+  {"readage",readage,METH_VARARGS, "reads scale factor for each star @ formation time from gadget snapshot"},
+  {"readZ",readZ,METH_VARARGS, "reads metallicity of gas & star particles from gadget snapshot"} 
 };
 
 PyMODINIT_FUNC
