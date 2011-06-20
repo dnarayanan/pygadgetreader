@@ -369,12 +369,88 @@ readmass(PyObject *self, PyObject *args)
 }
 
 
+/*######################### INTERNAL ENERGY ########################################*/
+static PyObject *
+readu(PyObject *self, PyObject *args)
+{  
+  PyArrayObject *array;
+  float *data;
+  int ndim = 1;
+
+  if(!PyArg_ParseTuple(args,"sis",&filename,&NumFiles,&Type)){
+    PyErr_Format(PyExc_TypeError,"incorrect number of arguments - correct syntax is (filename,# of Files,'particle type' (gas,dm,disk,bulge,stars,bndry)");
+    return NULL;
+  }
+  int i;
+  int n;
+  int pc = 0;
+  //  int index = 0;
+  //int count = 0;
+  for(j=0;j<NumFiles;j++){
+    read_header();
+    if(Ngas==0){
+      PyErr_Format(PyExc_IndexError,"Ngas=0 - No internal energy to read!");
+      return NULL;
+    }
+    if(j==0){
+      assign_type();
+      if(type!=0){
+	PyErr_Format(PyExc_IndexError,"Internal Energy can only be read for gas!!");
+	return NULL;
+      }
+      npy_intp dims[1]={header.npartTotal[type]};
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_FLOAT);
+    }
+
+    data=(float*)malloc(header.npart[type]*sizeof(float));
+
+    //skip positions
+    Skip;
+    fseek(infp,Ntotal_local*sizeof(float)*3,SEEK_CUR);
+    Skip;
+
+    //skip velocities
+    Skip;
+    fseek(infp,Ntotal_local*sizeof(float)*3,SEEK_CUR);
+    Skip;
+    
+    //skip PIDs
+    Skip;
+    fseek(infp,Ntotal_local*sizeof(int),SEEK_CUR);
+    Skip;
+
+    //skip MASS 
+    Skip;
+    for(i=0;i<6;i++){
+      if(header.npart[i]>0 && header.mass[i]==0.0){
+	fseek(infp,header.npart[i]*sizeof(float),SEEK_CUR);
+      }
+    }
+    Skip;
+
+    Skip; //skip before U
+    fread(data,header.npart[type]*sizeof(float),1,infp);
+    Skip; //skip after U
+    fclose(infp);
+
+    //count = count + header.npart[type];
+    for(n=0;n<header.npart[type];n++)
+      {
+	MDATA(array,pc) = data[n];
+	pc++;
+      }
+  }
+  return PyArray_Return(array);
+}
+
+
 PyMethodDef methods[] = {
   //  {"readheader",readheader,METH_VARARGS, "reads gadget snap header"},
   {"readpos",readpos,METH_VARARGS, "reads particle position data from gadget snapshot"},
   {"readvel",readvel,METH_VARARGS, "reads particle velocity data from gadget snapshot"},
   {"readpid",readpid,METH_VARARGS, "reads particle ID data from gadget snapshot"},
-  {"readmass",readmass,METH_VARARGS, "reads particle mass data from gadget snapshot"}
+  {"readmass",readmass,METH_VARARGS, "reads particle mass data from gadget snapshot"},
+  {"readu",readu,METH_VARARGS, "reads particle internal energy data from gadget snapshot"}
 };
 
 PyMODINIT_FUNC
