@@ -79,7 +79,7 @@ read_header()
   Nstar_local  = header.npart[4];
   Nbdry_local  = header.npart[5];
   Ntotal_local = Ngas_local+Ndm_local+Ndisk_local+Nbulge_local+Nstar_local+Nbdry_local;
-  printf("%d\n",Ngas_local);
+  //printf("%d\n",Ngas_local);
 }
 
 char* gas   = "gas";
@@ -219,6 +219,10 @@ readpos(PyObject *self, PyObject *args)
 	pc++;
       }
   }
+  if(pc!=header.npartTotal[type]){
+    PyErr_Format(PyExc_IndexError,"particle count mismatch!");
+    return NULL;
+  }
   return PyArray_Return(array);
 }
 
@@ -270,6 +274,10 @@ readvel(PyObject *self, PyObject *args)
 	DATA(array,pc,2) = data[3*n+2];
 	pc++;
       }
+  }
+  if(pc!=header.npartTotal[type]){
+    PyErr_Format(PyExc_IndexError,"particle count mismatch!");
+    return NULL;
   }
   return PyArray_Return(array);
 }
@@ -327,6 +335,10 @@ readpid(PyObject *self, PyObject *args)
 	pc++;
       }
   }
+  if(pc!=header.npartTotal[type]){
+    PyErr_Format(PyExc_IndexError,"particle count mismatch!");
+    return NULL;
+  }
   return PyArray_Return(array);
 }
 
@@ -356,12 +368,16 @@ readmass(PyObject *self, PyObject *args)
       array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_FLOAT);
     }
 
-    if(header.mass[type]>0){
+    if(header.mass[type]>0 && header.npart[type]>0){
       for(n=0;n<header.npart[type];n++){
 	  MDATA(array,pc)=header.mass[type];
 	  pc++;
 	}
-      printf("non-zero header mass detected - using header mass\n");
+      if(pc!=header.npartTotal[type]){
+	PyErr_Format(PyExc_IndexError,"particle count mismatch! pc=%d  npartTotal[%d]=%d",pc,type,header.npartTotal[type]);
+	return NULL;
+      }
+      printf("non-zero header mass detected - using header mass for %s\n",Type);
       return PyArray_Return(array);
     }
     else{
@@ -384,11 +400,14 @@ readmass(PyObject *self, PyObject *args)
 
     Skip; //skip before MASS
     //seek past particle groups not interested in
+    /*
     for(i=1;i<=type;i++){
       if(header.mass[i]==0.0 && header.npart[i]>0){
       fseek(infp,header.npart[i-1]*sizeof(float),SEEK_CUR);
       }
     }
+    */
+    if(type==4) fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
     fread(data,header.npart[type]*sizeof(float),1,infp);
     Skip; //skip after MASS
     fclose(infp);
@@ -399,11 +418,15 @@ readmass(PyObject *self, PyObject *args)
 	MDATA(array,pc) = data[n];
 	pc++;
       }
-  }
-  return PyArray_Return(array);
+    printf("reading mass block for %s\n",Type);
+    if(pc!=header.npartTotal[type]){
+      PyErr_Format(PyExc_IndexError,"particle count mismatch! pc=%d  npartTotal[%d]=%d",pc,type,header.npartTotal[type]);
+      return NULL;
+    }
+    return PyArray_Return(array);
+    }
   }
 }
-
 
 /*######################### INTERNAL ENERGY ########################################*/
 static PyObject *
@@ -455,6 +478,15 @@ readu(PyObject *self, PyObject *args)
     fseek(infp,Ntotal_local*sizeof(int),SEEK_CUR);
     Skip;
 
+    //skip MASS
+    if(header.mass[0]==0 && header.npart[0]>0 || header.mass[4]==0 && header.npart[4]>0){
+    Skip;
+    if(header.mass[0]==0 && header.npart[0]>0) fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    if(header.mass[4]==0 && header.npart[0]>0) fseek(infp,header.npart[4]*sizeof(float),SEEK_CUR);
+    Skip;
+    }
+
+      /*
     //skip MASS 
     Skip;
     for(i=0;i<6;i++){
@@ -463,6 +495,7 @@ readu(PyObject *self, PyObject *args)
       }
     }
     Skip;
+      */
 
     Skip; //skip before U
     fread(data,header.npart[type]*sizeof(float),1,infp);
@@ -475,6 +508,10 @@ readu(PyObject *self, PyObject *args)
 	MDATA(array,pc) = data[n];
 	pc++;
       }
+  }
+  if(pc!=header.npartTotal[type]){
+    PyErr_Format(PyExc_IndexError,"particle count mismatch!");
+    return NULL;
   }
   return PyArray_Return(array);
 }
@@ -530,6 +567,15 @@ readrho(PyObject *self, PyObject *args)
     fseek(infp,Ntotal_local*sizeof(int),SEEK_CUR);
     Skip;
 
+    //skip MASS
+    if(header.mass[0]==0 && header.npart[0]>0 || header.mass[4]==0 && header.npart[4]>0){
+    Skip;
+    if(header.mass[0]==0 && header.npart[0]>0) fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    if(header.mass[4]==0 && header.npart[0]>0) fseek(infp,header.npart[4]*sizeof(float),SEEK_CUR);
+    Skip;
+    }
+
+    /*
     //skip MASS 
     Skip;
     for(i=0;i<6;i++){
@@ -538,6 +584,7 @@ readrho(PyObject *self, PyObject *args)
       }
     }
     Skip;
+    */
 
     //skip U
     Skip;
@@ -555,6 +602,10 @@ readrho(PyObject *self, PyObject *args)
 	MDATA(array,pc) = data[n];
 	pc++;
       }
+  }
+  if(pc!=header.npartTotal[type]){
+    PyErr_Format(PyExc_IndexError,"particle count mismatch!");
+    return NULL;
   }
   return PyArray_Return(array);
 }
@@ -611,6 +662,15 @@ readNE(PyObject *self, PyObject *args)
     fseek(infp,Ntotal_local*sizeof(int),SEEK_CUR);
     Skip;
 
+    //skip MASS
+    if(header.mass[0]==0 && header.npart[0]>0 || header.mass[4]==0 && header.npart[4]>0){
+    Skip;
+    if(header.mass[0]==0 && header.npart[0]>0) fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    if(header.mass[4]==0 && header.npart[0]>0) fseek(infp,header.npart[4]*sizeof(float),SEEK_CUR);
+    Skip;
+    }
+
+    /*
     //skip MASS 
     Skip;
     for(i=0;i<6;i++){
@@ -619,6 +679,7 @@ readNE(PyObject *self, PyObject *args)
       }
     }
     Skip;
+    */
 
     //skip U
     Skip;
@@ -641,6 +702,10 @@ readNE(PyObject *self, PyObject *args)
 	MDATA(array,pc) = data[n];
 	pc++;
       }
+  }
+  if(pc!=header.npartTotal[type]){
+    PyErr_Format(PyExc_IndexError,"particle count mismatch!");
+    return NULL;
   }
   return PyArray_Return(array);
 }
@@ -696,6 +761,15 @@ readNH(PyObject *self, PyObject *args)
     fseek(infp,Ntotal_local*sizeof(int),SEEK_CUR);
     Skip;
 
+    //skip MASS
+    if(header.mass[0]==0 && header.npart[0]>0 || header.mass[4]==0 && header.npart[4]>0){
+    Skip;
+    if(header.mass[0]==0 && header.npart[0]>0) fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    if(header.mass[4]==0 && header.npart[0]>0) fseek(infp,header.npart[4]*sizeof(float),SEEK_CUR);
+    Skip;
+    }
+
+    /*
     //skip MASS 
     Skip;
     for(i=0;i<6;i++){
@@ -704,6 +778,7 @@ readNH(PyObject *self, PyObject *args)
       }
     }
     Skip;
+    */
 
     //skip U
     Skip;
@@ -731,6 +806,10 @@ readNH(PyObject *self, PyObject *args)
 	MDATA(array,pc) = data[n];
 	pc++;
       }
+  }
+  if(pc!=header.npartTotal[type]){
+    PyErr_Format(PyExc_IndexError,"particle count mismatch!");
+    return NULL;
   }
   return PyArray_Return(array);
 }
@@ -786,6 +865,15 @@ readHSML(PyObject *self, PyObject *args)
     fseek(infp,Ntotal_local*sizeof(int),SEEK_CUR);
     Skip;
 
+    //skip MASS
+    if(header.mass[0]==0 && header.npart[0]>0 || header.mass[4]==0 && header.npart[4]>0){
+    Skip;
+    if(header.mass[0]==0 && header.npart[0]>0) fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    if(header.mass[4]==0 && header.npart[0]>0) fseek(infp,header.npart[4]*sizeof(float),SEEK_CUR);
+    Skip;
+    }
+
+    /*
     //skip MASS 
     Skip;
     for(i=0;i<6;i++){
@@ -794,6 +882,7 @@ readHSML(PyObject *self, PyObject *args)
       }
     }
     Skip;
+    */
 
     //skip U
     Skip;
@@ -826,6 +915,10 @@ readHSML(PyObject *self, PyObject *args)
 	MDATA(array,pc) = data[n];
 	pc++;
       }
+  }
+  if(pc!=header.npartTotal[type]){
+    PyErr_Format(PyExc_IndexError,"particle count mismatch!");
+    return NULL;
   }
   return PyArray_Return(array);
 }
@@ -881,6 +974,15 @@ readSFR(PyObject *self, PyObject *args)
     fseek(infp,Ntotal_local*sizeof(int),SEEK_CUR);
     Skip;
 
+    //skip MASS
+    if(header.mass[0]==0 && header.npart[0]>0 || header.mass[4]==0 && header.npart[4]>0){
+    Skip;
+    if(header.mass[0]==0 && header.npart[0]>0) fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    if(header.mass[4]==0 && header.npart[0]>0) fseek(infp,header.npart[4]*sizeof(float),SEEK_CUR);
+    Skip;
+    }
+
+    /*
     //skip MASS 
     Skip;
     for(i=0;i<6;i++){
@@ -889,6 +991,7 @@ readSFR(PyObject *self, PyObject *args)
       }
     }
     Skip;
+    */
 
     //skip U
     Skip;
@@ -926,6 +1029,10 @@ readSFR(PyObject *self, PyObject *args)
 	MDATA(array,pc) = data[n];
 	pc++;
       }
+  }
+  if(pc!=header.npartTotal[type]){
+    PyErr_Format(PyExc_IndexError,"particle count mismatch!");
+    return NULL;
   }
   return PyArray_Return(array);
 }
@@ -981,6 +1088,15 @@ readage(PyObject *self, PyObject *args)
     fseek(infp,Ntotal_local*sizeof(int),SEEK_CUR);
     Skip;
 
+    //skip MASS
+    if(header.mass[0]==0 && header.npart[0]>0 || header.mass[4]==0 && header.npart[4]>0){
+    Skip;
+    if(header.mass[0]==0 && header.npart[0]>0) fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    if(header.mass[4]==0 && header.npart[0]>0) fseek(infp,header.npart[4]*sizeof(float),SEEK_CUR);
+    Skip;
+    }
+
+    /*
     //skip MASS 
     Skip;
     for(i=0;i<6;i++){
@@ -989,6 +1105,7 @@ readage(PyObject *self, PyObject *args)
       }
     }
     Skip;
+    */
 
     //skip U
     Skip;
@@ -1032,6 +1149,10 @@ readage(PyObject *self, PyObject *args)
 	pc++;
       }
   }
+  if(pc!=header.npartTotal[type]){
+    PyErr_Format(PyExc_IndexError,"particle count mismatch!");
+    return NULL;
+  }
   return PyArray_Return(array);
 }
 
@@ -1062,7 +1183,7 @@ readZ(PyObject *self, PyObject *args)
     if(j==0){
       assign_type();
       if(type!=0 && type!=4){
-	PyErr_Format(PyExc_IndexError,"Z can only be read for gas & stars!!");
+	PyErr_Format(PyExc_IndexError,"Z can only be read for gas or stars!!");
 	return NULL;
       }
       npy_intp dims[1]={header.npartTotal[type]};
@@ -1086,6 +1207,15 @@ readZ(PyObject *self, PyObject *args)
     fseek(infp,Ntotal_local*sizeof(int),SEEK_CUR);
     Skip;
 
+    //skip MASS
+    if(header.mass[0]==0 && header.npart[0]>0 || header.mass[4]==0 && header.npart[4]>0){
+    Skip;
+    if(header.mass[0]==0 && header.npart[0]>0) fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    if(header.mass[4]==0 && header.npart[0]>0) fseek(infp,header.npart[4]*sizeof(float),SEEK_CUR);
+    Skip;
+    }
+
+    /*
     //skip MASS 
     Skip;
     for(i=0;i<6;i++){
@@ -1094,6 +1224,7 @@ readZ(PyObject *self, PyObject *args)
       }
     }
     Skip;
+    */
 
     //skip U
     Skip;
@@ -1149,6 +1280,10 @@ readZ(PyObject *self, PyObject *args)
 	MDATA(array,pc) = data[n];
 	pc++;
       }
+  }
+  if(pc!=header.npartTotal[type]){
+    PyErr_Format(PyExc_IndexError,"particle count mismatch!");
+    return NULL;
   }
   return PyArray_Return(array);
 }
