@@ -140,38 +140,43 @@ assign_type()
 }
 
 
-char* Value;
-int value;
 /*######################### READ HEADER ########################################*/
 static PyObject *
 readhead(PyObject *self, PyObject *args)
 {
- if(!PyArg_ParseTuple(args,"sii",&filename,&NumFiles,&Value)){
-    PyErr_Format(PyExc_TypeError,"incorrect number of arguments - correct syntax is (filename,# of Files,'value'(time,redshift,flag_sfr,flag_feedback,flag_cooling,boxsize,O0,Ol,H,flagage,flagmetals)");
+  char* simtime   = "time";
+  char* redshift  = "redshift";
+  char* boxsize   = "boxsize";
+  char* O0        = "O0";
+  char* Ol        = "Ol";
+  char* h         = "h";
+  //FLAGS
+  char* f_sfr     = "f_sfr";
+  char* f_fb      = "f_fb";
+  char* f_cooling = "f_cooling";
+  char* f_age     = "f_age";
+  char* f_metals  = "f_metals";
+  char* Value;
+  int value;
+
+  if(!PyArg_ParseTuple(args,"sis",&filename,&NumFiles,&Value)){
+    PyErr_Format(PyExc_TypeError,"incorrect number of arguments - correct syntax is (filename,# of Files,'value'(time,redshift,boxsize,O0,Ol,h,f_sfr,f_fb,f_cooling,f_age,f_metals)");
     return NULL;
   }
-
- j=0;
- read_header();
- fclose(infp);
-
- value=Value;
-
- if(value==1) return Py_BuildValue("d",header.time);
- if(value==5) return Py_BuildValue("d",header.redshift);
- /*
- return Py_BuildValue("i",header.flag_sfr);
- return Py_BuildValue("i",header.flag_feedback);
- return Py_BuildValue("i",header.flag_cooling);
- return Py_BuildValue("d",header.BoxSize);
- */
- if(value==2) return Py_BuildValue("d",header.Omega0);
- if(value==3) return Py_BuildValue("d",header.OmegaLambda);
- if(value==4) return Py_BuildValue("d",header.HubbleParam);
- /*
- return Py_BuildValue("d",header.flag_stellarage);
- return Py_BuildValue("d",header.flag_metals);
- */
+  j=0;
+  read_header();
+  fclose(infp);  
+  if(strcmp(Value,simtime)==0)        return Py_BuildValue("d",header.time);
+  else if(strcmp(Value,redshift)==0)  return Py_BuildValue("d",header.redshift);
+  else if(strcmp(Value,boxsize)==0)   return Py_BuildValue("d",header.BoxSize);
+  else if(strcmp(Value,O0)==0)        return Py_BuildValue("d",header.Omega0);
+  else if(strcmp(Value,Ol)==0)        return Py_BuildValue("d",header.OmegaLambda);
+  else if(strcmp(Value,h)==0)         return Py_BuildValue("d",header.HubbleParam);
+  else if(strcmp(Value,f_sfr)==0)     return Py_BuildValue("i",header.flag_sfr);
+  else if(strcmp(Value,f_fb)==0)      return Py_BuildValue("i",header.flag_feedback);
+  else if(strcmp(Value,f_cooling)==0) return Py_BuildValue("i",header.flag_cooling);
+  else if(strcmp(Value,f_age)==0)     return Py_BuildValue("i",header.flag_stellarage);
+  else if(strcmp(Value,f_metals)==0)  return Py_BuildValue("i",header.flag_metals);
 }
 
 
@@ -190,8 +195,6 @@ readpos(PyObject *self, PyObject *args)
   int i;
   int n;
   int pc = 0;
-  //  int index = 0;
-  //int count = 0;
   for(j=0;j<NumFiles;j++){
     read_header();
     if(j==0){
@@ -241,8 +244,6 @@ readvel(PyObject *self, PyObject *args)
   int i;
   int n;
   int pc = 0;
-  //  int index = 0;
-  //int count = 0;
   for(j=0;j<NumFiles;j++){
     read_header();
     if(j==0){
@@ -297,8 +298,6 @@ readpid(PyObject *self, PyObject *args)
   int i;
   int n;
   int pc = 0;
-  //  int index = 0;
-  //int count = 0;
   for(j=0;j<NumFiles;j++){
     read_header();
     if(j==0){
@@ -358,8 +357,6 @@ readmass(PyObject *self, PyObject *args)
   int i;
   int n;
   int pc = 0;
-  //  int index = 0;
-  //int count = 0;
   for(j=0;j<NumFiles;j++){
     read_header();
     if(j==0){
@@ -442,9 +439,7 @@ readu(PyObject *self, PyObject *args)
   }
   int i;
   int n;
-  int pc = 0;
-  //  int index = 0;
-  //int count = 0;
+  int pc = 0; 
   for(j=0;j<NumFiles;j++){
     read_header();
     if(Ngas==0){
@@ -532,8 +527,6 @@ readrho(PyObject *self, PyObject *args)
   int i;
   int n;
   int pc = 0;
-  //  int index = 0;
-  //int count = 0;
   for(j=0;j<NumFiles;j++){
     read_header();
     if(Ngas==0){
@@ -627,8 +620,6 @@ readNE(PyObject *self, PyObject *args)
   int i;
   int n;
   int pc = 0;
-  //  int index = 0;
-  //int count = 0;
   for(j=0;j<NumFiles;j++){
     read_header();
     if(Ngas==0){
@@ -726,8 +717,6 @@ readNH(PyObject *self, PyObject *args)
   int i;
   int n;
   int pc = 0;
-  //  int index = 0;
-  //int count = 0;
   for(j=0;j<NumFiles;j++){
     read_header();
     if(Ngas==0){
@@ -830,8 +819,6 @@ readHSML(PyObject *self, PyObject *args)
   int i;
   int n;
   int pc = 0;
-  //  int index = 0;
-  //int count = 0;
   for(j=0;j<NumFiles;j++){
     read_header();
     if(Ngas==0){
@@ -939,8 +926,6 @@ readSFR(PyObject *self, PyObject *args)
   int i;
   int n;
   int pc = 0;
-  //  int index = 0;
-  //int count = 0;
   for(j=0;j<NumFiles;j++){
     read_header();
     if(Ngas==0){
@@ -1053,8 +1038,6 @@ readage(PyObject *self, PyObject *args)
   int i;
   int n;
   int pc = 0;
-  //  int index = 0;
-  //int count = 0;
   for(j=0;j<NumFiles;j++){
     read_header();
     if(Nstar==0){
@@ -1172,8 +1155,6 @@ readZ(PyObject *self, PyObject *args)
   int i;
   int n;
   int pc = 0;
-  //  int index = 0;
-  //int count = 0;
   for(j=0;j<NumFiles;j++){
     read_header();
     if(Ngas==0 && Nstar==0){
