@@ -366,63 +366,59 @@ readmass(PyObject *self, PyObject *args)
     }
 
     if(header.mass[type]>0 && header.npart[type]>0){
-      for(n=0;n<header.npart[type];n++){
+      printf("non-zero header mass detected - using header mass for %s\n",Type);
+      for(n=0;n<header.npart[type];n++)
+	{
 	  MDATA(array,pc)=header.mass[type];
 	  pc++;
 	}
-      if(pc!=header.npartTotal[type]){
-	PyErr_Format(PyExc_IndexError,"particle count mismatch! pc=%d  npartTotal[%d]=%d",pc,type,header.npartTotal[type]);
-	return NULL;
-      }
-      printf("non-zero header mass detected - using header mass for %s\n",Type);
-      return PyArray_Return(array);
     }
     else{
-    data=(float*)malloc(header.npart[type]*sizeof(float));
-
-    //skip positions
-    Skip;
-    fseek(infp,Ntotal_local*sizeof(float)*3,SEEK_CUR);
-    Skip;
-
-    //skip velocities
-    Skip;
-    fseek(infp,Ntotal_local*sizeof(float)*3,SEEK_CUR);
-    Skip;
-    
-    //skip PIDs
-    Skip;
-    fseek(infp,Ntotal_local*sizeof(int),SEEK_CUR);
-    Skip;
-
-    Skip; //skip before MASS
-    //seek past particle groups not interested in
-    /*
-    for(i=1;i<=type;i++){
-      if(header.mass[i]==0.0 && header.npart[i]>0){
-      fseek(infp,header.npart[i-1]*sizeof(float),SEEK_CUR);
-      }
-    }
-    */
-    if(type==4) fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
-    fread(data,header.npart[type]*sizeof(float),1,infp);
-    Skip; //skip after MASS
-    fclose(infp);
-
-    //count = count + header.npart[type];
-    for(n=0;n<header.npart[type];n++)
-      {
-	MDATA(array,pc) = data[n];
-	pc++;
-      }
-    printf("reading mass block for %s\n",Type);
-    if(pc!=header.npartTotal[type]){
-      PyErr_Format(PyExc_IndexError,"particle count mismatch! pc=%d  npartTotal[%d]=%d",pc,type,header.npartTotal[type]);
-      return NULL;
-    }
-    return PyArray_Return(array);
+      printf("reading mass block for %s\n",Type);
+      data=(float*)malloc(header.npart[type]*sizeof(float));
+      
+      //skip positions
+      Skip;
+      fseek(infp,Ntotal_local*sizeof(float)*3,SEEK_CUR);
+      Skip;
+      
+      //skip velocities
+      Skip;
+      fseek(infp,Ntotal_local*sizeof(float)*3,SEEK_CUR);
+      Skip;
+      
+      //skip PIDs
+      Skip;
+      fseek(infp,Ntotal_local*sizeof(int),SEEK_CUR);
+      Skip;
+      
+      Skip; //skip before MASS
+      //seek past particle groups not interested in
+      /*
+	for(i=1;i<=type;i++){
+	if(header.mass[i]==0.0 && header.npart[i]>0){
+	fseek(infp,header.npart[i-1]*sizeof(float),SEEK_CUR);
+	}
+	}
+      */
+      if(type==4) fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+      fread(data,header.npart[type]*sizeof(float),1,infp);
+      Skip; //skip after MASS
+      fclose(infp);
+      
+      //count = count + header.npart[type];
+      for(n=0;n<header.npart[type];n++)
+	{
+	  MDATA(array,pc) = data[n];
+	  pc++;
+	}
     }
   }
+  if(pc!=header.npartTotal[type]){
+    PyErr_Format(PyExc_IndexError,"particle count mismatch! pc=%d  npartTotal[%d]=%d",pc,type,header.npartTotal[type]);
+    return NULL;
+  }
+  return PyArray_Return(array);
 }
 
 /*######################### INTERNAL ENERGY ########################################*/
@@ -1040,6 +1036,10 @@ readage(PyObject *self, PyObject *args)
   int pc = 0;
   for(j=0;j<NumFiles;j++){
     read_header();
+    if(header.flag_stellarage==0){
+      PyErr_Format(PyExc_IndexError,"flag_stellarage=%d --> AGE NOT TRACKED",header.flag_stellarage);
+      return NULL;
+    }
     if(Nstar==0){
       PyErr_Format(PyExc_IndexError,"Nstar=0 - No stars to read!");
       return NULL;
@@ -1157,6 +1157,10 @@ readZ(PyObject *self, PyObject *args)
   int pc = 0;
   for(j=0;j<NumFiles;j++){
     read_header();
+    if(header.flag_metals==0){
+      PyErr_Format(PyExc_IndexError,"flag_metals=%d --> METALS NOT TRACKED",header.flag_metals);
+      return NULL;
+    }
     if(Ngas==0 && Nstar==0){
       PyErr_Format(PyExc_IndexError,"Nstar=0 and Ngas=0 - No metallicity to read!");
       return NULL;
@@ -1268,8 +1272,6 @@ readZ(PyObject *self, PyObject *args)
   }
   return PyArray_Return(array);
 }
-
-
 
 PyMethodDef methods[] = {
   //  {"readheader",readheader,METH_VARARGS, "reads gadget snap header"},
