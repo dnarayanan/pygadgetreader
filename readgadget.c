@@ -198,7 +198,7 @@ readhead(PyObject *self, PyObject *args, PyObject *keywds)
   char* Value;
   int value;
 
-  static char *kwlist[]={"file","data","type","numfiles","units",NULL};
+  static char *kwlist[]={"file","value","numfiles",NULL};
   if(!PyArg_ParseTupleAndKeywords(args,keywds,"ss|i",kwlist,&filename,&Value,&NumFiles)){
     PyErr_Format(PyExc_TypeError,"incorrect input");
     return NULL;
