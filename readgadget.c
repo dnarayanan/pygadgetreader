@@ -8,15 +8,13 @@
 #define Skip fread(&dummy,sizeof(dummy),1,infp)
 #define DATA(a,i,j)*((float *) PyArray_GETPTR2(a,i,j))
 #define PIDDATA(a,i)*((int *) PyArray_GETPTR1(a,i))
-#define MDATA(a,i)*((float *) PyArray_GETPTR1(a,i))
+#define MDATA(a,i)*((double *) PyArray_GETPTR1(a,i))
 
 const char *filename;  
 FILE *infp;
-char infile[200];
-int NumFiles=1;
-int Units=0;
-int j=0;
-int dummy;
+char infile[500];
+int NumFiles, Units, j, dummy;
+int ERR;
 
 struct io_header
 {
@@ -42,14 +40,18 @@ struct io_header
   char     fill[56];  /* fills to 256 Bytes */
 } header;
 
+
 int Ngas,Ndm,Ndisk,Nbulge,Nstar,Nbdry,Ntotal;
 int Ngas_local,Ndm_local,Ndisk_local,Nbulge_local,Nstar_local,Nbdry_local,Ntotal_local;
 read_header()
 {
-  if(NumFiles>1) sprintf(infile,"%s.%d",filename,j);
-  else sprintf(infile,"%s",filename);
+  if(NumFiles>1) 
+    sprintf(infile,"%s.%d",filename,j);
+  else 
+    sprintf(infile,"%s",filename);
   if(!(infp=fopen(infile,"r"))){
-    PyErr_Format(PyExc_IOError,"cannot open '%s' !",infile);
+    ERR = 1;
+    PyErr_Format(PyExc_TypeError,"can't open file: '%s'",infile);
     return NULL;
   }
   // READ HEADER
@@ -179,6 +181,39 @@ assign_type()
   */
 }
 
+
+
+static PyObject *
+test(PyObject *self, PyObject *args)
+{
+  if(!PyArg_ParseTuple(args,"si",&filename,&NumFiles)){
+    PyErr_Format(PyExc_TypeError,"wrong input");
+    return NULL;
+  }
+  j=0;
+  /* 
+ if(NumFiles>1) 
+    sprintf(infile,"%s.%d",filename,j);
+  else 
+    sprintf(infile,"%s",filename);
+  if(!(infp=fopen(infile,"r"))){
+    printf("cannot open file!!\n");
+    
+    PyErr_Format(PyExc_IOError,"shitbags");
+    PyErr_Format(PyExc_IndexError,"cannot open '%s' !",infile);
+    printf("after PyErr_Format\n");
+    return NULL;
+    
+    PyErr_Format(PyExc_IOError,"gadgetPyIO module can't open file: '%s'",infile);
+    return NULL;
+    printf("after return null\n");
+  }
+  */
+  read_header();
+  return Py_None;
+}
+
+
 /*######################### READ HEADER ########################################*/
 static PyObject *
 readhead(PyObject *self, PyObject *args, PyObject *keywds)
@@ -198,6 +233,10 @@ readhead(PyObject *self, PyObject *args, PyObject *keywds)
   char* Value;
   int value;
 
+  j=0;
+  NumFiles=1;
+  Units=0;
+
   static char *kwlist[]={"file","value","numfiles",NULL};
   if(!PyArg_ParseTupleAndKeywords(args,keywds,"ss|i",kwlist,&filename,&Value,&NumFiles)){
     PyErr_Format(PyExc_TypeError,"incorrect input");
@@ -205,6 +244,7 @@ readhead(PyObject *self, PyObject *args, PyObject *keywds)
   }
   read_header();
   fclose(infp);  
+
   if(strcmp(Value,simtime)==0)        return Py_BuildValue("d",header.time);
   else if(strcmp(Value,redshift)==0)  return Py_BuildValue("d",header.redshift);
   else if(strcmp(Value,boxsize)==0)   return Py_BuildValue("d",header.BoxSize);
@@ -223,6 +263,11 @@ PyArrayObject *array;
 static PyObject *
 readsnap(PyObject *self, PyObject *args, PyObject *keywds)
 {
+  j=0;
+  NumFiles=1;
+  Units=0;
+  ERR=0;
+
   static char *kwlist[]={"file","data","type","numfiles","units",NULL};
   if(!PyArg_ParseTupleAndKeywords(args,keywds,"sss|ii",kwlist,&filename,&Values,&Type,&NumFiles,&Units)){
     PyErr_Format(PyExc_TypeError,"wrong input");
@@ -234,14 +279,25 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
     return NULL;
   }
 
+  read_header();
+  if(ERR==1){
+    PyErr_Format(PyExc_TypeError,"readsnap: can't open file: '%s' ERR=%d",infile,ERR);
+    return NULL;
+  }
+  if(NumFiles!=header.num_files){
+    PyErr_Format(PyExc_IndexError,"NumFiles(%d) != header.num_files(%d)!",NumFiles,header.num_files);
+    return NULL;
+  }
+
+  fclose(infp);
+  assign_type();
+
   printf("\ninput: %s \n",filename);
   printf("extracting %s data for %s\n",Values,Type);
   if(Units==0) printf("returning code units\n\n");
   if(Units==1) printf("returning cgs units\n\n");
   
-  read_header();
-  fclose(infp);
-  assign_type();
+  //printf("j=%d\n",j);
 
   //  printf("values=%d\n",values);
   if(values==0)       readpos();
@@ -256,7 +312,8 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
   else if(values==9)  readSFR();
   else if(values==10) readage();
   else if(values==11) readZ();
-  else printf("wtf we have issues\n");
+  else printf("houston we have a problem...no values returned\n");
+  j=0;
   return PyArray_Return(array);
 }
 
@@ -273,7 +330,7 @@ readpos()
     read_header();
     if(j==0){
       npy_intp dims[2]={header.npartTotal[type],3};
-      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_FLOAT);
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
     }
     simdata=(float*)malloc(header.npart[type]*sizeof(float)*3);
     
@@ -315,7 +372,7 @@ readvel()
     read_header();
     if(j==0){
       npy_intp dims[2]={header.npartTotal[type],3};
-      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_FLOAT);
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
     }
     simdata=(float*)malloc(header.npart[type]*sizeof(float)*3);
     
@@ -401,14 +458,18 @@ readmass()
     read_header();
     if(j==0){
       npy_intp dims[1]={header.npartTotal[type]};
-      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_FLOAT);
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
+    }
+    if(Units==1){
+      printf("### RETURNING MASS IN GADGET UNITS, MULTIPLY BY 1.98892e43 TO CONVER TO GRAMS ###\n");
     }
 
     if(header.mass[type]>0 && header.npart[type]>0){
       printf("non-zero header mass detected - using header mass for %s\n",Type);
       for(n=0;n<header.npart[type];n++)
 	{
-	  MDATA(array,pc)=header.mass[type];
+	  if(Units==0) MDATA(array,pc)=header.mass[type];
+	  if(Units==1) MDATA(array,pc)=header.mass[type]*1.98892e43;
 	  pc++;
 	}
     }
@@ -430,7 +491,8 @@ readmass()
       //count = count + header.npart[type];
       for(n=0;n<header.npart[type];n++)
 	{
-	  MDATA(array,pc) = simdata[n];
+	  if(Units==0) MDATA(array,pc) = simdata[n];
+	  if(Units==1) MDATA(array,pc) = simdata[n]*1.98892e43;
 	  pc++;
 	}
     }
@@ -470,7 +532,7 @@ readu()
 	return NULL;
       }
       npy_intp dims[1]={header.npartTotal[type]};
-      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_FLOAT);
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
     }
 
     simdata=(float*)malloc(header.npart[type]*sizeof(float));
@@ -529,7 +591,7 @@ readrho()
 	return NULL;
       }
       npy_intp dims[1]={header.npartTotal[type]};
-      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_FLOAT);
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
     }
 
     simdata=(float*)malloc(header.npart[type]*sizeof(float));
@@ -582,7 +644,7 @@ readNE()
 	return NULL;
       }
       npy_intp dims[1]={header.npartTotal[type]};
-      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_FLOAT);
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
     }
 
     simdata=(float*)malloc(header.npart[type]*sizeof(float));
@@ -634,7 +696,7 @@ readNH()
 	return NULL;
       }
       npy_intp dims[1]={header.npartTotal[type]};
-      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_FLOAT);
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
     }
 
     simdata=(float*)malloc(header.npart[type]*sizeof(float));
@@ -687,7 +749,7 @@ readHSML()
 	return NULL;
       }
       npy_intp dims[1]={header.npartTotal[type]};
-      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_FLOAT);
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
     }
 
     simdata=(float*)malloc(header.npart[type]*sizeof(float));
@@ -741,7 +803,7 @@ readSFR()
 	return NULL;
       }
       npy_intp dims[1]={header.npartTotal[type]};
-      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_FLOAT);
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
     }
 
     simdata=(float*)malloc(header.npart[type]*sizeof(float));
@@ -800,7 +862,7 @@ readage()
 	return NULL;
       }
       npy_intp dims[1]={header.npartTotal[type]};
-      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_FLOAT);
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
     }
 
     simdata=(float*)malloc(header.npart[type]*sizeof(float));
@@ -860,7 +922,7 @@ readZ()
 	return NULL;
       }
       npy_intp dims[1]={header.npartTotal[type]};
-      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_FLOAT);
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
     }
 
     simdata=(float*)malloc(header.npart[type]*sizeof(float));
@@ -965,6 +1027,7 @@ skipage(){ //skip AGE if stars exist
 
 //Initialize Module
 PyMethodDef methods[] = {
+  {"test",test, METH_VARARGS ,"test function"},
   {"readsnap",readsnap,METH_VARARGS | METH_KEYWORDS, "readsnap info"},
   {"readhead",readhead,METH_VARARGS | METH_KEYWORDS, "read header data"},
   {NULL,NULL,0,NULL}
