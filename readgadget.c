@@ -295,7 +295,10 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
   printf("\ninput: %s \n",filename);
   printf("extracting %s data for %s\n",Values,Type);
   if(Units==0) printf("returning code units\n\n");
-  if(Units==1) printf("returning cgs units\n\n");
+  if(Units==1){
+    if(values==3) printf("returning Msun units\n\n");
+    else printf("returning cgs units\n\n");
+  }
   
   //printf("j=%d\n",j);
 
@@ -468,16 +471,18 @@ readmass()
       npy_intp dims[1]={header.npartTotal[type]};
       array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
     }
+    /*
     if(Units==1){
       printf("### RETURNING MASS IN GADGET UNITS, MULTIPLY BY 1.98892e43 TO CONVER TO GRAMS ###\n");
     }
+    */
 
     if(header.mass[type]>0 && header.npart[type]>0){
       printf("non-zero header mass detected - using header mass for %s\n",Type);
       for(n=0;n<header.npart[type];n++)
 	{
 	  if(Units==0) MDATA(array,pc)=header.mass[type];
-	  if(Units==1) MDATA(array,pc)=header.mass[type]*1.98892e43;
+	  if(Units==1) MDATA(array,pc)=header.mass[type]*1e10;//1.98892e43;
 	  pc++;
 	}
     }
@@ -500,7 +505,7 @@ readmass()
       for(n=0;n<header.npart[type];n++)
 	{
 	  if(Units==0) MDATA(array,pc) = simdata[n];
-	  if(Units==1) MDATA(array,pc) = simdata[n]*1.98892e43;
+	  if(Units==1) MDATA(array,pc) = simdata[n]*1e10;//1.98892e43;
 	  pc++;
 	}
     }

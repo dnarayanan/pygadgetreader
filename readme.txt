@@ -93,8 +93,8 @@ Definition:	readsnap('a','b','c',numfiles=0,units=0)
 		numfiles: Number of files the snapshot is broken up into. Assumed to be 1 if it is not included.
 		   units: Can either be 0 or 1.  Assumed to be 0 if not included.  
 		          This parameter allows for the data to be returned in cgs units rather than code units.
-			  Currently only active for density (rho) and internal energy 
-			  (u - returns temperature in K).
+			  Currently only active for density (rho), internal energy 
+			  (u - returns temperature in K), and Mass (returns Msun).
 
 Example:
 		DMpos=readsnap('snap_001','pos','dm')
