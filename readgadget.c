@@ -296,8 +296,10 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
   printf("extracting %s data for %s\n",Values,Type);
   if(Units==0) printf("returning code units\n\n");
   if(Units==1){
-    if(values==3) printf("returning Msun units\n\n");
-    else printf("returning cgs units\n\n");
+    if(values==3) printf("returning units of Msun \n\n");
+    else if(values==4) printf("returning units of Kelvin \n\n");
+    else if(values==5) printf("returning units of g/cm^3 \n\n");
+    else printf("returning code units\n\n");
   }
   
   //printf("j=%d\n",j);
