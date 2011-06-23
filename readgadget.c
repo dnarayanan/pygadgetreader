@@ -920,8 +920,9 @@ readZ()
       PyErr_Format(PyExc_IndexError,"flag_metals=%d --> METALS NOT TRACKED",header.flag_metals);
       return NULL;
     }
-    if(Ngas==0 && Nstar==0){
-      PyErr_Format(PyExc_IndexError,"Nstar=0 and Ngas=0 - No metallicity to read!");
+    if(Ngas==0 && Nstar==0 || header.flag_metals==0){
+      if(Ngas==0 && Nstar==0) PyErr_Format(PyExc_IndexError,"Nstar=0 and Ngas=0 - No metallicity to read!");
+      if(header.flag_metals==0) PyErr_Format(PyExc_IndexError,"flag_metals=%d - No metallicity to read!",header.flag_metals);
       return NULL;
     }
     if(j==0){
@@ -1026,7 +1027,7 @@ skipsfr(){ //skip SFR
   Skip;
 }
 skipage(){ //skip AGE if stars exist
-  if(Nstar>0){
+  if(Nstar>0 && header.flag_stellarage==1){
     Skip;
     fseek(infp,header.npart[4]*sizeof(float),SEEK_CUR);
     Skip;
