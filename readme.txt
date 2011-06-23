@@ -29,7 +29,7 @@ readhead - This module simply reads in the gadget header file and returns the va
 	 f_metals      - Metal tracking flag  		 0=off 1=on
 
 
-Definition:   readhead(a,b,numfiles=0)
+Definition:   readhead('a','b',numfiles=0)
 
 	      Parameters
 	      ----------
@@ -79,7 +79,7 @@ readsnap - This module does the bulk of the work.  It reads data blocks from the
 	   bndry       - Boundary particles
 	   
 
-Definition:	readsnap(a,b,c,numfiles=0,units=0)
+Definition:	readsnap('a','b','c',numfiles=0,units=0)
 
 		Parameters
 		----------
