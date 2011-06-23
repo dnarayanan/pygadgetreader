@@ -239,7 +239,7 @@ readhead(PyObject *self, PyObject *args, PyObject *keywds)
 
   static char *kwlist[]={"file","value","numfiles",NULL};
   if(!PyArg_ParseTupleAndKeywords(args,keywds,"ss|i",kwlist,&filename,&Value,&NumFiles)){
-    PyErr_Format(PyExc_TypeError,"incorrect input");
+    PyErr_Format(PyExc_TypeError,"incorrect input!  must provide filename and value of interest - see readme.txt");
     return NULL;
   }
   read_header();
@@ -270,7 +270,7 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
 
   static char *kwlist[]={"file","data","type","numfiles","units",NULL};
   if(!PyArg_ParseTupleAndKeywords(args,keywds,"sss|ii",kwlist,&filename,&Values,&Type,&NumFiles,&Units)){
-    PyErr_Format(PyExc_TypeError,"wrong input");
+    PyErr_Format(PyExc_TypeError,"wrong input!  must provide filename, data block, and particle type of interest - see readme.txt");
     return NULL;
   }
 
@@ -390,10 +390,18 @@ readvel()
     //count = count + header.npart[type];
     for(n=0;n<header.npart[type];n++)
       {
-	DATA(array,pc,0) = simdata[3*n];
-	DATA(array,pc,1) = simdata[3*n+1];
-	DATA(array,pc,2) = simdata[3*n+2];
-	pc++;
+	if(Units==1){
+	  DATA(array,pc,0) = simdata[3*n]   * sqrt(header.time);
+	  DATA(array,pc,1) = simdata[3*n+1] * sqrt(header.time);
+	  DATA(array,pc,2) = simdata[3*n+2] * sqrt(header.time);
+	  pc++;
+	}
+	else{
+	  DATA(array,pc,0) = simdata[3*n];
+	  DATA(array,pc,1) = simdata[3*n+1];
+	  DATA(array,pc,2) = simdata[3*n+2];
+	  pc++;
+	}
       }
   }
   if(pc!=header.npartTotal[type]){
@@ -570,10 +578,10 @@ readrho()
 
   double convert;
   if(Units==1){
-  //values used for converting from code units to cgs
-  double solarmass = 1.98892e43;
-  double kpctocm   = 3.08568025e21;
-  convert   = solarmass/pow(kpctocm,3);
+    //values used for converting from code units to cgs
+    double solarmass = 1.98892e33;
+    double kpctocm   = 3.08568025e21;
+    convert   = (pow(10.,10)*solarmass)/pow(kpctocm,3);
   }
 
   int i;
