@@ -1,4 +1,4 @@
-This module will read in POS,VEL,PID,MASS,U,RHO,NE,NH,HSML,SFR,STELLARAGE,Z from gadget type 1 snapshot files.  It will read in single or multiple files.  There is also a nifty toggle that allows you to return data in code units, or physical units.  There are two main modules described below.
+This module contains a function for reading in data from Gadget type 1 snapshot files, reading in Gadget type 1 header information, and one for reading data from the PStarGroupFinder properties file (galprop).  These functions are described below:
 
 REQUIREMENTS:
  -python
@@ -9,11 +9,11 @@ INSTALL:
 python setup.py build     --> this builds the module
 python setup.py install   --> this installs the module, may require sudo
 
-MODULES:  
-(in order to use these modules one must put 'from readgadget import *' at the top of your .py script)
+FUNCTIONS:  
+(in order to use these functions one must put 'from readgadget import *' at the top of your .py script to import the module)
 ##################################################
 
-readhead - This module simply reads in the gadget header file and returns the value of interest. 
+readhead - This function simply reads in the gadget header file and returns the value of interest. 
            The values it can read are:
 
 	 time	       - scale factor of the snapshot
@@ -38,6 +38,8 @@ Definition:   readhead('a','b',numfiles=0)
 	      b : Value of interest from the above list.  
 	      	  Must be input as a string and enclosed in ' ' - see examples.
 	      
+	      Optional
+	      --------
 	      numfiles: Number of files the snapshot is broken up into. Assumed to be 1 if it is not included.
 
 
@@ -52,7 +54,7 @@ Example:
 
 ##################################################
 
-readsnap - This module does the bulk of the work.  It reads data blocks from the snapshot 
+readsnap - This function does the bulk of the work.  It reads data blocks from the snapshot 
 	   file and returns the requested data for specified particle type.  
 	   Supported data blocks are:
 
@@ -90,9 +92,11 @@ Definition:	readsnap('a','b','c',numfiles=0,units=0)
 		c: Particle type you are interested in (see above list)
 		   Must be input as a string and enclosed in ' ' - see examples.
 		
+		Optional
+		--------
 		numfiles: Number of files the snapshot is broken up into. Assumed to be 1 if it is not included.
-		   units: Can either be 0 or 1.  Assumed to be 0 if not included.  
-		          This parameter allows for the data to be returned in cgs units rather than code units.
+		   units: Can either be 0 for code units or 1 for real units.  Assumed to be 0 if not included.  
+		          This parameter allows for the data to be returned in real units(1) rather than code units(0).
 			  Currently only active for density (rho), internal energy 
 			  (u - returns temperature in K), and Mass (returns Msun).
 
@@ -105,6 +109,45 @@ Example:
 		 grho=readsnap('snap_005','rho','gas',numfiles=2,units=1)
 		gtemp=readsnap('snap_005','u','gas',numfiles=2,units=1)
 			- reads a multi-file snapshot (2) and returns density and temperature in cgs units.
+
+##################################################
+
+galprop	 - This function will read in the properties file outputted by P-Star group finder.  It then returns one of the following:
+
+	 mstar	       - Mass of the stars within a group
+	 bmag	       - B-magnitude of each group
+	 imag	       - I-magnitude of each group
+	 vmag	       - V-magnitude of each group
+	 kmag	       - K-magnitude of each group
+	 cm	       - Center of mass positions of each group
+	 sfr	       - Instantanious star formation rate of each group
+	 mgas	       - Mass of the gas within a group
+	 zstar	       - Stellar metallicity of each group
+	 zgas	       - Gas metallicity of each group
+
+
+Definitions:	galprop('a',b,'c',units=0)
+
+		Parameters
+		----------
+		a: Input directory (location of the property file)
+		   Must be input as a string and enclosed in ' ' - see examples.
+		b: Snapshot number
+		c: Value of interest (see above list)
+		   Must be input as a string and enclosed in ' ' - see examples.
+
+		Optional
+		--------
+		untits: Can either be 0 for code units or 1 for real units.  Assumed to be 0 if not included.
+		        This is only active for Gas & Star Masses (1 returns units of Msun)
+
+Example:	group_mstar=galprop('../', 7, 'mstar',units=1)
+			- returns the total stellar mass of each group in units of Msun
+
+		group_cm=galprop('../', 7, 'cm')
+		gx,gy,gz=hsplit(group_cm,3)
+			- reads in group center of mass positions and returns an NgroupX3 array.
+			  hsplit is then used to split the array into gx,gy,gz positions.
 
 ##################################################
 

@@ -6,7 +6,7 @@
 #include <Python.h>
 #include <numpy/arrayobject.h>
 #define Skip fread(&dummy,sizeof(dummy),1,infp)
-#define DATA(a,i,j)*((float *) PyArray_GETPTR2(a,i,j))
+#define DATA(a,i,j)*((double *) PyArray_GETPTR2(a,i,j))
 #define PIDDATA(a,i)*((int *) PyArray_GETPTR1(a,i))
 #define MDATA(a,i)*((double *) PyArray_GETPTR1(a,i))
 
@@ -181,6 +181,231 @@ assign_type()
   */
 }
 
+/*###################### GALPROP ########################*/
+static PyObject *
+galprop(PyObject *self, PyObject *args, PyObject *keywds)
+{
+  PyObject *array;
+  int i;
+  int Ngroup;
+  char *Directory;
+  int Snap;
+  char *Value;
+  int value;
+  int Units = 0;
+
+  char* MSTAR   = "mstar";
+  char* BMAG    = "bmag";
+  char* IMAG    = "imag";
+  char* VMAG    = "vmag";
+  char* KMAG    = "kmag";
+  char* CM      = "cm";
+  char* SFR     = "sfr";
+  char* MGAS    = "mgas";
+  char* SMETAL  = "zstar";
+  char* GMETAL  = "zgas";
+
+  double convert = 1e10;
+
+  static char *kwlist[]={"dir","snapnumber","value","units",NULL};
+  if(!PyArg_ParseTupleAndKeywords(args,keywds,"sis|i",kwlist,&Directory,&Snap,&Value,&Units)){
+    PyErr_Format(PyExc_TypeError,"incorrect input!  must provide properties file directory, snap number, and value you're interested in - see readme.txt");
+    return NULL;
+  }
+
+  sprintf(infile,"%s/properties_%03d",Directory,Snap);
+  if(!(infp=fopen(infile,"r"))){
+    PyErr_Format(PyExc_IOError,"can't open file: '%s'",infile);
+    return NULL;
+  }
+
+  if(strcmp(Value,MSTAR)==0)       value = 0;
+  else if(strcmp(Value,BMAG)==0)   value = 1;
+  else if(strcmp(Value,IMAG)==0)   value = 2;
+  else if(strcmp(Value,VMAG)==0)   value = 3;
+  else if(strcmp(Value,KMAG)==0)   value = 4;
+  else if(strcmp(Value,CM)==0)     value = 5;
+  else if(strcmp(Value,SFR)==0)    value = 6;
+  else if(strcmp(Value,MGAS)==0)   value = 7;
+  else if(strcmp(Value,SMETAL)==0) value = 8;
+  else if(strcmp(Value,GMETAL)==0) value = 9;
+  else{
+    PyErr_Format(PyExc_IndexError,"wrong values type selected");
+    return NULL;
+  }
+
+  printf("\n\nReading %s \n",infile);
+
+  struct gal_data
+  {
+    float mstar;
+    float Bmag;
+    float Imag;
+    float Vmag;
+    float Kmag;
+    float cm[3];
+    float sfr;
+    float mgas;
+    float metalstar;
+    float metalgas;
+  } *gal;
+  
+  fread(&Ngroup,sizeof(int),1,infp);
+  //printf("Ngroup=%d\n",Ngroup);
+  if(value==0){
+    if(Units==0) printf("Returning %d stellar group masses in code units\n",Ngroup);
+    if(Units==1) printf("Returning %d stellar group masses in units of Msun\n",Ngroup);
+}
+  if(value==1) printf("Returning %d group B-magnitudes\n",Ngroup);
+  if(value==2) printf("Returning %d group I-magnitudes\n",Ngroup);
+  if(value==3) printf("Returning %d group V-magnitudes\n",Ngroup);
+  if(value==4) printf("Returning %d group K-magnitudes\n",Ngroup);
+  if(value==5) printf("Returning %d group center of mass positions\n",Ngroup);
+  if(value==6) printf("Returning %d group SFR in Msun/year\n",Ngroup);
+  if(value==7){
+    if(Units==0) printf("Returning %d group gas masses in code units\n",Ngroup);
+    if(Units==1) printf("Returning %d group gas masses units of Msun\n",Ngroup);
+  }
+  if(value==8) printf("Returning %d group stellar metallicities\n",Ngroup);
+  if(value==9) printf("Returning %d group gas metallicities\n",Ngroup);
+
+  gal=malloc(sizeof(struct gal_data)*Ngroup);
+
+  for(i=0;i<Ngroup;i++){
+    fread(&gal[i].mstar,    sizeof(float),1,infp);
+    fread(&gal[i].Bmag,     sizeof(float),1,infp);
+    fread(&gal[i].Imag,     sizeof(float),1,infp);
+    fread(&gal[i].Vmag,     sizeof(float),1,infp);
+    fread(&gal[i].Kmag,     sizeof(float),1,infp);
+    fread(&gal[i].cm,       sizeof(float),3,infp);
+    fread(&gal[i].sfr,      sizeof(float),1,infp);
+    fread(&gal[i].mgas,     sizeof(float),1,infp);
+    fread(&gal[i].metalstar,sizeof(float),1,infp);
+    fread(&gal[i].metalgas, sizeof(float),1,infp);
+  }
+  fclose(infp);
+
+  if(value==5){
+    int ndim = 2;
+    npy_intp dims[2] = {Ngroup,3};
+    array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
+    
+    for(i=0;i<Ngroup;i++){
+      DATA(array,i,0) = gal[i].cm[0];
+      DATA(array,i,1) = gal[i].cm[1];
+      DATA(array,i,2) = gal[i].cm[2];
+    }
+  }
+  else{
+    int ndim = 1;
+    npy_intp dims[1]={Ngroup};
+    array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
+
+    if(value==0){
+      if(Units==0) for(i=0;i<Ngroup;i++) MDATA(array,i) = gal[i].mstar;
+      if(Units==1) for(i=0;i<Ngroup;i++) MDATA(array,i) = gal[i].mstar*convert;
+    }
+    if(value==1) for(i=0;i<Ngroup;i++) MDATA(array,i) = gal[i].Bmag;
+    if(value==2) for(i=0;i<Ngroup;i++) MDATA(array,i) = gal[i].Imag;
+    if(value==3) for(i=0;i<Ngroup;i++) MDATA(array,i) = gal[i].Vmag;
+    if(value==4) for(i=0;i<Ngroup;i++) MDATA(array,i) = gal[i].Kmag;
+    if(value==6) for(i=0;i<Ngroup;i++) MDATA(array,i) = gal[i].sfr;
+    if(value==7){
+      if(Units==0) for(i=0;i<Ngroup;i++) MDATA(array,i) = gal[i].mgas;
+      if(Units==1) for(i=0;i<Ngroup;i++) MDATA(array,i) = gal[i].mgas*convert;
+    }
+    if(value==8) for(i=0;i<Ngroup;i++) MDATA(array,i) = gal[i].metalstar;
+    if(value==9) for(i=0;i<Ngroup;i++) MDATA(array,i) = gal[i].metalgas;
+  }
+  return PyArray_Return(array);
+}
+
+
+static PyObject *
+readfof(PyObject *self, PyObject *args, PyObject *keywds)
+{
+  int i;
+  int Ngroup;
+
+  static char *kwlist[]={"file","numfiles",NULL};
+  if(!PyArg_ParseTupleAndKeywords(args,keywds,"s|i",kwlist,&filename,&NumFiles)){
+    PyErr_Format(PyExc_TypeError,"incorrect input!  must provide filename and value of interest - see readme.txt");
+    return NULL;
+  }
+  
+  if(NumFiles>1) 
+    sprintf(infile,"%s.%d",filename,j);
+  else 
+    sprintf(infile,"%s",filename);
+  if(!(infp=fopen(infile,"r"))){
+    ERR = 1;
+    PyErr_Format(PyExc_TypeError,"can't open file: '%s'",infile);
+    return NULL;
+  }
+
+  struct count{
+    int total, cum, gas, dm, star;
+  } *cnt;
+
+  struct groupmass{
+    float total,gas,dm,star;
+  } *gmass;
+
+  struct center_of_mass{
+    float xpos,ypos,zpos;
+  } *cm;
+
+  fread(&Ngroup,sizeof(int),1,infp);
+  
+  cnt   = malloc(sizeof(struct count) * Ngroup);
+  gmass = malloc(sizeof(struct groupmass) * Ngroup);
+  cm    = malloc(sizeof(struct center_of_mass) * Ngroup);
+
+  for(i=0;i<Ngroup;i++){
+    cnt[i].total=0, cnt[i].cum=0,cnt[i].gas=0,cnt[i].dm=0,cnt[i].star=0;
+    gmass[i].total=0.,gmass[i].gas=0.,gmass[i].dm=0.,gmass[i].star=0.;
+    cm[i].xpos=0.,cm[i].ypos=0.,cm[i].zpos=0.;
+  }
+
+  for(i=0;i<Ngroup;i++) fread(&cnt[i].total,sizeof(int),1,infp);
+  for(i=0;i<Ngroup;i++) fread(&cnt[i].cum,sizeof(int),1,infp);
+  for(i=0;i<Ngroup;i++) fread(&gmass[i].total,sizeof(float),1,infp);
+
+  for(i=0;i<Ngroup;i++){
+    fread(&cm[i].xpos,sizeof(float),1,infp);
+    fread(&cm[i].ypos,sizeof(float),1,infp);
+    fread(&cm[i].zpos,sizeof(float),1,infp);
+  }
+
+  for(i=0;i<Ngroup;i++){
+    fread(&cnt[i].gas,sizeof(int),1,infp);
+    fread(&cnt[i].dm,sizeof(int),1,infp);
+    fread(&cnt[i].star,sizeof(int),1,infp);
+  }
+
+  for(i=0;i<Ngroup;i++){
+    fread(&gmass[i].gas,sizeof(float),1,infp);
+    fread(&gmass[i].dm,sizeof(float),1,infp);
+    fread(&gmass[i].star,sizeof(float),1,infp);
+  }
+  fclose(infp);
+
+
+ 
+//  for(i=0;i<Ngroup;i++){
+//    printf("%d\n",cnt[i].dm);
+    //printf("%f\n",gmass[i].dm);
+//  }
+
+
+  //  simdata=(float*)malloc(header.npart[type]*sizeof(float)*3);
+  //  fread(simdata,header.npart[type]*sizeof(float)*3,1,infp);
+
+
+  printf("ngroups=%d!\n",Ngroup);
+  return Py_None;
+
+}
 
 
 static PyObject *
@@ -1046,6 +1271,8 @@ PyMethodDef methods[] = {
   {"test",test, METH_VARARGS ,"test function"},
   {"readsnap",readsnap,METH_VARARGS | METH_KEYWORDS, "readsnap info"},
   {"readhead",readhead,METH_VARARGS | METH_KEYWORDS, "read header data"},
+  {"readfof",readfof,METH_VARARGS | METH_KEYWORDS, "read fof data"},
+  {"galprop",galprop,METH_VARARGS | METH_KEYWORDS, "read galaxy property data"},
   {NULL,NULL,0,NULL}
 };
 
