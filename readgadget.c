@@ -109,6 +109,8 @@ char* HSML  = "hsml";
 char* SFR   = "sfr";
 char* AGE   = "age";
 char* Z     = "z";
+char* fH2   = "fH2";
+char* fh2   = "fh2";
 char* Values;
 int values;
 
@@ -123,7 +125,7 @@ assign_type()
   else if(strcmp(Type,stars)==0) type = 4;
   else if(strcmp(Type,bndry)==0) type = 5;
   else{
-    PyErr_Format(PyExc_IndexError,"wrong partile type selected");
+    PyErr_Format(PyExc_IndexError,"wrong particle type selected");
     return NULL;
   }
   // match requested data type and assign corresponding integer
@@ -139,6 +141,8 @@ assign_type()
   else if(strcmp(Values,SFR)==0)   values = 9;
   else if(strcmp(Values,AGE)==0)   values = 10;
   else if(strcmp(Values,Z)==0)     values = 11;
+  else if(strcmp(Values,fH2)==0)   values = 12;
+  else if(strcmp(Values,fh2)==0)   values = 12;
   else{
     PyErr_Format(PyExc_IndexError,"wrong values type selected");
     return NULL;
@@ -542,6 +546,7 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
   else if(values==9)  readSFR();
   else if(values==10) readage();
   else if(values==11) readZ();
+  else if(values==12) readfh2();
   else printf("houston we have a problem...no values returned\n");
   j=0;
   return PyArray_Return(array);
@@ -1204,6 +1209,63 @@ readZ()
   }
 }
 
+/*##################### fH2 ############################*/
+readfh2()
+{
+  float *simdata;
+  int ndim = 1;
+
+  int i;
+  int n;
+  int pc = 0;
+  for(j=0;j<NumFiles;j++){
+    read_header();
+    if(Ngas==0){
+      PyErr_Format(PyExc_IndexError,"Ngas=0 - No fH2 to read!");
+      return NULL;
+    }
+    if(j==0){
+      if(type!=0){
+	PyErr_Format(PyExc_IndexError,"fH2 can only be read for gas!!");
+	return NULL;
+      }
+      npy_intp dims[1]={header.npartTotal[type]};
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
+    }
+
+    simdata=(float*)malloc(header.npart[type]*sizeof(float));
+
+    skippos();
+    skipvel();
+    skippid();
+    skipmass();
+    skipu();
+    skiprho();
+    skipne();
+    skipnh();
+    skiphsml();
+    skipsfr();
+    skipage();
+    skipz();
+
+    Skip; //skip before fH2
+    fread(simdata,header.npart[type]*sizeof(float),1,infp);
+    Skip; //skip after Z
+    fclose(infp);
+    
+    //count = count + header.npart[type];
+    for(n=0;n<header.npart[type];n++)
+      {
+	MDATA(array,pc) = simdata[n];
+	pc++;
+      }
+  }
+  if(pc!=header.npartTotal[type]){
+    PyErr_Format(PyExc_IndexError,"particle count mismatch!");
+    return NULL;
+  }
+}
+
 //DEFINE SKIPS
 skippos(){ //skip positions
   Skip;
@@ -1263,6 +1325,19 @@ skipage(){ //skip AGE if stars exist
     Skip;
     fseek(infp,header.npart[4]*sizeof(float),SEEK_CUR);
     Skip;
+  }
+}
+skipz(){ //skip Metallicity
+  if(header.flag_metals==1){
+    Skip;    
+    if(Nstar > 0){
+      fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+      fseek(infp,header.npart[4]*sizeof(float),SEEK_CUR);
+    }
+    else{
+      fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    }
+    Skip;		 
   }
 }
 
