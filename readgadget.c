@@ -111,6 +111,8 @@ char* AGE   = "age";
 char* Z     = "z";
 char* fH2   = "fH2";
 char* fh2   = "fh2";
+char* SIGMA = "Sigma";
+char* sigma = "sigma";
 char* Values;
 int values;
 
@@ -143,6 +145,8 @@ assign_type()
   else if(strcmp(Values,Z)==0)     values = 11;
   else if(strcmp(Values,fH2)==0)   values = 12;
   else if(strcmp(Values,fh2)==0)   values = 12;
+  else if(strcmp(Values,SIGMA)==0) values = 13;
+  else if(strcmp(Values,sigma)==0) values = 13;
   else{
     PyErr_Format(PyExc_IndexError,"wrong values type selected");
     return NULL;
@@ -547,6 +551,7 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
   else if(values==10) readage();
   else if(values==11) readZ();
   else if(values==12) readfh2();
+  else if(values==13) readsigma();
   else printf("houston we have a problem...no values returned\n");
   j=0;
   return PyArray_Return(array);
@@ -1250,7 +1255,64 @@ readfh2()
 
     Skip; //skip before fH2
     fread(simdata,header.npart[type]*sizeof(float),1,infp);
-    Skip; //skip after Z
+    Skip; //skip after fH2
+    fclose(infp);
+    
+    //count = count + header.npart[type];
+    for(n=0;n<header.npart[type];n++)
+      {
+	MDATA(array,pc) = simdata[n];
+	pc++;
+      }
+  }
+  if(pc!=header.npartTotal[type]){
+    PyErr_Format(PyExc_IndexError,"particle count mismatch!");
+    return NULL;
+  }
+}
+
+readsigma()
+{
+  float *simdata;
+  int ndim = 1;
+
+  int i;
+  int n;
+  int pc = 0;
+  for(j=0;j<NumFiles;j++){
+    read_header();
+    if(Ngas==0){
+      PyErr_Format(PyExc_IndexError,"Ngas=0 - No Sigma to read!");
+      return NULL;
+    }
+    if(j==0){
+      if(type!=0){
+	PyErr_Format(PyExc_IndexError,"Sigma can only be read for gas!!");
+	return NULL;
+      }
+      npy_intp dims[1]={header.npartTotal[type]};
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
+    }
+
+    simdata=(float*)malloc(header.npart[type]*sizeof(float));
+
+    skippos();
+    skipvel();
+    skippid();
+    skipmass();
+    skipu();
+    skiprho();
+    skipne();
+    skipnh();
+    skiphsml();
+    skipsfr();
+    skipage();
+    skipz();
+    skipfh2();
+
+    Skip; //skip before sigma
+    fread(simdata,header.npart[type]*sizeof(float),1,infp);
+    Skip; //skip after sigma
     fclose(infp);
     
     //count = count + header.npart[type];
@@ -1339,6 +1401,11 @@ skipz(){ //skip Metallicity
     }
     Skip;		 
   }
+}
+skipfh2(){ //skip fH2
+  Skip;
+  fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+  Skip;
 }
 
 //Initialize Module
