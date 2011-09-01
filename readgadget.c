@@ -528,8 +528,8 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
   printf("\ninput: %s \n",filename);
   printf("extracting %s data for %s\n",Values,Type);
   if(Units==0){
-    if(values==5)  printf("returning PHYSICAL density in code units\n\n");
-    if(values==13) printf("returning PHYSICAL surface density in code units\n\n");
+    if(values==5)  printf("returning PHYSICAL density in CODE units\n\n");
+    if(values==13) printf("returning PHYSICAL surface density in CODE units\n\n");
     else           printf("returning code units\n\n");
   }
   if(Units==1){
@@ -1331,8 +1331,8 @@ readsigma()
     //count = count + header.npart[type];
     for(n=0;n<header.npart[type];n++)
       {
-	if(Units==0) MDATA(array,pc) = simdata[n]*pow(1.+header.redshift,2);
-	if(Units==1) MDATA(array,pc) = simdata[n]*pow(1.+header.redshift,2)*convert;
+	if(Units==0) MDATA(array,pc) = simdata[n];
+	if(Units==1) MDATA(array,pc) = simdata[n]*convert;
 	pc++;
       }
   }
