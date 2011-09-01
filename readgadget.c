@@ -527,12 +527,17 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
 
   printf("\ninput: %s \n",filename);
   printf("extracting %s data for %s\n",Values,Type);
-  if(Units==0) printf("returning code units\n\n");
+  if(Units==0){
+    if(values==5)  printf("returning PHYSICAL density in code units\n\n");
+    if(values==13) printf("returning PHYSICAL surface density in code units\n\n");
+    else           printf("returning code units\n\n");
+  }
   if(Units==1){
-    if(values==3) printf("returning units of Msun \n\n");
-    else if(values==4) printf("returning units of Kelvin \n\n");
-    else if(values==5) printf("returning units of g/cm^3 \n\n");
-    else printf("returning code units\n\n");
+    if(values==3)       printf("returning units of Msun \n\n");
+    else if(values==4)  printf("returning units of Kelvin \n\n");
+    else if(values==5)  printf("returning PHYSICAL density in units of g/cm^3 \n\n");
+    else if(values==13) printf("returning PHYSICAL surface density in units of g/cm^2 \n\n");
+    else                printf("returning code units\n\n");
   }
   
   //printf("j=%d\n",j);
@@ -860,8 +865,8 @@ readrho()
     //count = count + header.npart[type];
     for(n=0;n<header.npart[type];n++)
       {
-	if(Units==0) MDATA(array,pc) = simdata[n];
-	if(Units==1) MDATA(array,pc) = simdata[n]*convert;
+	if(Units==0) MDATA(array,pc) = simdata[n]*pow(1.+header.redshift,3);
+	if(Units==1) MDATA(array,pc) = simdata[n]*pow(1.+header.redshift,3)*convert;
 	pc++;
       }
   }
@@ -1276,6 +1281,14 @@ readsigma()
   float *simdata;
   int ndim = 1;
 
+  double convert;
+  if(Units==1){
+    //values used for converting from code units to cgs
+    double solarmass = 1.98892e33;
+    double kpctocm   = 3.08568025e21;
+    convert   = (pow(10.,10)*solarmass)/pow(kpctocm,2);
+  }
+
   int i;
   int n;
   int pc = 0;
@@ -1318,7 +1331,8 @@ readsigma()
     //count = count + header.npart[type];
     for(n=0;n<header.npart[type];n++)
       {
-	MDATA(array,pc) = simdata[n];
+	if(Units==0) MDATA(array,pc) = simdata[n]*pow(1.+header.redshift,2);
+	if(Units==1) MDATA(array,pc) = simdata[n]*pow(1.+header.redshift,2)*convert;
 	pc++;
       }
   }
