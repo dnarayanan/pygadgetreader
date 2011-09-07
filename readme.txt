@@ -70,6 +70,8 @@ readsnap - This function does the bulk of the work.  It reads data blocks from t
 	   sfr	       - Gas star formation rate in Msun/year
 	   age	       - Formation time of stellar particles (in terms of the scale factor)
 	   z	       - Metallicty of gas & star particles
+	   fH2	       - Fractional Abundance of molecular hydrogen
+	   Sigma       - Approximate surface density @ each particle (HIdensity * scale_height)
 
 
 	   Supported particle types:
@@ -98,7 +100,7 @@ Definition:	readsnap('a','b','c',numfiles=0,units=0)
 		   units: Can either be 0 for code units or 1 for real units.  Assumed to be 0 if not included.  
 		          This parameter allows for the data to be returned in real units(1) rather than code units(0).
 			  Currently only active for density (rho), internal energy 
-			  (u - returns temperature in K), and Mass (returns Msun).
+			  (u - returns temperature in K), Mass (returns Msun), and Sigma (returns g/cm^2).
 
 Example:
 		DMpos=readsnap('snap_001','pos','dm')
