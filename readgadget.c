@@ -7,7 +7,7 @@
 #include <numpy/arrayobject.h>
 #define Skip fread(&dummy,sizeof(dummy),1,infp)
 #define DATA(a,i,j)*((double *) PyArray_GETPTR2(a,i,j))
-#define PIDDATA(a,i)*((int *) PyArray_GETPTR1(a,i))
+#define PIDDATA(a,i)*((long int *) PyArray_GETPTR1(a,i))
 #define MDATA(a,i)*((double *) PyArray_GETPTR1(a,i))
 
 const char *filename;  
@@ -658,7 +658,7 @@ readvel()
 /*######################### PID ########################################*/
 readpid()
 {  
-  int *simdata;
+  long int *simdata;
   int ndim = 1;
 
   int i;
@@ -670,7 +670,7 @@ readpid()
       npy_intp dims[1]={header.npartTotal[type]};
       array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_INT);
     }
-    simdata=(int*)malloc(header.npart[type]*sizeof(int));
+    simdata=(long int*)malloc(header.npart[type]*sizeof(long int));
     
     skippos();
     skipvel();
