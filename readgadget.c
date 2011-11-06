@@ -635,17 +635,25 @@ readvel()
     //count = count + header.npart[type];
     for(n=0;n<header.npart[type];n++)
       {
-	if(Units==1){
-	  DATA(array,pc,0) = simdata[3*n]   * sqrt(header.time);
-	  DATA(array,pc,1) = simdata[3*n+1] * sqrt(header.time);
-	  DATA(array,pc,2) = simdata[3*n+2] * sqrt(header.time);
-	  pc++;
-	}
-	else{
+	if(header.OmegaLambda == 0.){
 	  DATA(array,pc,0) = simdata[3*n];
 	  DATA(array,pc,1) = simdata[3*n+1];
 	  DATA(array,pc,2) = simdata[3*n+2];
 	  pc++;
+	}
+	else{
+	  if(Units==1){
+	    DATA(array,pc,0) = simdata[3*n]   * sqrt(header.time);
+	    DATA(array,pc,1) = simdata[3*n+1] * sqrt(header.time);
+	    DATA(array,pc,2) = simdata[3*n+2] * sqrt(header.time);
+	    pc++;
+	  }
+	  else{
+	    DATA(array,pc,0) = simdata[3*n];
+	    DATA(array,pc,1) = simdata[3*n+1];
+	    DATA(array,pc,2) = simdata[3*n+2];
+	    pc++;
+	  }
 	}
       }
   }
@@ -865,9 +873,16 @@ readrho()
     //count = count + header.npart[type];
     for(n=0;n<header.npart[type];n++)
       {
-	if(Units==0) MDATA(array,pc) = simdata[n]*pow(1.+header.redshift,3);
-	if(Units==1) MDATA(array,pc) = simdata[n]*pow(1.+header.redshift,3)*convert;
-	pc++;
+	if(header.OmegaLambda == 0.){
+	  if(Units==0) MDATA(array,pc) = simdata[n];
+	  if(Units==1) MDATA(array,pc) = simdata[n]*convert;
+	  pc++;
+	}
+	else{
+	  if(Units==0) MDATA(array,pc) = simdata[n]*pow(1.+header.redshift,3);
+	  if(Units==1) MDATA(array,pc) = simdata[n]*pow(1.+header.redshift,3)*convert;
+	  pc++;
+	}
       }
   }
   if(pc!=header.npartTotal[type]){
