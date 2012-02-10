@@ -457,6 +457,12 @@ readhead(PyObject *self, PyObject *args, PyObject *keywds)
   char* O0        = "O0";
   char* Ol        = "Ol";
   char* h         = "h";
+  char* gascount  = "gascount";
+  char* dmcount   = "dmcount";
+  char* diskcount = "diskcount";
+  char* bulgecount= "bulgecount";
+  char* starcount = "starcount";
+  char* bndrycount= "bndrycount";
   //FLAGS
   char* f_sfr     = "f_sfr";
   char* f_fb      = "f_fb";
@@ -489,6 +495,12 @@ readhead(PyObject *self, PyObject *args, PyObject *keywds)
   else if(strcmp(Value,f_cooling)==0) return Py_BuildValue("i",header.flag_cooling);
   else if(strcmp(Value,f_age)==0)     return Py_BuildValue("i",header.flag_stellarage);
   else if(strcmp(Value,f_metals)==0)  return Py_BuildValue("i",header.flag_metals);
+  else if(strcmp(Value,gascount)==0)  return Py_BuildValue("i",header.npartTotal[0]);
+  else if(strcmp(Value,dmcount)==0)   return Py_BuildValue("i",header.npartTotal[1]);
+  else if(strcmp(Value,diskcount)==0) return Py_BuildValue("i",header.npartTotal[2]);
+  else if(strcmp(Value,bulgecount)==0)return Py_BuildValue("i",header.npartTotal[3]);
+  else if(strcmp(Value,starcount)==0) return Py_BuildValue("i",header.npartTotal[4]);
+  else if(strcmp(Value,bndrycount)==0)return Py_BuildValue("i",header.npartTotal[5]);
 }
 
 /*############################# DO SOME WORK! ###########################################*/

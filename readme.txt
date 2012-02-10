@@ -22,6 +22,12 @@ readhead - This function simply reads in the gadget header file and returns the 
 	 O0	       - Omega_0 (Omega_dm+Omega_m)
 	 Ol	       - Omega_Lambda
 	 h	       - hubble parameter
+	 gascount      - total # of gas   particles [type 0]
+	 dmcount       - total # of DM    particles [type 1]
+	 diskcount     - total # of disk  particles [type 2]
+	 bulgecount    - total # of bulge particles [type 3]
+	 starcount     - total # of star  particles [type 4]
+	 bndrycount    - total # of bndry particles [type 5]
 	 f_sfr	       - Star Formation Rate flag	 0=off 1=on
 	 f_fb	       - Feedback flag	     		 0=off 1=on
 	 f_cooling     - Cooling flag			 0=off 1=on 
