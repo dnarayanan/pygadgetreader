@@ -528,6 +528,12 @@ galdata(PyObject *self, PyObject *args, PyObject *keywds)
       }
     }  
   }
+  fclose(infp);
+  fclose(fp_pos);
+  fclose(fp_index);
+  fclose(fp_type);
+  fclose(fp_cat);
+  fclose(fp_prop);
 
   return PyArray_Return(array);
 }
