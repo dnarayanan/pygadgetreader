@@ -463,6 +463,8 @@ galdata(PyObject *self, PyObject *args, PyObject *keywds)
     PyErr_Format(PyExc_IOError,"can't open file: '%s'",infile);
     return NULL;
   }
+  fclose(infp)
+
   sprintf(infile,"%s/index_%03d",Directory,Snap);
   if(!(fp_index=fopen(infile,"rb"))){
     PyErr_Format(PyExc_IOError,"can't open file: '%s'",infile);
@@ -528,7 +530,6 @@ galdata(PyObject *self, PyObject *args, PyObject *keywds)
       }
     }  
   }
-  fclose(infp);
   fclose(fp_pos);
   fclose(fp_index);
   fclose(fp_type);
