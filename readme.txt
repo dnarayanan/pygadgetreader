@@ -46,7 +46,8 @@ Definition:   readhead('a','b',numfiles=0)
 	      
 	      Optional
 	      --------
-	      numfiles: Number of files the snapshot is broken up into. Assumed to be 1 if it is not included.
+	      numfiles: DEPRECIATED!  No longer needed, but still here for backwards compatability with previous scripts:
+	      Number of files the snapshot is broken up into. Assumed to be 1 if it is not included.
 
 
 Example:
@@ -156,6 +157,29 @@ Example:	group_mstar=galprop('../', 7, 'mstar',units=1)
 		gx,gy,gz=hsplit(group_cm,3)
 			- reads in group center of mass positions and returns an NgroupX3 array.
 			  hsplit is then used to split the array into gx,gy,gz positions.
+
+##################################################
+
+galdata	 - This function will return data from all baryonic particle contained within a specified galprop group.  The data returned is an array with the following particle properties at each index:
+
+	 xpos	       - x-position of the particle (index 0)
+	 ypos	       - y-position of the particle (index 1)
+	 zpos	       - z-position of the particle (index 2)
+	 PID	       - ID of the particle (index 3: currently NON-functional)
+	 TYPE	       - TYPE of particle: 0=gas, 4=star (index 4)
+
+
+Definitions:	galdata('a',b,'c')
+
+		Parameters
+		----------
+		a: Input directory (location of the property files)
+		   Must be input as a string and enclosed in ' ' - see examples.
+		b: Snapshot number
+		c: Galaxy number of interest - see examples.
+
+Example:	galdata=galdata('../', 7, 5)
+			- returns an array of data with the above information for galaxy 5 in the galprop list
 
 ##################################################
 

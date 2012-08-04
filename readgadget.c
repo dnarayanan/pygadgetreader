@@ -7,8 +7,9 @@
 #include <numpy/arrayobject.h>
 #define Skip fread(&dummy,sizeof(dummy),1,infp)
 #define DATA(a,i,j)*((double *) PyArray_GETPTR2(a,i,j))
-#define PIDDATA(a,i)*((int *) PyArray_GETPTR1(a,i))
+#define PIDDATA(a,i)*((unsigned int *) PyArray_GETPTR1(a,i))
 #define MDATA(a,i)*((double *) PyArray_GETPTR1(a,i))
+#define GALIDDATA(a,i,j)*((int *) PyArray_GETPTR2(a,i,j))
 
 const char *filename;  
 FILE *infp;
@@ -45,21 +46,40 @@ int Ngas,Ndm,Ndisk,Nbulge,Nstar,Nbdry,Ntotal;
 int Ngas_local,Ndm_local,Ndisk_local,Nbulge_local,Nstar_local,Nbdry_local,Ntotal_local;
 read_header()
 {
+  
+  /*
   if(NumFiles>1) 
     sprintf(infile,"%s.%d",filename,j);
   else 
     sprintf(infile,"%s",filename);
+  */
+
+  
+  sprintf(infile,"%s",filename);
+  if(!(infp=fopen(infile,"r"))){
+    sprintf(infile,"%s.%d",filename,j);
+    if(!(infp=fopen(infile,"r"))) {
+      ERR = 1;
+      PyErr_Format(PyExc_TypeError,"can't open file : '%s'",infile);
+      return NULL;
+    }
+  }
+  
+
   if(!(infp=fopen(infile,"r"))){
     ERR = 1;
     PyErr_Format(PyExc_TypeError,"can't open file: '%s'",infile);
     return NULL;
   }
+
   // READ HEADER
   Skip;
   fread(&header,sizeof(header),1,infp);
   Skip;
   
   //printf("numfiles=%d \t\t header.num_files=%d \n",NumFiles,header.num_files);
+
+  NumFiles = header.num_files;
 
   if(NumFiles != header.num_files){
     PyErr_Format(PyExc_IndexError,"NumFiles(%d) != header.num_files(%d)!",NumFiles,header.num_files);
@@ -416,6 +436,103 @@ readfof(PyObject *self, PyObject *args, PyObject *keywds)
 }
 
 
+/*###################### GALDATA ########################*/
+static PyObject *
+galdata(PyObject *self, PyObject *args, PyObject *keywds)
+{
+  PyObject *array;
+  //PyObject *array2;
+  char *Directory;
+  int Snap;
+  int ndim = 2;
+  FILE *fp_pos, *fp_index, *fp_type, *fp_cat, *fp_prop;
+  int tot_gal, len;
+  int k, i;
+  int galnum;
+  float x,y,z;
+  unsigned int id;
+
+  static char *kwlist[]={"dir","snapnumber","galnum",NULL};
+  if(!PyArg_ParseTupleAndKeywords(args,keywds,"sii",kwlist,&Directory,&Snap,&galnum)){
+    PyErr_Format(PyExc_TypeError,"incorrect input!  must provide properties file directory, snap number, and galaxy number - see readme.txt");
+    return NULL;
+  }
+
+  sprintf(infile,"%s/pos_%03d",Directory,Snap);
+  if(!(fp_pos=fopen(infile,"rb"))){
+    PyErr_Format(PyExc_IOError,"can't open file: '%s'",infile);
+    return NULL;
+  }
+  sprintf(infile,"%s/index_%03d",Directory,Snap);
+  if(!(fp_index=fopen(infile,"rb"))){
+    PyErr_Format(PyExc_IOError,"can't open file: '%s'",infile);
+    return NULL;
+  }
+  sprintf(infile,"%s/type_%03d",Directory,Snap);
+  if(!(fp_type=fopen(infile,"rb"))){
+    PyErr_Format(PyExc_IOError,"can't open file: '%s'",infile);
+    return NULL;
+  }
+  sprintf(infile,"%s/catalogue_%03d",Directory,Snap);
+  if(!(fp_cat=fopen(infile,"rb"))){
+    PyErr_Format(PyExc_IOError,"can't open file: '%s'",infile);
+    return NULL;
+  }
+
+  /*
+  sprintf(infile,"%s/properties_%03d",Directory,Snap);
+  if(!(fp_prop=fopen(infile,"rb"))){
+    PyErr_Format(PyExc_IOError,"can't open file: '%s'",infile);
+    return NULL;
+  }
+  */
+
+  fseek( fp_pos,   sizeof(int), SEEK_CUR);
+  fseek( fp_index, sizeof(int), SEEK_CUR);
+  fseek( fp_type,  sizeof(int), SEEK_CUR);
+  fread( &tot_gal, sizeof(int), 1, fp_cat);
+  //fseek( fp_prop,  sizeof(int), SEEK_CUR);
+  
+
+  printf("  total number of galaxies: %d\n", tot_gal);
+
+  for(i=0; i<tot_gal; i++){
+    fread( &len,         sizeof(int), 1, fp_cat);
+    fseek( fp_cat,       sizeof(int), SEEK_CUR);
+    //fseek( fp_prop, 12*sizeof(float), SEEK_CUR);
+
+    if (i==galnum){
+      printf("particles in target galaxy: %d\n",len);
+      npy_intp dims[2]={len,5};
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
+
+      for(k=0; k<len; k++){
+        fread( &x,    sizeof(float), 1, fp_pos);
+        fread( &y,    sizeof(float), 1, fp_pos);
+        fread( &z,    sizeof(float), 1, fp_pos);
+        fread( &id,   sizeof(int),   1, fp_index);
+        fread( &type, sizeof(int),   1, fp_type);
+
+        DATA(array, k, 0) = x;
+        DATA(array, k, 1) = y;
+        DATA(array, k, 2) = z;
+        DATA(array, k, 3) = (double)(id-1);
+        DATA(array, k, 4) = (double)type;
+      }
+    }
+    else{
+      for(k=0; k<len; k++){
+        fseek( fp_pos, 3*sizeof(float), SEEK_CUR);
+        fseek( fp_index,   sizeof(int), SEEK_CUR);
+        fseek( fp_type,    sizeof(int), SEEK_CUR);
+      }
+    }  
+  }
+
+  return PyArray_Return(array);
+}
+
+
 static PyObject *
 test(PyObject *self, PyObject *args)
 {
@@ -529,15 +646,17 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
     PyErr_Format(PyExc_TypeError,"readsnap: can't open file: '%s' ERR=%d",infile,ERR);
     return NULL;
   }
+  
   if(NumFiles!=header.num_files){
     PyErr_Format(PyExc_IndexError,"NumFiles(%d) != header.num_files(%d)!",NumFiles,header.num_files);
     return NULL;
   }
+  
 
   fclose(infp);
   assign_type();
 
-  printf("\ninput: %s \n",filename);
+  printf("\ninput (%d files): %s \n",NumFiles,filename);
   printf("extracting %s data for %s\n",Values,Type);
   if(Units==0){
     if(values==5)  printf("returning PHYSICAL density in CODE units\n\n");
@@ -678,19 +797,19 @@ readvel()
 /*######################### PID ########################################*/
 readpid()
 {
-  int *simdata;
+  unsigned int *simdata;
   int ndim = 1;
 
   int i;
   int n;
-  int pc = 0;
+  unsigned int pc = 0;
   for(j=0;j<NumFiles;j++){
     read_header();
     if(j==0){
       npy_intp dims[1]={header.npartTotal[type]};
       array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_UINT32);
     }
-    simdata=(int*)malloc(header.npart[type]*sizeof(int));
+    simdata=(unsigned int*)malloc(header.npart[type]*sizeof(int));
     
     skippos();
     skipvel();
@@ -1449,6 +1568,9 @@ skipfh2(){ //skip fH2
   Skip;
 }
 
+
+
+
 //Initialize Module
 PyMethodDef methods[] = {
   {"test",test, METH_VARARGS ,"test function"},
@@ -1456,6 +1578,7 @@ PyMethodDef methods[] = {
   {"readhead",readhead,METH_VARARGS | METH_KEYWORDS, "read header data"},
   {"readfof",readfof,METH_VARARGS | METH_KEYWORDS, "read fof data"},
   {"galprop",galprop,METH_VARARGS | METH_KEYWORDS, "read galaxy property data"},
+  {"galdata",galdata,METH_VARARGS | METH_KEYWORDS, "return galaxy particle info"},
   {NULL,NULL,0,NULL}
 };
 
