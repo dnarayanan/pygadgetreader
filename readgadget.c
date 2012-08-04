@@ -533,7 +533,7 @@ galdata(PyObject *self, PyObject *args, PyObject *keywds)
   fclose(fp_index);
   fclose(fp_type);
   fclose(fp_cat);
-  fclose(fp_prop);
+  //fclose(fp_prop);
 
   return PyArray_Return(array);
 }
