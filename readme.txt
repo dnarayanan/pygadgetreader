@@ -165,21 +165,32 @@ galdata	 - This function will return data from all baryonic particle contained w
 	 xpos	       - x-position of the particle (index 0)
 	 ypos	       - y-position of the particle (index 1)
 	 zpos	       - z-position of the particle (index 2)
-	 PID	       - ID of the particle (index 3: currently NON-functional)
+	 INDEX	       - index of the particle (in relation to ALL particles from the simulation) (index 3)
 	 TYPE	       - TYPE of particle: 0=gas, 4=star (index 4)
 
 
-Definitions:	galdata('a',b,'c')
+Definitions:	galdata('a','b',c,d)
 
 		Parameters
 		----------
-		a: Input directory (location of the property files)
+		a: Snapshot file.
 		   Must be input as a string and enclosed in ' ' - see examples.
-		b: Snapshot number
-		c: Galaxy number of interest - see examples.
+		b: Input directory (location of the property files)
+		   Must be input as a string and enclosed in ' ' - see examples.
+		c: Snapshot number
+		d: Galaxy number of interest - see examples.
 
-Example:	galdata=galdata('../', 7, 5)
+Example:	galaxy=galdata('snap_001', '../', 7, 5)
 			- returns an array of data with the above information for galaxy 5 in the galprop list
+
+To match data to the snapshot:
+		indexes = galaxy[:,3]  			#unfortunately this returns an array of doubles
+		indexes = indexes.astype(int)  	#convert that array to integers
+		
+		- now you can access the data for this particlular galaxy using these indexes on the full dataset
+		  for example:  if you read in the density value via:	rho = readsnap(snap,'rho','gas')
+		  				then rho[indexes] will return the density values of only the particles within
+		  				the target galaxy.
 
 ##################################################
 

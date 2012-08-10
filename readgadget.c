@@ -451,11 +451,78 @@ galdata(PyObject *self, PyObject *args, PyObject *keywds)
   int galnum;
   float x,y,z;
   unsigned int id;
+  int Numfiles;
+  double tempIndex;  
 
-  static char *kwlist[]={"dir","snapnumber","galnum",NULL};
-  if(!PyArg_ParseTupleAndKeywords(args,keywds,"sii",kwlist,&Directory,&Snap,&galnum)){
-    PyErr_Format(PyExc_TypeError,"incorrect input!  must provide properties file directory, snap number, and galaxy number - see readme.txt");
+  static char *kwlist[]={"file","dir","snapnumber","galnum",NULL};
+  if(!PyArg_ParseTupleAndKeywords(args,keywds,"ssii",kwlist,&filename,&Directory,&Snap,&galnum)){
+    PyErr_Format(PyExc_TypeError,"incorrect input!  snapshot, galprop data file directory, snap number, and galaxy number - see readme.txt");
     return NULL;
+  }
+
+  //READ SNAPSHOT
+  sprintf(infile,"%s",filename);
+  if(!(infp=fopen(infile,"r"))){
+    sprintf(infile,"%s.0",filename);
+    if(!(infp=fopen(infile,"r"))) {
+      ERR = 1;
+      PyErr_Format(PyExc_TypeError,"can't open file : '%s'",infile);
+      return NULL;
+    }
+  }
+
+  // READ HEADER
+  Skip;
+  fread(&header,sizeof(header),1,infp);
+  Skip;
+  fclose(infp);
+  NumFiles = header.num_files;
+
+
+  unsigned int *s_tallies, *g_tallies, *num_gas, *num_dm, *num_star;
+  s_tallies=(unsigned int*)malloc(NumFiles*sizeof(unsigned int));
+  g_tallies=(unsigned int*)malloc(NumFiles*sizeof(unsigned int));
+  num_gas  =(unsigned int*)malloc(NumFiles*sizeof(unsigned int));
+  num_dm   =(unsigned int*)malloc(NumFiles*sizeof(unsigned int));
+  num_star =(unsigned int*)malloc(NumFiles*sizeof(unsigned int));
+
+  s_tallies[0] = header.npart[0]+header.npart[1];
+  g_tallies[0] = 0;
+  num_gas[0]   = header.npart[0];
+  num_dm[0]    = header.npart[1];
+  num_star[0]  = header.npart[4];
+
+  if(NumFiles>1){
+    for(i=1;i<NumFiles;i++){
+      sprintf(infile,"%s.%d",filename,i);
+      if(!(infp=fopen(infile,"r"))){
+        ERR=1;
+        PyErr_Format(PyExc_TypeError, "can't open file : '%s'",infile);
+      }
+
+      Skip;
+      fread(&header,sizeof(header),1,infp);
+      Skip;
+      fclose(infp);
+
+      num_gas[i]  =header.npart[0];
+      num_dm[i]   =header.npart[1];
+      num_star[i] =header.npart[4];
+    }
+    for(i=1;i<NumFiles;i++){
+      g_tallies[i] = g_tallies[i-1] + num_dm[i-1]  + num_star[i-1];
+      s_tallies[i] = s_tallies[i-1] + num_gas[i] + num_dm[i];
+    }
+    /*
+    for(i=0;i<NumFiles;i++){
+      printf("num_gas[%d]=%d\n",i,num_gas[i]);
+      fflush(stdout);
+    }
+    for(i=0;i<NumFiles;i++){
+      printf("g_tallies[%d]=%d\ts_tallies[%d]=%d\n",i,g_tallies[i],i,s_tallies[i]);
+      fflush(stdout);
+    }
+    */
   }
 
   sprintf(infile,"%s/pos_%03d",Directory,Snap);
@@ -494,8 +561,7 @@ galdata(PyObject *self, PyObject *args, PyObject *keywds)
   fread( &tot_gal, sizeof(int), 1, fp_cat);
   //fseek( fp_prop,  sizeof(int), SEEK_CUR);
   
-
-  printf("  total number of galaxies: %d\n", tot_gal);
+  //printf("  total number of galaxies: %d\n", tot_gal);
 
   for(i=0; i<tot_gal; i++){
     fread( &len,         sizeof(int), 1, fp_cat);
@@ -503,7 +569,7 @@ galdata(PyObject *self, PyObject *args, PyObject *keywds)
     //fseek( fp_prop, 12*sizeof(float), SEEK_CUR);
 
     if (i==galnum){
-      printf("particles in target galaxy: %d\n",len);
+      printf("particles in target galaxy %d: %d\n",galnum,len);
       npy_intp dims[2]={len,5};
       array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
 
@@ -514,10 +580,14 @@ galdata(PyObject *self, PyObject *args, PyObject *keywds)
         fread( &id,   sizeof(int),   1, fp_index);
         fread( &type, sizeof(int),   1, fp_type);
 
+        tempIndex = 0.;
+        tempIndex = (double)return_index(NumFiles,s_tallies,g_tallies,id,type);
+        //printf("tempIndex=%f\n",tempIndex);
+
         DATA(array, k, 0) = x;
         DATA(array, k, 1) = y;
         DATA(array, k, 2) = z;
-        DATA(array, k, 3) = (double)(id-1);
+        DATA(array, k, 3) = tempIndex;
         DATA(array, k, 4) = (double)type;
       }
     }
@@ -536,6 +606,48 @@ galdata(PyObject *self, PyObject *args, PyObject *keywds)
   //fclose(fp_prop);
 
   return PyArray_Return(array);
+}
+
+return_index(int NumFiles, unsigned int *s_tallies, unsigned int *g_tallies, unsigned int id, int type)
+{
+  int i;
+  id = id - 1;
+  unsigned int new_id;
+  int escape = 0;
+
+  if(NumFiles > 1){
+    for(i=0;i<NumFiles-1;i++){
+      if(type==4){
+        if(id < s_tallies[i+1] && escape==0){
+          new_id = id - s_tallies[i];
+          escape = 1;
+        }
+        if(id > s_tallies[NumFiles-1] && escape==0){
+          new_id = id - s_tallies[NumFiles-1];
+          escape = 1;
+        }
+      }
+      else if(type==0){
+        for(i=0;i<NumFiles;i++){
+          if(id<s_tallies[i] && escape==0){
+            new_id = id - g_tallies[i];
+            escape = 1;
+          }
+        }
+      }
+    }
+  }
+  else if(NumFiles==1){
+    if(type==4)
+      new_id = id - s_tallies[0];
+    if(type==0)
+      new_id = id;
+  }
+  else{
+    printf("%d detected!  original ID=%d, type=%d\n",new_id, id, type);
+    fflush(stdout);
+  }
+  return new_id;
 }
 
 
