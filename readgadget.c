@@ -995,7 +995,11 @@ readmass()
       
       Skip; //skip before MASS
       //seek past particle groups not interested in
-      if(type==4) fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+      if(type==1) fseek(infp, header.npart[0]*sizeof(float),SEEK_CUR);
+      if(type==2) fseek(infp,(header.npart[0]+header.npart[1])*sizeof(float),SEEK_CUR);
+      if(type==3) fseek(infp,(header.npart[0]+header.npart[1]+header.npart[2])*sizeof(float),SEEK_CUR);
+      if(type==4) fseek(infp,(header.npart[0]+header.npart[1]+header.npart[2]+header.npart[3])*sizeof(float),SEEK_CUR);
+      //if(type==4) fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
       fread(simdata,header.npart[type]*sizeof(float),1,infp);
       Skip; //skip after MASS
       fclose(infp);
@@ -1623,10 +1627,19 @@ skippid(){ //skip PIDs
   Skip;
 }
 skipmass(){ //skip MASS
-  if(header.mass[0]==0 && header.npart[0]>0 || header.mass[4]==0 && header.npart[4]>0){
+  if(header.mass[0]==0 && header.npart[0]>0 || 
+     header.mass[1]==0 && header.npart[1]>0 ||
+     header.mass[2]==0 && header.npart[2]>0 ||
+     header.mass[3]==0 && header.npart[3]>0 ||
+     header.mass[4]==0 && header.npart[4]>0 ||
+     header.mass[5]==0 && header.npart[5]>0){
     Skip;
     if(header.mass[0]==0 && header.npart[0]>0) fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
-    if(header.mass[4]==0 && header.npart[0]>0) fseek(infp,header.npart[4]*sizeof(float),SEEK_CUR);
+    if(header.mass[1]==0 && header.npart[1]>0) fseek(infp,header.npart[1]*sizeof(float),SEEK_CUR);
+    if(header.mass[2]==0 && header.npart[2]>0) fseek(infp,header.npart[2]*sizeof(float),SEEK_CUR);
+    if(header.mass[3]==0 && header.npart[3]>0) fseek(infp,header.npart[3]*sizeof(float),SEEK_CUR);
+    if(header.mass[4]==0 && header.npart[4]>0) fseek(infp,header.npart[4]*sizeof(float),SEEK_CUR);
+    if(header.mass[5]==0 && header.npart[5]>0) fseek(infp,header.npart[5]*sizeof(float),SEEK_CUR);
     Skip;
   }
 }
