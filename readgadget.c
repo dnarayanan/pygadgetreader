@@ -963,6 +963,7 @@ readmass()
 
   int i;
   int n;
+  int k;
   int pc = 0;
   for(j=0;j<NumFiles;j++){
     read_header();
@@ -995,10 +996,34 @@ readmass()
       
       Skip; //skip before MASS
       //seek past particle groups not interested in
-      if(type==1) fseek(infp, header.npart[0]*sizeof(float),SEEK_CUR);
-      if(type==2) fseek(infp,(header.npart[0]+header.npart[1])*sizeof(float),SEEK_CUR);
-      if(type==3) fseek(infp,(header.npart[0]+header.npart[1]+header.npart[2])*sizeof(float),SEEK_CUR);
-      if(type==4) fseek(infp,(header.npart[0]+header.npart[1]+header.npart[2]+header.npart[3])*sizeof(float),SEEK_CUR);
+      if(type==1){
+	if(header.mass[0]==0)
+	  fseek(infp, header.npart[0]*sizeof(float),SEEK_CUR);
+      }
+      if(type==2){
+	for(k=0;k<2;k++){
+	  if(header.mass[k]==0)
+	    fseek(infp,header.npart[k]*sizeof(float),SEEK_CUR);
+	}
+      }      
+      if(type==3){
+	for(k=0;k<3;k++){
+	  if(header.mass[k]==0)
+	    fseek(infp,header.npart[k]*sizeof(float),SEEK_CUR);
+	}
+      } 
+      if(type==4){
+	for(k=0;k<4;k++){
+	  if(header.mass[k]==0)
+	    fseek(infp,header.npart[k]*sizeof(float),SEEK_CUR);
+	}
+      }
+      if(type==5){
+	for(k=0;k<5;k++){
+	  if(header.mass[k]==0)
+	    fseek(infp,header.npart[k]*sizeof(float),SEEK_CUR);
+	}
+      }
       //if(type==4) fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
       fread(simdata,header.npart[type]*sizeof(float),1,infp);
       Skip; //skip after MASS
