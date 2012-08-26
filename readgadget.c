@@ -480,17 +480,24 @@ galdata(PyObject *self, PyObject *args, PyObject *keywds)
 
 
   unsigned int *s_tallies, *g_tallies, *num_gas, *num_dm, *num_star;
+  unsigned int *num_disk, *num_bulge, *num_bndry;
   s_tallies=(unsigned int*)malloc(NumFiles*sizeof(unsigned int));
   g_tallies=(unsigned int*)malloc(NumFiles*sizeof(unsigned int));
   num_gas  =(unsigned int*)malloc(NumFiles*sizeof(unsigned int));
   num_dm   =(unsigned int*)malloc(NumFiles*sizeof(unsigned int));
+  num_disk =(unsigned int*)malloc(NumFiles*sizeof(unsigned int));
+  num_bulge=(unsigned int*)malloc(NumFiles*sizeof(unsigned int));
   num_star =(unsigned int*)malloc(NumFiles*sizeof(unsigned int));
+  num_bndry=(unsigned int*)malloc(NumFiles*sizeof(unsigned int));
 
-  s_tallies[0] = header.npart[0]+header.npart[1];
+  s_tallies[0] = header.npart[0]+header.npart[1]+header.npart[2]+header.npart[3];
   g_tallies[0] = 0;
   num_gas[0]   = header.npart[0];
   num_dm[0]    = header.npart[1];
+  num_disk[0]  = header.npart[2];
+  num_bulge[0] = header.npart[3];
   num_star[0]  = header.npart[4];
+  num_bndry[0] = header.npart[5];
 
   if(NumFiles>1){
     for(i=1;i<NumFiles;i++){
@@ -505,13 +512,20 @@ galdata(PyObject *self, PyObject *args, PyObject *keywds)
       Skip;
       fclose(infp);
 
-      num_gas[i]  =header.npart[0];
-      num_dm[i]   =header.npart[1];
-      num_star[i] =header.npart[4];
+      num_gas[i]   = header.npart[0];
+      num_dm[i]    = header.npart[1];
+      num_disk[i]  = header.npart[2];
+      num_bulge[i] = header.npart[3];
+      num_star[i]  = header.npart[4];
+      num_bndry[i] = header.npart[5];
     }
     for(i=1;i<NumFiles;i++){
+      /*
       g_tallies[i] = g_tallies[i-1] + num_dm[i-1]  + num_star[i-1];
       s_tallies[i] = s_tallies[i-1] + num_gas[i] + num_dm[i];
+      */
+      g_tallies[i] = g_tallies[i-1] + num_dm[i-1]  + num_disk[i-1] + num_bulge[i-1] + num_star[i-1] + num_bndry[i-1];
+      s_tallies[i] = s_tallies[i-1] + num_bndry[i-1] + num_gas[i] + num_dm[i] + num_disk[i] + num_bulge[i];
     }
     /*
     for(i=0;i<NumFiles;i++){
