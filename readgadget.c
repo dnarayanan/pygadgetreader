@@ -232,6 +232,9 @@ galprop(PyObject *self, PyObject *args, PyObject *keywds)
   char* MGAS    = "mgas";
   char* SMETAL  = "zstar";
   char* GMETAL  = "zgas";
+  char* SFRMETAL= "sfrmetal";
+  char* HIMASS  = "HImass";
+  char* H2MASS  = "H2mass";
 
   double convert = 1e10;
 
@@ -257,6 +260,9 @@ galprop(PyObject *self, PyObject *args, PyObject *keywds)
   else if(strcmp(Value,MGAS)==0)   value = 7;
   else if(strcmp(Value,SMETAL)==0) value = 8;
   else if(strcmp(Value,GMETAL)==0) value = 9;
+  else if(strcmp(Value,SFRMETAL)==0) value = 10;
+  else if(strcmp(Value,HIMASS)==0) value = 11;
+  else if(strcmp(Value,H2MASS)==0) value = 12;
   else{
     PyErr_Format(PyExc_IndexError,"wrong values type selected");
     return NULL;
@@ -276,6 +282,9 @@ galprop(PyObject *self, PyObject *args, PyObject *keywds)
     float mgas;
     float metalstar;
     float metalgas;
+    float sfrmetal;
+    float HIgalmass;
+    float H2galmass;
   } *gal;
   
   fread(&Ngroup,sizeof(int),1,infp);
@@ -295,7 +304,16 @@ galprop(PyObject *self, PyObject *args, PyObject *keywds)
     if(Units==1) printf("Returning %d group gas masses units of Msun\n",Ngroup);
   }
   if(value==8) printf("Returning %d group stellar metallicities\n",Ngroup);
-  if(value==9) printf("Returning %d group gas metallicities\n",Ngroup);
+  if(value==9) printf("Returning %d group gas MASS-weighted metallicities\n",Ngroup);
+  if(value==10) printf("Returning %d group gas SFR-weighted metallicities\n",Ngroup);
+  if(value==11){
+    if(Units==0) printf("Returning %d group HI mass in code units\n",Ngroup);
+    if(Units==1) printf("Returning %d group HI mass in units of Msun\n",Ngroup);
+  }
+  if(value==12){
+    if(Units==0) printf("Returning %d group H2 mass in code units\n",Ngroup);
+    if(Units==1) printf("Returning %d group H2 mass in units of Msun\n",Ngroup);
+  } 
 
   gal=malloc(sizeof(struct gal_data)*Ngroup);
 
@@ -310,6 +328,9 @@ galprop(PyObject *self, PyObject *args, PyObject *keywds)
     fread(&gal[i].mgas,     sizeof(float),1,infp);
     fread(&gal[i].metalstar,sizeof(float),1,infp);
     fread(&gal[i].metalgas, sizeof(float),1,infp);
+    fread(&gal[i].sfrmetal, sizeof(float),1,infp);
+    fread(&gal[i].HIgalmass, sizeof(float),1,infp);
+    fread(&gal[i].H2galmass, sizeof(float),1,infp);
   }
   fclose(infp);
 
@@ -344,6 +365,15 @@ galprop(PyObject *self, PyObject *args, PyObject *keywds)
     }
     if(value==8) for(i=0;i<Ngroup;i++) MDATA(array,i) = gal[i].metalstar;
     if(value==9) for(i=0;i<Ngroup;i++) MDATA(array,i) = gal[i].metalgas;
+    if(value==10) for(i=0;i<Ngroup;i++) MDATA(array,i) = gal[i].sfrmetal;
+    if(value==11){
+      if(Units==0) for(i=0;i<Ngroup;i++) MDATA(array,i) = gal[i].HIgalmass;
+      if(Units==1) for(i=0;i<Ngroup;i++) MDATA(array,i) = gal[i].HIgalmass*convert;
+    }
+    if(value==12){
+      if(Units==0) for(i=0;i<Ngroup;i++) MDATA(array,i) = gal[i].H2galmass;
+      if(Units==1) for(i=0;i<Ngroup;i++) MDATA(array,i) = gal[i].H2galmass*convert;
+    } 
   }
   return PyArray_Return(array);
 }
@@ -583,7 +613,7 @@ galdata(PyObject *self, PyObject *args, PyObject *keywds)
     //fseek( fp_prop, 12*sizeof(float), SEEK_CUR);
 
     if (i==galnum){
-      printf("particles in target galaxy %d: %d\n",galnum,len);
+      //printf("particles in target galaxy %d: %d\n",galnum,len);
       npy_intp dims[2]={len,5};
       array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
 
@@ -662,6 +692,108 @@ return_index(int NumFiles, unsigned int *s_tallies, unsigned int *g_tallies, uns
     fflush(stdout);
   }
   return new_id;
+}
+
+/*###################### GALDATAONLY NO INDEXES ########################*/
+static PyObject *
+galdataonly(PyObject *self, PyObject *args, PyObject *keywds)
+{
+  PyObject *array;
+  //PyObject *array2;
+  char *Directory;
+  int Snap;
+  int ndim = 2;
+  FILE *fp_pos, *fp_index, *fp_type, *fp_cat, *fp_prop;
+  int tot_gal, len;
+  int k, i;
+  int galnum;
+  float x,y,z;
+  unsigned int id;
+  int Numfiles;
+
+  static char *kwlist[]={"dir","snapnumber","galnum",NULL};
+  if(!PyArg_ParseTupleAndKeywords(args,keywds,"sii",kwlist,&Directory,&Snap,&galnum)){
+    PyErr_Format(PyExc_TypeError,"incorrect input!  galprop data file directory, snap number, and galaxy number - see readme.txt");
+    return NULL;
+  }
+  
+  sprintf(infile,"%s/pos_%03d",Directory,Snap);
+  if(!(fp_pos=fopen(infile,"rb"))){
+    PyErr_Format(PyExc_IOError,"can't open file: '%s'",infile);
+    return NULL;
+  }
+
+  sprintf(infile,"%s/index_%03d",Directory,Snap);
+  if(!(fp_index=fopen(infile,"rb"))){
+    PyErr_Format(PyExc_IOError,"can't open file: '%s'",infile);
+    return NULL;
+  }
+  sprintf(infile,"%s/type_%03d",Directory,Snap);
+  if(!(fp_type=fopen(infile,"rb"))){
+    PyErr_Format(PyExc_IOError,"can't open file: '%s'",infile);
+    return NULL;
+  }
+  sprintf(infile,"%s/catalogue_%03d",Directory,Snap);
+  if(!(fp_cat=fopen(infile,"rb"))){
+    PyErr_Format(PyExc_IOError,"can't open file: '%s'",infile);
+    return NULL;
+  }
+
+  /*
+  sprintf(infile,"%s/properties_%03d",Directory,Snap);
+  if(!(fp_prop=fopen(infile,"rb"))){
+    PyErr_Format(PyExc_IOError,"can't open file: '%s'",infile);
+    return NULL;
+  }
+  */
+
+  fseek( fp_pos,   sizeof(int), SEEK_CUR);
+  fseek( fp_index, sizeof(int), SEEK_CUR);
+  fseek( fp_type,  sizeof(int), SEEK_CUR);
+  fread( &tot_gal, sizeof(int), 1, fp_cat);
+  //fseek( fp_prop,  sizeof(int), SEEK_CUR);
+  
+  //printf("  total number of galaxies: %d\n", tot_gal);
+
+  for(i=0; i<tot_gal; i++){
+    fread( &len,         sizeof(int), 1, fp_cat);
+    fseek( fp_cat,       sizeof(int), SEEK_CUR);
+    //fseek( fp_prop, 12*sizeof(float), SEEK_CUR);
+
+    if (i==galnum){
+      //printf("particles in target galaxy %d: %d\n",galnum,len);
+      npy_intp dims[2]={len,5};
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
+
+      for(k=0; k<len; k++){
+        fread( &x,    sizeof(float), 1, fp_pos);
+        fread( &y,    sizeof(float), 1, fp_pos);
+        fread( &z,    sizeof(float), 1, fp_pos);
+        fread( &id,   sizeof(int),   1, fp_index);
+        fread( &type, sizeof(int),   1, fp_type);
+
+        DATA(array, k, 0) = x;
+        DATA(array, k, 1) = y;
+        DATA(array, k, 2) = z;
+        DATA(array, k, 3) = 0;
+        DATA(array, k, 4) = (double)type;
+      }
+    }
+    else{
+      for(k=0; k<len; k++){
+        fseek( fp_pos, 3*sizeof(float), SEEK_CUR);
+        fseek( fp_index,   sizeof(int), SEEK_CUR);
+        fseek( fp_type,    sizeof(int), SEEK_CUR);
+      }
+    }  
+  }
+  fclose(fp_pos);
+  fclose(fp_index);
+  fclose(fp_type);
+  fclose(fp_cat);
+  //fclose(fp_prop);
+
+  return PyArray_Return(array);
 }
 
 
@@ -1749,6 +1881,7 @@ PyMethodDef methods[] = {
   {"readfof",readfof,METH_VARARGS | METH_KEYWORDS, "read fof data"},
   {"galprop",galprop,METH_VARARGS | METH_KEYWORDS, "read galaxy property data"},
   {"galdata",galdata,METH_VARARGS | METH_KEYWORDS, "return galaxy particle info"},
+  {"galdataonly",galdataonly,METH_VARARGS | METH_KEYWORDS, "return galaxy particle info (no indexes)"},
   {NULL,NULL,0,NULL}
 };
 
