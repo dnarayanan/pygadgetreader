@@ -221,6 +221,8 @@ galprop(PyObject *self, PyObject *args, PyObject *keywds)
   char *Value;
   int value;
   int Units = 0;
+  int SFRZ  = 0;
+  int HIH2  = 0;
 
   char* MSTAR   = "mstar";
   char* BMAG    = "bmag";
@@ -238,8 +240,8 @@ galprop(PyObject *self, PyObject *args, PyObject *keywds)
 
   double convert = 1e10;
 
-  static char *kwlist[]={"dir","snapnumber","value","units",NULL};
-  if(!PyArg_ParseTupleAndKeywords(args,keywds,"sis|i",kwlist,&Directory,&Snap,&Value,&Units)){
+  static char *kwlist[]={"dir","snapnumber","value","units","sfrZ","HIH2",NULL};
+  if(!PyArg_ParseTupleAndKeywords(args,keywds,"sis|iii",kwlist,&Directory,&Snap,&Value,&Units,&SFRZ,&HIH2)){
     PyErr_Format(PyExc_TypeError,"incorrect input!  must provide properties file directory, snap number, and value you're interested in - see readme.txt");
     return NULL;
   }
@@ -249,6 +251,9 @@ galprop(PyObject *self, PyObject *args, PyObject *keywds)
     PyErr_Format(PyExc_IOError,"can't open file: '%s'",infile);
     return NULL;
   }
+
+  if(HIH2==1 && SFRZ == 0)
+    SFRZ = 1;
 
   if(strcmp(Value,MSTAR)==0)       value = 0;
   else if(strcmp(Value,BMAG)==0)   value = 1;
@@ -260,9 +265,9 @@ galprop(PyObject *self, PyObject *args, PyObject *keywds)
   else if(strcmp(Value,MGAS)==0)   value = 7;
   else if(strcmp(Value,SMETAL)==0) value = 8;
   else if(strcmp(Value,GMETAL)==0) value = 9;
-  else if(strcmp(Value,SFRMETAL)==0) value = 10;
-  else if(strcmp(Value,HIMASS)==0) value = 11;
-  else if(strcmp(Value,H2MASS)==0) value = 12;
+  else if(strcmp(Value,SFRMETAL)==0 && SFRZ==1) value = 10;
+  else if(strcmp(Value,HIMASS)==0 && HIH2==1) value = 11;
+  else if(strcmp(Value,H2MASS)==0 && HIH2==1) value = 12;
   else{
     PyErr_Format(PyExc_IndexError,"wrong values type selected");
     return NULL;
@@ -328,9 +333,12 @@ galprop(PyObject *self, PyObject *args, PyObject *keywds)
     fread(&gal[i].mgas,     sizeof(float),1,infp);
     fread(&gal[i].metalstar,sizeof(float),1,infp);
     fread(&gal[i].metalgas, sizeof(float),1,infp);
-    fread(&gal[i].sfrmetal, sizeof(float),1,infp);
-    fread(&gal[i].HIgalmass, sizeof(float),1,infp);
-    fread(&gal[i].H2galmass, sizeof(float),1,infp);
+    if(SFRZ==1)
+      fread(&gal[i].sfrmetal, sizeof(float),1,infp);
+    if(HIH2==1){
+      fread(&gal[i].HIgalmass, sizeof(float),1,infp);
+      fread(&gal[i].H2galmass, sizeof(float),1,infp);
+    }
   }
   fclose(infp);
 
