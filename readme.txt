@@ -65,6 +65,7 @@ readsnap - This function does the bulk of the work.  It reads data blocks from t
 	   file and returns the requested data for specified particle type.  
 	   Supported data blocks are:
 
+	   --GADGET & TIPSY--
 	   pos	       - Position data
 	   vel	       - Velocity data in km/s
 	   pid	       - Particle ids
@@ -81,7 +82,18 @@ readsnap - This function does the bulk of the work.  It reads data blocks from t
 	   Sigma       - Approximate surface density @ each particle (HIdensity * scale_height)
 
 
-	   Supported particle types:
+	   --TIPSY ONLY--
+	   metals      - (aux)    NMETALS array 
+	   tmax	       - (aux)    maximum gas temperature
+	   delaytime   - (aux)    gas particle delaytime
+	   nspawn      - (aux)    number of star particles spawned
+	   potential   - (bin)    grav potential of particles
+	   s_age       - (aux)    stellar age
+	   mhalo       - (envira) mass of parent SKID halo
+	   windage     - (envira) time since last launched in a wind for gas
+
+
+	   Supported particle types (note tipsy only returns gas/dm/star particles):
 	   gas	       - Gas
 	   dm	       - Dark Matter
 	   disk	       - Disk particles
@@ -90,7 +102,7 @@ readsnap - This function does the bulk of the work.  It reads data blocks from t
 	   bndry       - Boundary particles
 	   
 
-Definition:	readsnap('a','b','c',numfiles=0,units=0)
+Definition:	readsnap('a','b','c',numfiles=0,units=0,tipsy=0)
 
 		Parameters
 		----------
@@ -108,6 +120,8 @@ Definition:	readsnap('a','b','c',numfiles=0,units=0)
 		          This parameter allows for the data to be returned in real units(1) rather than code units(0).
 			  Currently only active for density (rho), internal energy 
 			  (u - returns temperature in K), Mass (returns Msun), and Sigma (returns g/cm^2).
+		   tipsy: Must be set to 1 if reading in tipsy binary/aux/envira files.
+			  
 
 Example:
 		DMpos=readsnap('snap_001','pos','dm')
