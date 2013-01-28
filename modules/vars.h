@@ -47,7 +47,7 @@ struct io_header
   int      flag_doubleprecision;
 
   int flag_lpt_ics;
-  flag lpt_scalingcator;
+  int flag_lpt_scalingcator;
 
   int flag_tmax;
   int flag_potential;
