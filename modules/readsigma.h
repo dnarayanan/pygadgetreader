@@ -50,8 +50,7 @@ readsigma()
     skipnh();
     skiphsml();
     skipsfr();
-    skipage();
-    skipz();
+    skipdelaytime();
     skipfh2();
 
     Skip; //skip before sigma

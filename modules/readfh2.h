@@ -42,8 +42,7 @@ readfh2()
     skipnh();
     skiphsml();
     skipsfr();
-    skipage();
-    skipz();
+    skipdelaytime();
 
     Skip; //skip before fH2
     fread(simdata,header.npart[type]*sizeof(float),1,infp);

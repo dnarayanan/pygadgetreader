@@ -24,7 +24,7 @@ galprop(PyObject *self, PyObject *args, PyObject *keywds)
   char *Value;
   int value;
   int Units = 0;
-  int SFRZ  = 0;
+  int SFRZ  = 1;
   int HIH2  = 0;
 
   char* MSTAR   = "mstar";

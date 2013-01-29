@@ -49,6 +49,9 @@ readage()
       skipnh();
       skiphsml();
       skipsfr();
+      skipdelaytime();
+      skipfh2();
+      skipsigma();
       
       Skip; //skip before AGE
       fread(simdata,header.npart[type]*sizeof(float),1,infp);
