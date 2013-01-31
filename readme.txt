@@ -102,7 +102,7 @@ readsnap - This function does the bulk of the work.  It reads data blocks from t
 	   bndry       - Boundary particles
 	   
 
-Definition:	readsnap('a','b','c',numfiles=0,units=0,tipsy=0)
+Definition:	readsnap('a','b','c',numfiles=0,units=0,tipsy=0,future=0)
 
 		Parameters
 		----------
@@ -121,6 +121,7 @@ Definition:	readsnap('a','b','c',numfiles=0,units=0,tipsy=0)
 			  Currently only active for density (rho), internal energy 
 			  (u - returns temperature in K), Mass (returns Msun), and Sigma (returns g/cm^2).
 		   tipsy: Must be set to 1 if reading in tipsy binary/aux/envira files.
+		  future: integer value for the future file.
 			  
 
 Example:

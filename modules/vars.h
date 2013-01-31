@@ -16,10 +16,12 @@
 const char *filename;  
 FILE *infp;
 FILE *auxfp;
+FILE *futfp;
 char infile[500];
 int NumFiles, Units, j, dummy;
 int ERR;
 int Tipsy = 0;
+int Future = 0;
 int MAXDIM = 3;
 int NMETALS = 4;
 

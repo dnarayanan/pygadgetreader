@@ -56,7 +56,7 @@ readhead(PyObject *self, PyObject *args, PyObject *keywds)
   Units=0;
 
   static char *kwlist[]={"file","value","numfiles","tipsy",NULL};
-  if(!PyArg_ParseTupleAndKeywords(args,keywds,"ss|ii",kwlist,&filename,&Value,&NumFiles,&Tipsy)){
+  if(!PyArg_ParseTupleAndKeywords(args,keywds,"ss|iii",kwlist,&filename,&Value,&NumFiles,&Tipsy)){
     PyErr_Format(PyExc_TypeError,"incorrect input!  must provide filename and value of interest - see readme.txt");
     //return NULL;
   }
@@ -101,8 +101,8 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
   Units=0;
   ERR=0;
 
-  static char *kwlist[]={"file","data","type","numfiles","units","tipsy",NULL};
-  if(!PyArg_ParseTupleAndKeywords(args,keywds,"sss|iii",kwlist,&filename,&Values,&Type,&NumFiles,&Units,&Tipsy)){
+  static char *kwlist[]={"file","data","type","numfiles","units","tipsy","future",NULL};
+  if(!PyArg_ParseTupleAndKeywords(args,keywds,"sss|iiii",kwlist,&filename,&Values,&Type,&NumFiles,&Units,&Tipsy,&Future)){
     PyErr_Format(PyExc_TypeError,"wrong input!  must provide filename, data block, and particle type of interest - see readme.txt");
     //return NULL;
   }
@@ -128,49 +128,53 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
   assign_type();
 
   if(Tipsy==1) Units=1;
-
-  printf("\ninput (%d files): %s \n",NumFiles,filename);
-  printf("extracting %s data for %s\n",Values,Type);
-  if(Units==0){
-    if(values==5)  printf("returning PHYSICAL density in CODE units\n\n");
-    if(values==13) printf("returning PHYSICAL surface density in CODE units\n\n");
-    else           printf("returning code units\n\n");
+  if(Future>0){
+    read_tipsy_future(Future,values);
   }
-  if(Units==1){
-    if(values==3)       printf("returning units of Msun \n\n");
-    else if(values==4)  printf("returning units of Kelvin \n\n");
-    else if(values==5)  printf("returning PHYSICAL density in units of g/cm^3 \n\n");
-    else if(values==13) printf("returning PHYSICAL surface density in units of g/cm^2 \n\n");
-    else                printf("returning code units\n\n");
-  }
-  
-  //printf("j=%d\n",j);
+  else{
 
-  printf("values=%d\n",values);
-  if(values==0)       readpos();
-  else if(values==1)  readvel();
-  else if(values==2)  readpid();
-  else if(values==3)  readmass();
-  else if(values==4)  readu();
-  else if(values==5)  readrho();
-  else if(values==6)  readNE();
-  else if(values==7)  readNH();
-  else if(values==8)  readHSML();
-  else if(values==9)  readSFR();
-  else if(values==10) readage();
-  else if(values==11) readZ();
-  else if(values==12) readfh2();
-  else if(values==13) readsigma();
-  else if(values==14) readmetals();
-  else if(values==16) readdelaytime();
-  else if(values==15 || values==17 || values==18 || values==19) read_tipsy(values);
-  else if(values==20 || values==21) read_tipsy_envira(values);
-  else printf("houston we have a problem...no values returned\n");
-  j=0;
+    printf("\ninput (%d files): %s \n",NumFiles,filename);
+    printf("extracting %s data for %s\n",Values,Type);
+    if(Units==0){
+      if(values==5)  printf("returning PHYSICAL density in CODE units\n\n");
+      if(values==13) printf("returning PHYSICAL surface density in CODE units\n\n");
+      else           printf("returning code units\n\n");
+    }
+    if(Units==1){
+      if(values==3)       printf("returning units of Msun \n\n");
+      else if(values==4)  printf("returning units of Kelvin \n\n");
+      else if(values==5)  printf("returning PHYSICAL density in units of g/cm^3 \n\n");
+      else if(values==13) printf("returning PHYSICAL surface density in units of g/cm^2 \n\n");
+      else                printf("returning code units\n\n");
+    }
+    
+    //printf("j=%d\n",j);
+    
+    printf("values=%d\n",values);
+    if(values==0)       readpos();
+    else if(values==1)  readvel();
+    else if(values==2)  readpid();
+    else if(values==3)  readmass();
+    else if(values==4)  readu();
+    else if(values==5)  readrho();
+    else if(values==6)  readNE();
+    else if(values==7)  readNH();
+    else if(values==8)  readHSML();
+    else if(values==9)  readSFR();
+    else if(values==10) readage();
+    else if(values==11) readZ();
+    else if(values==12) readfh2();
+    else if(values==13) readsigma();
+    else if(values==14) readmetals();
+    else if(values==16) readdelaytime();
+    else if(values==15 || values==17 || values==18 || values==19) read_tipsy();
+    else if(values==20 || values==21) read_tipsy_envira();
+    else printf("houston we have a problem...no values returned\n");
+    j=0;
+  } 
   return PyArray_Return(array);
 }
-
-
+  
 //Initialize Module
 PyMethodDef methods[] = {
   {"test",test, METH_VARARGS ,"test function"},

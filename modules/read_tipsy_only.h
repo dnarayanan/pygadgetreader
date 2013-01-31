@@ -7,7 +7,7 @@
 #include <numpy/arrayobject.h>
 
 //used for reading in phi(18), tmax(15), & nspawn(17)
-read_tipsy(int value)
+read_tipsy()
 {
   if(Tipsy==0)
     PyErr_Format(PyExc_IndexError,"Not a Tipsy file!\n");
@@ -157,7 +157,7 @@ read_tipsy(int value)
 
 
 //read from the envira file.  20=Mhalo, 21=wind form age
-read_tipsy_envira(int value)
+read_tipsy_envira()
 {
   printf("IN READ TIPSY ENVIRA\n");
 
@@ -217,7 +217,7 @@ read_tipsy_envira(int value)
 	fseek(infp,sizeof(int),SEEK_CUR); //ID
 	fseek(infp,sizeof(int),SEEK_CUR); //phase
 	
-	if(value==20)
+	if(values==20)
 	  fread(&tmp,sizeof(float),1,infp); //mhalo
 	else
 	  fseek(infp,sizeof(float),SEEK_CUR);
@@ -229,7 +229,7 @@ read_tipsy_envira(int value)
 	fseek(infp,sizeof(int),SEEK_CUR); //satswitch
 	fseek(infp,sizeof(int),SEEK_CUR); //i
 
-	if(value==21)
+	if(values==21)
 	  fread(&tmp,sizeof(float),1,infp); //wind form age
 	else
 	  fseek(infp,sizeof(float),SEEK_CUR); 
@@ -242,5 +242,86 @@ read_tipsy_envira(int value)
       printf("finished gas loop\n");
     }
     fclose(auxfp);
+  }
+}
+
+
+//read from the future file.
+read_tipsy_future()
+{
+  printf("IN READ TIPSY FUT%03d\n",Future);
+
+  if(Tipsy==0)
+    PyErr_Format(PyExc_IndexError,"Not a Tipsy file!\n");
+  else{
+    int ndim = 1;
+    int n;
+    
+    char futurefile[500];
+
+    long nselect = 0;
+    read_header();
+    fclose(infp);
+
+    if(type==0) nselect = t_header.ngas;
+    else PyErr_Format(PyExc_IndexError,"Must select gas!\n");
+    
+    npy_intp dims[1]={nselect};
+
+    strcpy(futurefile, filename);
+    
+    if(futurefile[strlen(futurefile)-3] == 'b')
+      futurefile[strlen(futurefile)-3] = 'f';
+    if(futurefile[strlen(futurefile)-2] == 'i')
+      futurefile[strlen(futurefile)-2] = 'u';
+    if(futurefile[strlen(futurefile)-1] == 'n')
+      futurefile[strlen(futurefile)-1] = 't';
+
+    printf("reading %s%03d \n",futurefile,Future);
+    sprintf(infile,"%s%03d",futurefile,Future);
+    if(!(futfp=fopen(infile,"r"))) {
+      ERR = 1;
+      PyErr_Format(PyExc_TypeError,"can't open file : '%s'",infile);
+    }
+
+    array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
+
+    printf("file read, array allocated, starting loop\n");
+
+    float tmp=0.;
+    if(type==0){
+      for(n=0;n<nselect;n++){
+	fseek(infp,sizeof(int),SEEK_CUR); //ID
+
+	if(values==5) //RHO
+	  fread(&tmp,sizeof(float),1,infp);
+	else
+	  fseek(infp,sizeof(float),SEEK_CUR);
+
+	if(values==4) //temp
+	  fread(&tmp,sizeof(float),1,infp);
+	else
+	  fseek(infp,sizeof(float),SEEK_CUR);
+
+	if(values==11) //metals
+	  fread(&tmp,sizeof(float),1,infp);
+	else
+	  fseek(infp,sizeof(float),SEEK_CUR);
+
+	fseek(infp,sizeof(float),SEEK_CUR); //starfrac
+	
+	if(values==10) //star age
+	  fread(&tmp,sizeof(float),1,infp);
+	else
+	  fseek(infp,sizeof(float),SEEK_CUR);
+
+	fseek(infp,sizeof(int),SEEK_CUR); //relaunch
+	fseek(infp,sizeof(int),SEEK_CUR); //i
+
+	MDATA(array,n) = tmp;
+      }
+      printf("finished gas loop\n");
+    }
+    fclose(futfp);
   }
 }
