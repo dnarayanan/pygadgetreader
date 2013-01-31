@@ -66,28 +66,28 @@ readsnap - This function does the bulk of the work.  It reads data blocks from t
 	   Supported data blocks are:
 
 	   --GADGET & TIPSY--
-	   pos	       - Position data
-	   vel	       - Velocity data in km/s
-	   pid	       - Particle ids
-	   mass	       - Particle masses
-	   u	       - Gas internal energy
-	   rho	       - Gas density
-	   ne	       - Number density of free electrons
-	   nh	       - Number density of neutral hydrogen
-	   hsml	       - Smoothing length of SPH particles
-	   sfr	       - Gas star formation rate in Msun/year
-	   age	       - Formation time of stellar particles (in terms of the scale factor)
-	   z	       - Metallicty of gas & star particles
-	   fH2	       - Fractional Abundance of molecular hydrogen
-	   Sigma       - Approximate surface density @ each particle (HIdensity * scale_height)
+	   pos	       - (all)         Position data
+	   vel	       - (all)         Velocity data in km/s
+	   pid	       - (all)         Particle ids
+	   mass	       - (all)         Particle masses
+	   u	       - (gas)         Internal energy
+	   rho	       - (gas)         Density
+	   ne	       - (gas)         Number density of free electrons
+	   nh	       - (gas)         Number density of neutral hydrogen
+	   hsml	       - (gas)         Smoothing length of SPH particles
+	   sfr	       - (gas)         Star formation rate in Msun/year
+	   delaytime   - (gas)         DelayTime (>0 member of wind)
+	   fH2	       - (gas)         Fractional Abundance of molecular hydrogen
+	   Sigma       - (gas)         Approximate surface density @ each particle (HIdensity * scale_height)
+	   age	       - (stars)       Formation time of stellar particles (in terms of the scale factor)
+	   z	       - (gas & stars) Metallicty of gas & star particles (returns total Z)
+	   tmax        - (gas & stars) Maximum temp
+	   nspawn      - (gas & stars) Number of star particles spawned
+	   potential   - (all)         Potential of particles
 
+	   metals      - (gas & stars) NMETALS array [C,O,Si,Fe]
 
 	   --TIPSY ONLY--
-	   metals      - (aux)    NMETALS array 
-	   tmax	       - (aux)    maximum gas temperature
-	   delaytime   - (aux)    gas particle delaytime
-	   nspawn      - (aux)    number of star particles spawned
-	   potential   - (bin)    grav potential of particles
 	   s_age       - (aux)    stellar age
 	   mhalo       - (envira) mass of parent SKID halo
 	   windage     - (envira) time since last launched in a wind for gas

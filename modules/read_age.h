@@ -90,6 +90,7 @@ readage()
     npy_intp dims[1]={nselect};
     array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
 
+    fseek(infp,t_header.ngas * sizeof(struct tipsy_gas),SEEK_CUR);
     float tmp=0.;
     for(n=0;n<nselect;n++){
       fseek(infp,sizeof(float)*8,SEEK_CUR);

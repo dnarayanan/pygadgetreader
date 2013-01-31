@@ -116,6 +116,9 @@ readZ()
     array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
 
     float tmp=0.;
+    if(type==4)
+      fseek(infp,t_header.ngas * sizeof(struct tipsy_gas),SEEK_CUR);
+
     for(n=0;n<nselect;n++){
       fseek(infp,sizeof(float)*10,SEEK_CUR);
       fread(&tmp,sizeof(float),1,infp);
@@ -251,26 +254,31 @@ readmetals()
     npy_intp dims[2]={nselect,4};
     array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
 
-    float tmp0,tmp1,tmp2,tmp3=0.;
+    if(type==4)
+      fseek(infp,t_header.ngas * sizeof(struct tipsy_gas_aux),SEEK_CUR);
+
+    float tmp;
     for(n=0;n<nselect;n++){
-      fread(&tmp0, sizeof(float),1,infp);        //metals
-      fread(&tmp1, sizeof(float),1,infp);
-      fread(&tmp2, sizeof(float),1,infp);
-      fread(&tmp3, sizeof(float),1,infp);
-
-      fseek(infp,sizeof(float),SEEK_CUR);         //sfr
-      fseek(infp,sizeof(float),SEEK_CUR);         //tmax
-      fseek(infp,sizeof(float),SEEK_CUR);         //delaytime
-      fseek(infp,sizeof(float),SEEK_CUR);         //ne
-      fseek(infp,sizeof(float),SEEK_CUR);         //nh
-      fseek(infp,sizeof(int),SEEK_CUR);           //nspawn
-
-      //printf("%e   %e   %e   %e\n",tmp0,tmp1,tmp2,tmp3);
-
-      DATA(array,n,0) = tmp0; //C
-      DATA(array,n,1) = tmp1; //O
-      DATA(array,n,2) = tmp2; //Si
-      DATA(array,n,3) = tmp3; //Fe
+      if(type==0){
+	for(i=0;i<NMETALS;i++){
+	  fread(&tmp, sizeof(float),1,infp);
+	  DATA(array,n,i) = tmp;
+	}
+	fseek(infp,sizeof(float),SEEK_CUR);         //sfr
+	fseek(infp,sizeof(float),SEEK_CUR);         //tmax
+	fseek(infp,sizeof(float),SEEK_CUR);         //delaytime
+	fseek(infp,sizeof(float),SEEK_CUR);         //ne
+	fseek(infp,sizeof(float),SEEK_CUR);         //nh
+	fseek(infp,sizeof(int),SEEK_CUR);           //nspawn
+      }
+      else{
+	for(i=0;i<NMETALS;i++){
+	  fread(&tmp, sizeof(float),1,infp);
+	  DATA(array,n,i) = tmp;
+	}
+	fseek(infp,sizeof(float)*2,SEEK_CUR);
+	fseek(infp,sizeof(int),SEEK_CUR);
+      }
     }
     fclose(auxfp);
   }

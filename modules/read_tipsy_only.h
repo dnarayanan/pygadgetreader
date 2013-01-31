@@ -6,7 +6,7 @@
 #include <Python.h>
 #include <numpy/arrayobject.h>
 
-//used for reading in phi(18), tmax(15), & nspawn(17)
+//used for reading in s_age(19)
 read_tipsy()
 {
   if(Tipsy==0)
@@ -22,136 +22,44 @@ read_tipsy()
     char auxfile[500];
     long nselect = 0;
     read_header();
-    if(type==0) nselect = t_header.ngas;
-    else if(type==1) nselect = t_header.ndark;
-    else if(type==4) nselect = t_header.nstar;
-    else PyErr_Format(PyExc_IndexError,"Must select gas,dm,star!\n");
+    if(type==4) nselect = t_header.nstar;
+    else PyErr_Format(PyExc_IndexError,"Must select star!\n");
     
     npy_intp dims[1]={nselect};
     
-    //phi from bin
-    if(values==18){
-      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
-      
-      float tmp=0.;
-      
-      if(type==0){ //GAS
-	for(n=0;n<nselect;n++){
-	  fseek(infp,sizeof(float)*11,SEEK_CUR);
-	  fread(&tmp,sizeof(float),1,infp);
-	  
-	  MDATA(array,n) = tmp;
-	}
-      }
-      else if(type==1){ //DM
-	fseek(infp,t_header.ngas * sizeof(struct tipsy_gas),SEEK_CUR); //skip gas
-	for(n=0;n<nselect;n++){
-	  fseek(infp,sizeof(float)*8,SEEK_CUR);
-	  fread(&tmp,sizeof(float),1,infp);
-	  
-	  MDATA(array,n) = tmp;
-	}
-      }
-      else if(type==4){ //STAR
-	fseek(infp,t_header.ngas * sizeof(struct tipsy_gas),SEEK_CUR); //skip gas
-	fseek(infp,t_header.ndark * sizeof(struct tipsy_dm),SEEK_CUR); //skip DM
-	for(n=0;n<nselect;n++){
-	  fseek(infp,sizeof(float)*10,SEEK_CUR);
-	  fread(&tmp,sizeof(float),1,infp);
-
-	  MDATA(array,n) = tmp;
-	}
-      }
-      fclose(infp);
+    fclose(infp);
+    strcpy(auxfile, filename);
+    
+    if(auxfile[strlen(auxfile)-3] == 'b')
+      auxfile[strlen(auxfile)-3] = 'a';
+    if(auxfile[strlen(auxfile)-2] == 'i')
+      auxfile[strlen(auxfile)-2] = 'u';
+    if(auxfile[strlen(auxfile)-1] == 'n')
+      auxfile[strlen(auxfile)-1] = 'x';
+    
+    printf("reading s_age from %s\n", auxfile);
+        
+    sprintf(infile,"%s",auxfile);
+    if(!(auxfp=fopen(infile,"r"))) {
+      ERR = 1;
+      PyErr_Format(PyExc_TypeError,"can't open file : '%s'",infile);
+      //return NULL;
     }
-   
-    //tmax, delaytime, nspawn from aux
-    else{
-      fclose(infp);
-      strcpy(auxfile, filename);
-      
-      if(auxfile[strlen(auxfile)-3] == 'b')
-	auxfile[strlen(auxfile)-3] = 'a';
-      if(auxfile[strlen(auxfile)-2] == 'i')
-	auxfile[strlen(auxfile)-2] = 'u';
-      if(auxfile[strlen(auxfile)-1] == 'n')
-	auxfile[strlen(auxfile)-1] = 'x';
-      
-      if(values==15)
-	printf("reading tmax from %s\n", auxfile);
-      if(values==17)
-	printf("reading nspawn from %s\n", auxfile);
-      
-      
-      sprintf(infile,"%s",auxfile);
-      if(!(auxfp=fopen(infile,"r"))) {
-	ERR = 1;
-	PyErr_Format(PyExc_TypeError,"can't open file : '%s'",infile);
-	//return NULL;
+    
+    array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
+    
+    float tmp=0.;
+    if(type==4){
+      fseek(infp,t_header.ngas * sizeof(struct tipsy_gas_aux),SEEK_CUR);
+      for(n=0;n<nselect;n++){
+	fseek(infp,sizeof(float)*NMETALS,SEEK_CUR);
+	fread(&tmp,sizeof(float),1,infp);
+	fseek(infp,sizeof(float),SEEK_CUR);
+	fseek(infp,sizeof(int),SEEK_CUR);
+	MDATA(array,n) = tmp;
       }
-      
-      if(values==17)
-	array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_UINT32);
-      else
-	array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
-      
-      int tmp1=0;
-      float tmp=0.;
-      if(type==0){
-	for(n=0;n<nselect;n++){
-	  fseek(infp,sizeof(float)*NMETALS,SEEK_CUR); //metals
-	  fseek(infp,sizeof(float),SEEK_CUR);         //sfr
-	  
-	  if(values==15)
-	    fread(&tmp,sizeof(float),1,infp);
-	  else
-	    fseek(infp,sizeof(float),SEEK_CUR);         //tmax
-	  
-	  fseek(infp,sizeof(float),SEEK_CUR);         //delaytime
-	  
-	  fseek(infp,sizeof(float),SEEK_CUR);         //ne
-	  fseek(infp,sizeof(float),SEEK_CUR);         //nh
-	  
-	  if(values==17)
-	    fread(&tmp1,sizeof(int),1,infp);
-	  else
-	    fseek(infp,sizeof(int),SEEK_CUR);           //nspawn
-	  
-	  if(values==17)
-	    NSPAWNDATA(array,n) = tmp1;
-	  else
-	    MDATA(array,n) = tmp;
-	}
-      }
-      else if(type==4){
-	fseek(infp,t_header.ngas * sizeof(struct tipsy_gas),SEEK_CUR);
-	fseek(infp,t_header.ndark * sizeof(struct tipsy_dm),SEEK_CUR);
-	for(n=0;n<nselect;n++){
-	  fseek(infp,sizeof(float)*4,SEEK_CUR);
-	  
-	  if(values==19)
-	    fread(&tmp,sizeof(float),1,infp);
-	  else
-	    fseek(infp,sizeof(float),SEEK_CUR);
-
-	  if(values==15)
-	    fread(&tmp,sizeof(float),1,infp);
-	  else
-	    fseek(infp,sizeof(float),SEEK_CUR);
-
-	  if(values==17)
-	    fread(&tmp1,sizeof(int),1,infp);
-	  else
-	    fseek(infp,sizeof(int),SEEK_CUR);
-
-	  if(values==17)
-	    NSPAWNDATA(array,n) = tmp1;
-	  else
-	    MDATA(array,n) = tmp;
-	}
-      }
-      fclose(auxfp);
     }
+    fclose(auxfp);
   }
 }
 

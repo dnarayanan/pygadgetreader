@@ -157,6 +157,9 @@ read_header()
       PyErr_Format(PyExc_IndexError,"NumFiles(%d) != header.num_files(%d)!",NumFiles,header.num_files);
       //return NULL;
     }
+    if(NMETALS != header.flag_metals)
+      PyErr_Format(PyExc_IndexError,"NMETALS(%d) != header.flag_metals(%d)!",NMETALS,header.flag_metals);
+
     
     if(j==0){
       // Assign TOTAL particle counts
