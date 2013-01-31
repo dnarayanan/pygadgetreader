@@ -6,7 +6,7 @@
 #include <Python.h>
 #include <numpy/arrayobject.h>
 
-//used for reading in phi(18), tmax(15), delaytime(16), & nspawn(17)
+//used for reading in phi(18), tmax(15), & nspawn(17)
 read_tipsy(int value)
 {
   if(Tipsy==0)
@@ -79,8 +79,6 @@ read_tipsy(int value)
       
       if(values==15)
 	printf("reading tmax from %s\n", auxfile);
-      if(values==16)
-	printf("reading delaytime from %s\n", auxfile);
       if(values==17)
 	printf("reading nspawn from %s\n", auxfile);
       
@@ -109,10 +107,7 @@ read_tipsy(int value)
 	  else
 	    fseek(infp,sizeof(float),SEEK_CUR);         //tmax
 	  
-	  if(values==16)
-	    fread(&tmp,sizeof(float),1,infp);
-	  else
-	    fseek(infp,sizeof(float),SEEK_CUR);         //delaytime
+	  fseek(infp,sizeof(float),SEEK_CUR);         //delaytime
 	  
 	  fseek(infp,sizeof(float),SEEK_CUR);         //ne
 	  fseek(infp,sizeof(float),SEEK_CUR);         //nh

@@ -58,6 +58,15 @@ readage()
       Skip; //skip after AGE
       fclose(infp);
       
+      //NEW
+      /*
+      double MPC = 3.0857e+24;
+      double KM  = 1.e+5;
+      H0 = sqrt(8*PI/3);
+      t0 = 2./(3.*H0);
+      unit_Time = H0*MPC / (100.*header.hubbleparam*KM);
+      */
+
       //count = count + header.npart[type];
       for(n=0;n<header.npart[type];n++)
 	{

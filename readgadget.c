@@ -9,20 +9,20 @@
 #include "modules/vars.h"
 #include "modules/skips.h"
 #include "modules/galprop.h"
-#include "modules/readpos.h"
-#include "modules/readvel.h"
-#include "modules/readpid.h"
-#include "modules/readmass.h"
-#include "modules/readu.h"
-#include "modules/readrho.h"
-#include "modules/readne.h"
-#include "modules/readnh.h"
-#include "modules/readhsml.h"
-#include "modules/readsfr.h"
-#include "modules/readage.h"
-#include "modules/readmetal.h"
-#include "modules/readfh2.h"
-#include "modules/readsigma.h"
+#include "modules/read_pos.h"
+#include "modules/read_vel.h"
+#include "modules/read_pid.h"
+#include "modules/read_mass.h"
+#include "modules/read_u.h"
+#include "modules/read_rho.h"
+#include "modules/read_ne.h"
+#include "modules/read_nh.h"
+#include "modules/read_hsml.h"
+#include "modules/read_sfr.h"
+#include "modules/read_age.h"
+#include "modules/read_metal.h"
+#include "modules/read_fh2.h"
+#include "modules/read_delaytime.h"
 #include "modules/read_tipsy_only.h"
 
 
@@ -162,7 +162,8 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
   else if(values==12) readfh2();
   else if(values==13) readsigma();
   else if(values==14) readmetals();
-  else if(values==15 || values==16 || values==17 || values==18 || values==19) read_tipsy(values);
+  else if(values==16) readdelaytime();
+  else if(values==15 || values==17 || values==18 || values==19) read_tipsy(values);
   else if(values==20 || values==21) read_tipsy_envira(values);
   else printf("houston we have a problem...no values returned\n");
   j=0;
