@@ -23,6 +23,9 @@
 #include "modules/read_metal.h"
 #include "modules/read_fh2.h"
 #include "modules/read_delaytime.h"
+#include "modules/read_tmax.h"
+#include "modules/read_nspawn.h"
+#include "modules/read_potential.h"
 #include "modules/read_tipsy_only.h"
 
 
@@ -127,6 +130,8 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
   fclose(infp);
   assign_type();
 
+  init_tconvert();
+
   if(Tipsy==1) Units=1;
   if(Future>0){
     read_tipsy_future(Future,values);
@@ -145,6 +150,7 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
       else if(values==4)  printf("returning units of Kelvin \n\n");
       else if(values==5)  printf("returning PHYSICAL density in units of g/cm^3 \n\n");
       else if(values==13) printf("returning PHYSICAL surface density in units of g/cm^2 \n\n");
+      else if(values==15) printf("returning units of Kelvin \n\n");
       else                printf("returning code units\n\n");
     }
     
@@ -166,8 +172,11 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
     else if(values==12) readfh2();
     else if(values==13) readsigma();
     else if(values==14) readmetals();
+    else if(values==15) readtmax();
     else if(values==16) readdelaytime();
-    else if(values==15 || values==17 || values==18 || values==19) read_tipsy();
+    else if(values==17) readnspawn();
+    else if(values==18) readpotential();
+    else if(values==19) read_tipsy();
     else if(values==20 || values==21) read_tipsy_envira();
     else printf("houston we have a problem...no values returned\n");
     j=0;

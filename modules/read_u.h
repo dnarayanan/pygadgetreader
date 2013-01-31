@@ -12,6 +12,7 @@ readu()
   float *simdata;
   int ndim  = 1;
   
+  /*
   double convert;
   if(Units==1){
     double boltzmann   = 1.380688e-16;   //erg/kelvin
@@ -20,6 +21,7 @@ readu()
     double gammaminus1 = (5./3.)-1.;
     convert     = gammaminus1*(proton_mass/boltzmann)*pow(kmtocm,2);
   }
+  */
   int i;
   int n;
   int pc = 0; 
@@ -57,7 +59,7 @@ readu()
       for(n=0;n<header.npart[type];n++)
 	{
 	  if(Units==0) MDATA(array,pc) = simdata[n];
-	  if(Units==1) MDATA(array,pc) = simdata[n]*convert;
+	  if(Units==1) MDATA(array,pc) = simdata[n]*tconvert;
 	  pc++;
 	}
     }

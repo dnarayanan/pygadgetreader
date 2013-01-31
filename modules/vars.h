@@ -303,3 +303,13 @@ assign_type()
   if(type==5) printf("%d bndry selected, extracting %s data\n",Nbdry,Values);
   */
 }
+
+
+double tconvert;
+init_tconvert(){
+  double boltzmann   = 1.380688e-16;   //erg/kelvin
+  double proton_mass = 1.67262158e-24;  //grams
+  double kmtocm      = 1.e5;
+  double gammaminus1 = (5./3.)-1.;
+  tconvert     = gammaminus1*(proton_mass/boltzmann)*pow(kmtocm,2);
+ }
