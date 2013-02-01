@@ -87,10 +87,19 @@ readsnap - This function does the bulk of the work.  It reads data blocks from t
 
 	   metals      - (gas & stars) NMETALS array [C,O,Si,Fe]
 
-	   --TIPSY ONLY--
+	   --TIPSY--
 	   s_age       - (aux)    stellar age
+
 	   mhalo       - (envira) mass of parent SKID halo
 	   windage     - (envira) time since last launched in a wind for gas
+	   rvir	       - (envira) ??
+	   vvir	       - (envira) ??
+
+	   starfrac    - (future) ??
+	   relaunch    - (future) ??
+	   rho	       - (future) gad density in the future
+	   u	       - (future) gas particle temp in the future
+	   z	       - (future) metal value of particle in the future
 
 
 	   Supported particle types (note tipsy only returns gas/dm/star particles):

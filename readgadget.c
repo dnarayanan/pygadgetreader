@@ -138,6 +138,10 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
   }
   else{
 
+    //protect against "FUTURE" values
+    if(values==24 || values==25 || values==26)
+      PyErr_Format(PyExc_IndexError,"Only valid for Future files!!  turn future=1 flag on!");
+
     printf("\ninput (%d files): %s \n",NumFiles,filename);
     printf("extracting %s data for %s\n",Values,Type);
     if(Units==0){
@@ -177,7 +181,7 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
     else if(values==17) readnspawn();
     else if(values==18) readpotential();
     else if(values==19) read_tipsy();
-    else if(values==20 || values==21) read_tipsy_envira();
+    else if(values==20 || values==21 || values==22 || values==23) read_tipsy_envira();
     else printf("houston we have a problem...no values returned\n");
     j=0;
   } 

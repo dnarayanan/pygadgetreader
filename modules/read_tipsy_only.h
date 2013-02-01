@@ -37,8 +37,10 @@ read_tipsy()
     if(auxfile[strlen(auxfile)-1] == 'n')
       auxfile[strlen(auxfile)-1] = 'x';
     
+
     printf("reading s_age from %s\n", auxfile);
-        
+
+
     sprintf(infile,"%s",auxfile);
     if(!(auxfp=fopen(infile,"r"))) {
       ERR = 1;
@@ -102,6 +104,11 @@ read_tipsy_envira()
       printf("reading Mhalo from %s\n", auxfile);
     if(values==21)
       printf("reading wind_age from %s\n", auxfile);
+    if(values==22)
+      printf("reading rvir from %s\n", auxfile);
+    if(values==23)
+      printf("reading vvir from %s\n", auxfile);
+    
 
     /*
     if(values==17)
@@ -130,8 +137,16 @@ read_tipsy_envira()
 	else
 	  fseek(infp,sizeof(float),SEEK_CUR);
 
-	fseek(infp,sizeof(float),SEEK_CUR); //Rvir
-	fseek(infp,sizeof(float),SEEK_CUR); //Vvir
+	if(values==22)
+	  fread(&tmp,sizeof(float),1,infp);
+	else
+	  fseek(infp,sizeof(float),SEEK_CUR); //Rvir
+
+	if(values==23)
+	  fread(&tmp,sizeof(float),1,infp);
+	else
+	  fseek(infp,sizeof(float),SEEK_CUR); //Vvir
+
 	fseek(infp,sizeof(float),SEEK_CUR); //Vang
 	fseek(infp,sizeof(float),SEEK_CUR); //Vmag
 	fseek(infp,sizeof(int),SEEK_CUR); //satswitch
@@ -197,6 +212,7 @@ read_tipsy_future()
     printf("file read, array allocated, starting loop\n");
 
     float tmp=0.;
+    float itmp=0;
     if(type==0){
       for(n=0;n<nselect;n++){
 	fseek(infp,sizeof(int),SEEK_CUR); //ID
@@ -216,17 +232,35 @@ read_tipsy_future()
 	else
 	  fseek(infp,sizeof(float),SEEK_CUR);
 
-	fseek(infp,sizeof(float),SEEK_CUR); //starfrac
+	if(values==24)
+	  fread(&tmp,sizeof(float),1,infp);
+	else
+	  fseek(infp,sizeof(float),SEEK_CUR); //starfrac
 	
+	if(values==25)  //AGESTARFORM
+	  fread(&tmp,sizeof(float),1,infp);
+	else
+	  fseek(infp,sizeof(float),SEEK_CUR);
+	
+	/*
 	if(values==10) //star age
 	  fread(&tmp,sizeof(float),1,infp);
 	else
 	  fseek(infp,sizeof(float),SEEK_CUR);
+	*/
 
-	fseek(infp,sizeof(int),SEEK_CUR); //relaunch
+	if(values==26)
+	  fread(&itmp,sizeof(int),1,infp);
+	else
+	  fseek(infp,sizeof(int),SEEK_CUR); //relaunch
+	
 	fseek(infp,sizeof(int),SEEK_CUR); //i
 
-	MDATA(array,n) = tmp;
+	//assign to array
+	if(values==26)
+	  NSPAWNDATA(array,n) = itmp;
+	else
+	  MDATA(array,n) = tmp;
       }
       printf("finished gas loop\n");
     }
