@@ -35,7 +35,7 @@ struct io_header
   double   redshift;
   int      flag_sfr;
   int      flag_feedback;
-  int      npartTotal[6];
+  unsigned int      npartTotal[6];
   int      flag_cooling;
   int      num_files;
   double   BoxSize;
@@ -44,12 +44,12 @@ struct io_header
   double   HubbleParam; 
   int      flag_stellarage;
   int      flag_metals;
-  int      npartTotalHighWord[6];
+  unsigned int      npartTotalHighWord[6];
   int      flag_entropy_instead_u;
   int      flag_doubleprecision;
 
   int flag_lpt_ics;
-  int flag_lpt_scalingcator;
+  float flag_lpt_scalingcator;
 
   int flag_tmax;
   int flag_potential;

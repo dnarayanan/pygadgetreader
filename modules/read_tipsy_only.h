@@ -212,7 +212,7 @@ read_tipsy_future()
     printf("file read, array allocated, starting loop\n");
 
     float tmp=0.;
-    float itmp=0;
+    int itmp=0;
     if(type==0){
       for(n=0;n<nselect;n++){
 	fseek(infp,sizeof(int),SEEK_CUR); //ID

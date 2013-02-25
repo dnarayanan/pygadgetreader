@@ -51,6 +51,10 @@ readhead(PyObject *self, PyObject *args, PyObject *keywds)
   char* f_cooling = "f_cooling";
   char* f_age     = "f_age";
   char* f_metals  = "f_metals";
+  char* f_fh2     = "f_fh2";
+  char* f_dt      = "f_delaytime";
+  char* f_tmax    = "f_tmax";
+  char* f_pot     = "f_potential";
   char* Value;
   int value;
 
@@ -91,6 +95,10 @@ readhead(PyObject *self, PyObject *args, PyObject *keywds)
     else if(strcmp(Value,bulgecount)==0)return Py_BuildValue("i",header.npartTotal[3]);
     else if(strcmp(Value,starcount)==0) return Py_BuildValue("i",header.npartTotal[4]);
     else if(strcmp(Value,bndrycount)==0)return Py_BuildValue("i",header.npartTotal[5]);
+    else if(strcmp(Value,f_fh2)==0)     return Py_BuildValue("i",header.flag_fH2);
+    else if(strcmp(Value,f_tmax)==0)    return Py_BuildValue("i",header.flag_tmax);
+    else if(strcmp(Value,f_pot)==0)     return Py_BuildValue("i",header.flag_potential);
+    else if(strcmp(Value,f_dt)==0)      return Py_BuildValue("i",header.flag_delaytime);
   }
 }
 
