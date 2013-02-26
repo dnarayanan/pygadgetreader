@@ -207,7 +207,10 @@ read_tipsy_future()
       PyErr_Format(PyExc_TypeError,"can't open file : '%s'",infile);
     }
 
-    array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
+    if(values==26) 
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_UINT32);
+    else
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
 
     printf("file read, array allocated, starting loop\n");
 
