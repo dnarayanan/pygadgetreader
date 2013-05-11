@@ -168,7 +168,7 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
     
     //printf("j=%d\n",j);
     
-    printf("values=%d\n",values);
+    //printf("values=%d\n",values);
     if(values==0)       readpos();
     else if(values==1)  readvel();
     else if(values==2)  readpid();

@@ -208,7 +208,7 @@ read_tipsy_future()
     }
 
     if(values==26) 
-      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_UINT32);
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_INT32);
     else
       array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
 
