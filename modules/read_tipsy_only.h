@@ -212,7 +212,7 @@ read_tipsy_future()
     else
       array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
 
-    printf("file read, array allocated, starting loop\n");
+    //printf("file read, array allocated, starting loop\n");
 
     float tmp=0.;
     int itmp=0;
@@ -265,7 +265,7 @@ read_tipsy_future()
 	else
 	  MDATA(array,n) = tmp;
       }
-      printf("finished gas loop\n");
+      //printf("finished gas loop\n");
     }
     fclose(futfp);
   }
