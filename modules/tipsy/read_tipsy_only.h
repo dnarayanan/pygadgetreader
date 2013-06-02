@@ -7,7 +7,7 @@
 #include <numpy/arrayobject.h>
 
 //used for reading in s_age(19)
-read_tipsy()
+void read_tipsy()
 {
   if(Tipsy==0)
     PyErr_Format(PyExc_IndexError,"Not a Tipsy file!\n");
@@ -20,7 +20,7 @@ read_tipsy()
     int n;
     
     char auxfile[500];
-    long nselect = 0;
+    unsigned int nselect = 0;
     read_header();
     if(type==4) nselect = t_header.nstar;
     else PyErr_Format(PyExc_IndexError,"Must select star!\n");
@@ -67,7 +67,7 @@ read_tipsy()
 
 
 //read from the envira file.  20=Mhalo, 21=wind form age
-read_tipsy_envira()
+void read_tipsy_envira()
 {
   printf("IN READ TIPSY ENVIRA\n");
 
@@ -79,7 +79,7 @@ read_tipsy_envira()
     
     char auxfile[500];
 
-    long nselect = 0;
+    unsigned int nselect = 0;
     read_header();
     if(type==0) nselect = t_header.ngas;
     //else if(type==1) nselect = t_header.ndark;
@@ -166,11 +166,12 @@ read_tipsy_envira()
     }
     fclose(auxfp);
   }
+  return;
 }
 
 
 //read from the future file.
-read_tipsy_future()
+void read_tipsy_future(int Future,int values)
 {
   printf("IN READ TIPSY FUT%03d\n",Future);
 
@@ -182,7 +183,7 @@ read_tipsy_future()
     
     char futurefile[500];
 
-    long nselect = 0;
+    unsigned int nselect = 0;
     read_header();
     fclose(infp);
 
@@ -269,4 +270,5 @@ read_tipsy_future()
     }
     fclose(futfp);
   }
+  return;
 }

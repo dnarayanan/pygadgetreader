@@ -13,12 +13,25 @@
 
 #define NSPAWNDATA(a,i)*((int *) PyArray_GETPTR1(a,i))
 
+
+#define METALFACTOR 0.0189/0.0147
+#define H_MASSFRAC 0.76
+#define BOLTZMANN 1.3806e-16
+#define PROTONMASS 1.6726e-24
+#define GAMMA 5./3.
+#define CM_PER_MPC 3.085678e24
+#define UnitLength_in_cm 3.085678e21
+#define UnitMass_in_g 1.989e43
+#define UnitVelocity_in_cm_per_s 1.e5
+#define SOLARMASS 1.989e33
+
 const char *filename;  
 FILE *infp;
 FILE *auxfp;
 FILE *futfp;
 char infile[500];
 int NumFiles, Units, j, dummy;
+int Debug;
 int ERR;
 int Tipsy = 0;
 int Future = 0;
@@ -29,7 +42,7 @@ PyArrayObject *array;
 
 struct io_header
 {
-  int      npart[6];
+  unsigned int      npart[6];
   double   mass[6];
   double   time;
   double   redshift;
@@ -106,7 +119,7 @@ struct tipsy_dm
 
 int Ngas,Ndm,Ndisk,Nbulge,Nstar,Nbdry,Ntotal;
 int Ngas_local,Ndm_local,Ndisk_local,Nbulge_local,Nstar_local,Nbdry_local,Ntotal_local;
-read_header()
+int read_header()
 {
   
   /*
@@ -116,7 +129,8 @@ read_header()
     sprintf(infile,"%s",filename);
   */
 
-  
+  if(Debug) printf("reading file...ERR=%d\n",ERR);
+
   sprintf(infile,"%s",filename);
   if(!(infp=fopen(infile,"r"))){
     sprintf(infile,"%s.%d",filename,j);
@@ -126,13 +140,37 @@ read_header()
       //return NULL;
     }
   }
+  /*
+  sprintf(infile,"%s",filename);
+  if( access( filename, F_OK ) != -1){
+    infp=fopen(infile,"r");
+  }
+  else{
+    sprintf(infile,"%s.%d",filename,j);
+    if( access( filename, F_OK) != -1){
+      infp=fopen(infile,"r");
+    }
+    else
+      ERR = 1;    
+  }
+  */
   
+  if(Debug) printf("after file open...ERR=%d\n",ERR);
+  
+  if(ERR){
+    if(Debug) printf("lol in error statement...\n");
+    return 0;
+  }
 
+  if(Debug) printf("after ERR statement...\n");
+
+  /*
   if(!(infp=fopen(infile,"r"))){
     ERR = 1;
     PyErr_Format(PyExc_TypeError,"can't open file: '%s'",infile);
     //return NULL;
   }
+  */
 
   if(Tipsy==1){
     fread(&t_header, sizeof(t_header),1,infp);
@@ -143,11 +181,17 @@ read_header()
     Ntotal = t_header.ntotal;
   }
   else{
-    
+    int skip1, skip2;
+    char* blocklabel;
+
+    blocklabel="Header";
+
+    rewind(infp);
     // READ HEADER
-    Skip;
+    fread(&skip1,sizeof(int),1,infp);
     fread(&header,sizeof(header),1,infp);
-    Skip;
+    fread(&skip2,sizeof(int),1,infp);
+    errorcheck(skip1,skip2,blocklabel);
     
     //printf("numfiles=%d \t\t header.num_files=%d \n",NumFiles,header.num_files);
     
@@ -180,6 +224,7 @@ read_header()
     Nbdry_local  = header.npart[5];
     Ntotal_local = Ngas_local+Ndm_local+Ndisk_local+Nbulge_local+Nstar_local+Nbdry_local;
   }
+  return 1;
 }
 
 
@@ -231,7 +276,7 @@ char* STARFRAC    = "starfrac";
 char* AGESTARFORM = "agestarform";
 char* RELAUNCH    = "relaunch";
 
-assign_type()
+void assign_type()
 {
   // match particle type and assign corresponding integer value
   if(strcmp(Type,gas)==0)        type = 0;
@@ -317,14 +362,16 @@ assign_type()
   if(type==4) printf("%d stars selected, extracting %s data\n",Nstar,Values);
   if(type==5) printf("%d bndry selected, extracting %s data\n",Nbdry,Values);
   */
+  return;
 }
 
 
 double tconvert;
-init_tconvert(){
+void init_tconvert(){
   double boltzmann   = 1.380688e-16;   //erg/kelvin
   double proton_mass = 1.67262158e-24;  //grams
   double kmtocm      = 1.e5;
   double gammaminus1 = (5./3.)-1.;
   tconvert     = gammaminus1*(proton_mass/boltzmann)*pow(kmtocm,2);
+  return;
  }

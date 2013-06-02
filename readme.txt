@@ -35,7 +35,7 @@ readhead - This function simply reads in the gadget header file and returns the 
 	 f_metals      - Metal tracking flag  		 0=off 1=on
 
 
-Definition:   readhead('a','b',numfiles=0)
+Definition:   readhead('a','b',numfiles=0,tipsy=0,debug=0)
 
 	      Parameters
 	      ----------
@@ -111,7 +111,7 @@ readsnap - This function does the bulk of the work.  It reads data blocks from t
 	   bndry       - Boundary particles
 	   
 
-Definition:	readsnap('a','b','c',numfiles=0,units=0,tipsy=0,future=0)
+Definition:	readsnap('a','b','c',numfiles=0,units=0,tipsy=0,future=0,debug=0)
 
 		Parameters
 		----------

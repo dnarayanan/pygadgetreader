@@ -6,28 +6,27 @@
 #include <Python.h>
 #include <numpy/arrayobject.h>
 
+#include "modules/funcs.h"
 #include "modules/vars.h"
 #include "modules/skips.h"
-#include "modules/galprop.h"
-#include "modules/read_pos.h"
-#include "modules/read_vel.h"
-#include "modules/read_pid.h"
-#include "modules/read_mass.h"
-#include "modules/read_u.h"
-#include "modules/read_rho.h"
-#include "modules/read_ne.h"
-#include "modules/read_nh.h"
-#include "modules/read_hsml.h"
-#include "modules/read_sfr.h"
-#include "modules/read_age.h"
-#include "modules/read_metal.h"
-#include "modules/read_fh2.h"
-#include "modules/read_delaytime.h"
-#include "modules/read_tmax.h"
-#include "modules/read_nspawn.h"
-#include "modules/read_potential.h"
-#include "modules/read_tipsy_only.h"
+#include "modules/director.h"
 
+// GADGET
+#include "modules/gadget/galprop.h"
+#include "modules/gadget/read_posvel.h"
+#include "modules/gadget/read_gasprops.h"
+#include "modules/gadget/read_pid.h"
+#include "modules/gadget/read_mass.h"
+#include "modules/gadget/read_nspawn.h"
+#include "modules/gadget/read_metal.h"
+#include "modules/gadget/read_age.h"
+#include "modules/gadget/read_tmax.h"
+#include "modules/gadget/read_potential.h"
+
+// TIPSY
+#include "modules/tipsy/tipsy_binread.h"
+#include "modules/tipsy/tipsy_auxread.h"
+#include "modules/tipsy/read_tipsy_only.h"
 
 /*######################### READ HEADER ########################################*/
 static PyObject *
@@ -61,12 +60,27 @@ readhead(PyObject *self, PyObject *args, PyObject *keywds)
   j=0;
   NumFiles=1;
   Units=0;
-
-  static char *kwlist[]={"file","value","numfiles","tipsy",NULL};
-  if(!PyArg_ParseTupleAndKeywords(args,keywds,"ss|iii",kwlist,&filename,&Value,&NumFiles,&Tipsy)){
+  Debug=0;
+  
+  static char *kwlist[]={"file","value","numfiles","tipsy","debug",NULL};
+  if(!PyArg_ParseTupleAndKeywords(args,keywds,"ss|iii",kwlist,&filename,&Value,&NumFiles,&Tipsy,&Debug)){
     PyErr_Format(PyExc_TypeError,"incorrect input!  must provide filename and value of interest - see readme.txt");
     //return NULL;
   }
+
+  if(Debug) printf("metalfactor = %f\n",METALFACTOR);
+
+  /*
+  sprintf(infile,"%s",filename);
+  if(!(infp=fopen(infile,"r"))){
+    sprintf(infile,"%s.%d",filename,j);
+    if(!(infp=fopen(infile,"r"))) {
+      ERR = 1;
+      PyErr_Format(PyExc_TypeError,"can't open file : '%s'",infile);
+      //return NULL;
+    }
+  }
+  */
   read_header();
   fclose(infp);  
 
@@ -76,6 +90,8 @@ readhead(PyObject *self, PyObject *args, PyObject *keywds)
     else if(strcmp(Value,gascount)==0)  return Py_BuildValue("i",t_header.ngas);
     else if(strcmp(Value,dmcount)==0)   return Py_BuildValue("i",t_header.ndark);
     else if(strcmp(Value,starcount)==0) return Py_BuildValue("i",t_header.nstar);
+    else
+      PyErr_Format(PyExc_TypeError,"incorrect header selection!");
   }
   else{
     if(strcmp(Value,simtime)==0)        return Py_BuildValue("d",header.time);
@@ -99,6 +115,8 @@ readhead(PyObject *self, PyObject *args, PyObject *keywds)
     else if(strcmp(Value,f_tmax)==0)    return Py_BuildValue("i",header.flag_tmax);
     else if(strcmp(Value,f_pot)==0)     return Py_BuildValue("i",header.flag_potential);
     else if(strcmp(Value,f_dt)==0)      return Py_BuildValue("i",header.flag_delaytime);
+    else
+      PyErr_Format(PyExc_TypeError,"incorrect header selection!");
   }
 }
 
@@ -111,9 +129,11 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
   NumFiles=1;
   Units=0;
   ERR=0;
+  Debug=0;
+  int filepresent = 0;
 
-  static char *kwlist[]={"file","data","type","numfiles","units","tipsy","future",NULL};
-  if(!PyArg_ParseTupleAndKeywords(args,keywds,"sss|iiii",kwlist,&filename,&Values,&Type,&NumFiles,&Units,&Tipsy,&Future)){
+  static char *kwlist[]={"file","data","type","numfiles","units","tipsy","future","debug",NULL};
+  if(!PyArg_ParseTupleAndKeywords(args,keywds,"sss|iiiii",kwlist,&filename,&Values,&Type,&NumFiles,&Units,&Tipsy,&Future,&Debug)){
     PyErr_Format(PyExc_TypeError,"wrong input!  must provide filename, data block, and particle type of interest - see readme.txt");
     //return NULL;
   }
@@ -123,9 +143,21 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
     //return NULL;
   }
 
-  read_header();
+  /*
+  sprintf(infile,"%s",filename);
+  if(!(infp=fopen(infile,"r"))){
+    sprintf(infile,"%s.%d",filename,j);
+    if(!(infp=fopen(infile,"r"))) {
+      ERR = 1;
+      //PyErr_Format(PyExc_TypeError,"can't open file : '%s'",infile);
+      PyErr_Format(PyExc_IndexError,"can't open file : '%s'",infile);
+      //return NULL;
+    }
+  }
+
   if(ERR==1){
-    PyErr_Format(PyExc_TypeError,"readsnap: can't open file: '%s' ERR=%d",infile,ERR);
+    //PyErr_Format(PyExc_TypeError,"readsnap: can't open file: '%s' ERR=%d",infile,ERR);
+    PyErr_Format(PyExc_IndexError,"readsnap: can't open file: '%s' ERR=%d",infile,ERR);
     //return NULL;
   }
   
@@ -133,9 +165,18 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
     PyErr_Format(PyExc_IndexError,"NumFiles(%d) != header.num_files(%d)!",NumFiles,header.num_files);
     //return NULL;
   }
-  
+  */
 
+  filepresent = read_header();
+  if(Debug) printf("filepresent=%d\n",filepresent);
+  
+  if(filepresent == 0) {
+    printf("file not found...\n");
+    PyErr_Format(PyExc_IndexError,"cannot open file : '%s!'",filename);
+    return NULL;
+  }
   fclose(infp);
+  
   assign_type();
 
   init_tconvert();
