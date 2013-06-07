@@ -12,6 +12,7 @@ void readpid()
   unsigned int *simdata;
   int ndim = 1;
 
+  int k;
   int i;
   unsigned int n;
   unsigned int pc = 0;
@@ -29,10 +30,19 @@ void readpid()
     
     fread(&skip1,sizeof(int),1,infp);
     //seek past particle groups not interested in
-    for(i=1;i<=type;i++){
-      fseek(infp,header.npart[i-1]*sizeof(int),SEEK_CUR);
+    if(type>0){
+      for(i=1;i<=type;i++){
+	fseek(infp,header.npart[i-1]*sizeof(int),SEEK_CUR);
+      }
     }
+
     fread(simdata,header.npart[type]*sizeof(int),1,infp);
+
+    if(type<5){
+      for(i=type+1; i<6; i++)
+	fseek(infp, header.npart[i]*sizeof(int),SEEK_CUR);
+    }    
+
     fread(&skip2,sizeof(int),1,infp);
     errorcheck(skip1,skip2,blocklabel);
     fclose(infp);
