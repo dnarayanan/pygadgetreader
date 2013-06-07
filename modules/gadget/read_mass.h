@@ -48,37 +48,28 @@ void gadget_mass()
       simdata=(float*)malloc(header.npart[type]*sizeof(float));
       
       fread(&skip1,sizeof(int),1,infp);
+
       //seek past particle groups not interested in
-      if(type==1){
-	if(header.mass[0]==0)
-	  fseek(infp, header.npart[0]*sizeof(float),SEEK_CUR);
-      }
-      if(type==2){
-	for(k=0;k<2;k++){
-	  if(header.mass[k]==0)
-	    fseek(infp,header.npart[k]*sizeof(float),SEEK_CUR);
-	}
-      }      
-      if(type==3){
-	for(k=0;k<3;k++){
-	  if(header.mass[k]==0)
-	    fseek(infp,header.npart[k]*sizeof(float),SEEK_CUR);
-	}
-      } 
-      if(type==4){
-	for(k=0;k<4;k++){
-	  if(header.mass[k]==0)
-	    fseek(infp,header.npart[k]*sizeof(float),SEEK_CUR);
+      if(type>0){
+	for(k=1;k<=type;k++){
+	  if(header.mass[k-1]==0 && header.npart[k-1]>0){
+	    if(Debug) printf("skipping past mass block of type type %d before\n",k-1);	    
+	    fseek(infp, header.npart[k-1]*sizeof(float),SEEK_CUR);
+	  }
 	}
       }
-      if(type==5){
-	for(k=0;k<5;k++){
-	  if(header.mass[k]==0)
-	    fseek(infp,header.npart[k]*sizeof(float),SEEK_CUR);
-	}
-      }
-      //if(type==4) fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+
       fread(simdata,header.npart[type]*sizeof(float),1,infp);
+
+      if(type<5){
+	for(k=type+1; k<6; k++){
+	  if(header.mass[k]==0 && header.npart[k]>0){
+	    if(Debug) printf("skipping past mass block of type type %d after\n",k);	    
+	    fseek(infp, header.npart[k]*sizeof(float),SEEK_CUR);
+	  }
+	}
+      }
+
       fread(&skip2,sizeof(int),1,infp);
       errorcheck(skip1,skip2,blocklabel);
       fclose(infp);
