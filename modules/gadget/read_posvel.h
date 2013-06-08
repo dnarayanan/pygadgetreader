@@ -17,11 +17,12 @@ void gadget_posvel(){
   unsigned int pc = 0;
   double factor = 1.;
   unsigned int skip1, skip2;
+  char* blocklabel;
 
   if(values==0)
-    char* blocklabel = "POS";
+    blocklabel = "POS";
   if(values==1)
-    char* blocklabel = "VEL";
+    blocklabel = "VEL";
 
   /* GADGET */
   for(j=0;j<NumFiles;j++){
