@@ -202,7 +202,8 @@ int read_header()
       //return NULL;
     }
     if(NMETALS != header.flag_metals)
-      PyErr_Format(PyExc_IndexError,"NMETALS(%d) != header.flag_metals(%d)!",NMETALS,header.flag_metals);
+      printf("WARNING: NMETALS(%d) != header.flag_metals(%d)!\n",NMETALS,header.flag_metals);
+      //PyErr_Format(PyExc_IndexError,"NMETALS(%d) != header.flag_metals(%d)!",NMETALS,header.flag_metals);
 
     
     if(j==0){
