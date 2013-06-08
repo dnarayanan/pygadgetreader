@@ -32,9 +32,15 @@ void gadget_readpotential()
     simdata=(float*)malloc(header.npart[type]*sizeof(float));
     
     fread(&skip1,sizeof(int),1,infp);
-    for(i=1;i<type;i++)
-      fseek(infp,header.npart[i-1]*sizeof(float),SEEK_CUR);
+    if(type>0){
+      for(i=1;i<type;i++)
+	fseek(infp,header.npart[i-1]*sizeof(float),SEEK_CUR);
+    }
     fread(simdata,header.npart[type]*sizeof(float),1,infp);
+    if(type<5){
+      for(i=type+1; i<6; i++)
+	fseek(infp,header.npart[i]*sizeof(float),SEEK_CUR);
+    }
     fread(&skip2,sizeof(int),1,infp);
     errorcheck(skip1,skip2,blocklabel);
     fclose(infp);

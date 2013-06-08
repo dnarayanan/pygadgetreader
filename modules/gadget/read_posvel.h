@@ -16,7 +16,13 @@ void gadget_posvel(){
   int n;
   unsigned int pc = 0;
   double factor = 1.;
-  
+  unsigned int skip1, skip2;
+
+  if(values==0)
+    char* blocklabel = "POS";
+  if(values==1)
+    char* blocklabel = "VEL";
+
   /* GADGET */
   for(j=0;j<NumFiles;j++){
     skip_blocks(values);
@@ -26,13 +32,20 @@ void gadget_posvel(){
     }
     simdata=(float*)malloc(header.npart[type]*sizeof(float)*3);
     
-    Skip; //skip before
+    fread(&skip1,sizeof(int),1,infp);
     //seek past particle groups not interested in
-    for(i=1;i<=type;i++){
-      fseek(infp,header.npart[i-1]*3*sizeof(float),SEEK_CUR);
+    if(type>0){
+      for(i=1;i<=type;i++)
+	fseek(infp,header.npart[i-1]*3*sizeof(float),SEEK_CUR);
     }
     fread(simdata,header.npart[type]*sizeof(float)*3,1,infp);
-    Skip; //skip after
+    //skip past additional particle types
+    if(type<5){
+      for(i=type+1; i<6; i++)
+	fseek(infp, header.npart[i]*sizeof(float)*3,SEEK_CUR);
+    }
+    fread(&skip2,sizeof(int),1,infp);
+    errorcheck(skip1,skip2,blocklabel);
     fclose(infp);
     
     //count = count + header.npart[type];
