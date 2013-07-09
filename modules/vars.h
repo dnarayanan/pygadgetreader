@@ -61,13 +61,14 @@ struct io_header
   int      flag_entropy_instead_u;
   int      flag_doubleprecision;
 
-  int flag_lpt_ics;
-  float flag_lpt_scalingcator;
+  int flag_potential;
+  int flag_fH2;
 
   int flag_tmax;
-  int flag_potential;
   int flag_delaytime;
-  int flag_fH2;
+
+  int flag_lpt_ics;
+  float flag_lpt_scalingcator;
 
   char     fill[32];  /* fills to 256 Bytes */
 } header;
