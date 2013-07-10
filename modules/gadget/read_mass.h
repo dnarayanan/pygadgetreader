@@ -49,6 +49,24 @@ void gadget_mass()
       
       fread(&skip1,sizeof(int),1,infp);
 
+      if(type==0){
+	fread(simdata,header.npart[type]*sizeof(float),1,infp);
+	for(k=type+1;k<6;k++)
+	  if(header.mass[k]==0 && header.npart[k]>0){
+	    fseek(infp, header.npart[k]*sizeof(float),SEEK_CUR);
+	  }
+      }
+      else{
+	for(k=0;k<type;k++)
+	  if(header.mass[k]==0 && header.npart[k]>0)
+	    fseek(infp, header.npart[k]*sizeof(float),SEEK_CUR);
+	fread(simdata,header.npart[type]*sizeof(float),1,infp);
+	for(k=type+1;k<6;k++)
+	  if(header.mass[k]==0 && header.npart[k]>0)
+	    fseek(infp, header.npart[k]*sizeof(float),SEEK_CUR);
+      }
+
+      /*
       //seek past particle groups not interested in
       if(type>0){
 	for(k=1;k<=type;k++){
@@ -59,7 +77,7 @@ void gadget_mass()
 	}
       }
 
-      fread(simdata,header.npart[type]*sizeof(float),1,infp);
+
 
       if(type<5){
 	for(k=type+1; k<6; k++){
@@ -69,6 +87,7 @@ void gadget_mass()
 	  }
 	}
       }
+      */
 
       fread(&skip2,sizeof(int),1,infp);
       errorcheck(skip1,skip2,blocklabel);
