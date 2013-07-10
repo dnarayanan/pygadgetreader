@@ -63,6 +63,8 @@ void gadget_readZ()
     fread(&skip1,sizeof(int),1,infp);
     if(type==4)
       fseek(infp,header.npart[0]*sizeof(float)*header.flag_metals,SEEK_CUR);
+
+    if(Debug) printf("reading metals - header.flag_metals=%d & METALFACTOR=%f\n",header.flag_metals,METALFACTOR);
     
     float tmp;
     float Z_tmp;
@@ -88,7 +90,6 @@ void gadget_readZ()
   if(pc!=header.npartTotal[type])
     PyErr_Format(PyExc_IndexError,"particle count mismatch!");
   
-  fclose(infp);
   return;
 }
 
