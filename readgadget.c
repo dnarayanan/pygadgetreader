@@ -81,8 +81,16 @@ readhead(PyObject *self, PyObject *args, PyObject *keywds)
     }
   }
   */
-  read_header();
-  fclose(infp);  
+  int filepresent = 0;
+  filepresent = read_header();
+  if(Debug) printf("filepresent=%d\n",filepresent);
+  
+  if(filepresent == 0) {
+    printf("file not found...\n");
+    PyErr_Format(PyExc_IndexError,"cannot open file : '%s!'",filename);
+    return NULL;
+  }
+  fclose(infp);
 
   if(Tipsy==1){
     if(strcmp(Value,simtime)==0)        return Py_BuildValue("d",t_header.time);
