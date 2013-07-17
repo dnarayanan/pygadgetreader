@@ -89,22 +89,26 @@ void skip_blocks(int blockval){
   fread(&skip2,sizeof(int),1,infp);
   blocklabel="RHO";
   errorcheck(skip1,skip2,blocklabel);
-
+  
   // NE
   if(blockval==6) return;
-  fread(&skip1,sizeof(int),1,infp);
-  fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
-  fread(&skip2,sizeof(int),1,infp);
-  blocklabel="NE";
-  errorcheck(skip1,skip2,blocklabel);
-
+  if(header.flag_cooling){
+    fread(&skip1,sizeof(int),1,infp);
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    fread(&skip2,sizeof(int),1,infp);
+    blocklabel="NE";
+    errorcheck(skip1,skip2,blocklabel);
+  }
+  
   // NH
   if(blockval==7) return;
-  fread(&skip1,sizeof(int),1,infp);
-  fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
-  fread(&skip2,sizeof(int),1,infp);
-  blocklabel="NH";
-  errorcheck(skip1,skip2,blocklabel);
+  if(header.flag_cooling){
+    fread(&skip1,sizeof(int),1,infp);
+    fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
+    fread(&skip2,sizeof(int),1,infp);
+    blocklabel="NH";
+    errorcheck(skip1,skip2,blocklabel);
+  }
 
   // HSML
   if(blockval==8) return;
