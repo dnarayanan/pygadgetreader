@@ -160,7 +160,7 @@ void skip_blocks(int blockval){
 
   // AGE
   if(blockval==10) return;
-  if(header.flag_stellarage){
+  if(header.flag_stellarage && header.npart[4]>0){
     fread(&skip1,sizeof(int),1,infp);
     fseek(infp,header.npart[4]*sizeof(float),SEEK_CUR);
     fread(&skip2,sizeof(int),1,infp);
