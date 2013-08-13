@@ -127,6 +127,7 @@ void read_tipsy_envira()
     printf("file read, array allocated, starting loop\n");
 
     float tmp=0.;
+    int itmp=0;
     if(type==0){
       for(n=0;n<nselect;n++){
 	fseek(infp,sizeof(int),SEEK_CUR); //ID
@@ -149,7 +150,10 @@ void read_tipsy_envira()
 
 	fseek(infp,sizeof(float),SEEK_CUR); //Vang
 	fseek(infp,sizeof(float),SEEK_CUR); //Vmag
-	fseek(infp,sizeof(int),SEEK_CUR); //satswitch
+	if(values==27)
+	  fread(&itmp,sizeof(int),1,infp);
+	else
+	  fseek(infp,sizeof(int),SEEK_CUR); //satswitch
 	fseek(infp,sizeof(int),SEEK_CUR); //i
 
 	if(values==21)
@@ -160,7 +164,10 @@ void read_tipsy_envira()
 	fseek(infp,sizeof(int),SEEK_CUR); //skid_ID
 	fseek(infp,sizeof(float),SEEK_CUR); //skid_rad
 	
-	MDATA(array,n) = tmp;
+	if(values==27)
+	  NSPAWNDATA(array,n) = itmp;
+	else
+	  MDATA(array,n) = tmp;
       }
       printf("finished gas loop\n");
     }

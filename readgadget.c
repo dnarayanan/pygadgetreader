@@ -238,7 +238,7 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
     else if(values==17) readnspawn();
     else if(values==18) readpotential();
     else if(values==19) read_tipsy();
-    else if(values==20 || values==21 || values==22 || values==23) read_tipsy_envira();
+    else if(values==20 || values==21 || values==22 || values==23 || values==27) read_tipsy_envira();
     else printf("houston we have a problem...no values returned\n");
     j=0;
   } 

@@ -272,6 +272,7 @@ char* MHALO  = "mhalo";
 char* W_AGE  = "windage";
 char* RVIR   = "rvir";
 char* VVIR   = "vvir";
+char* SATSW  = "satswitch";
 
 /* TIPSY FUTURE */
 char* STARFRAC    = "starfrac";
@@ -319,11 +320,12 @@ void assign_type()
   else if(strcmp(Values,S_AGE)==0)    values = 19;
   else if(strcmp(Values,MHALO)==0)    values = 20;
   else if(strcmp(Values,W_AGE)==0)    values = 21;
-  else if(strcmp(Values,RVIR)==0)    values = 22;
-  else if(strcmp(Values,VVIR)==0)    values = 23;
-  else if(strcmp(Values,STARFRAC)==0)    values = 24;
-  else if(strcmp(Values,AGESTARFORM)==0)    values = 25;
-  else if(strcmp(Values,RELAUNCH)==0)    values = 26;
+  else if(strcmp(Values,RVIR)==0)     values = 22;
+  else if(strcmp(Values,VVIR)==0)     values = 23;
+  else if(strcmp(Values,STARFRAC)==0) values = 24;
+  else if(strcmp(Values,AGESTARFORM)==0) values = 25;
+  else if(strcmp(Values,RELAUNCH)==0) values = 26;
+  else if(strcmp(Values,SATSW)==0)    values = 27;
   else{
     PyErr_Format(PyExc_IndexError,"wrong values type selected");
     //return NULL;
