@@ -273,6 +273,7 @@ char* W_AGE  = "windage";
 char* RVIR   = "rvir";
 char* VVIR   = "vvir";
 char* SATSW  = "satswitch";
+char* SKIDID = "skidid";
 
 /* TIPSY FUTURE */
 char* STARFRAC    = "starfrac";
@@ -326,6 +327,7 @@ void assign_type()
   else if(strcmp(Values,AGESTARFORM)==0) values = 25;
   else if(strcmp(Values,RELAUNCH)==0) values = 26;
   else if(strcmp(Values,SATSW)==0)    values = 27;
+  else if(strcmp(Values,SKIDID)==0)   values = 28;
   else{
     PyErr_Format(PyExc_IndexError,"wrong values type selected");
     //return NULL;

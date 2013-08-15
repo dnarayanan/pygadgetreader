@@ -108,6 +108,10 @@ void read_tipsy_envira()
       printf("reading rvir from %s\n", auxfile);
     if(values==23)
       printf("reading vvir from %s\n", auxfile);
+    if(values==27)
+      printf("reading satswitch from %s\n", auxfile);
+    if(values==28)
+      printf("reading skid_id from %s\n", auxfile);
     
 
     /*
@@ -161,10 +165,14 @@ void read_tipsy_envira()
 	else
 	  fseek(infp,sizeof(float),SEEK_CUR); 
 
-	fseek(infp,sizeof(int),SEEK_CUR); //skid_ID
+	if(values==28)
+	  fread(&itmp,sizeof(int),1,infp);
+	else
+	  fseek(infp,sizeof(int),SEEK_CUR); //skid_ID
+
 	fseek(infp,sizeof(float),SEEK_CUR); //skid_rad
 	
-	if(values==27)
+	if(values==27 || values==28)
 	  NSPAWNDATA(array,n) = itmp;
 	else
 	  MDATA(array,n) = tmp;
