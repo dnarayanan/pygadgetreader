@@ -9,11 +9,11 @@
 /*######################### Z ########################################*/
 void gadget_readZ()
 {  
-  float *simdata;
+  //float *simdata;
   int ndim = 1;
 
   int k;
-  int i;
+  //int i;
   unsigned int n;
   unsigned int pc = 0;
   
@@ -26,7 +26,7 @@ void gadget_readZ()
     if(header.flag_metals==0)
       PyErr_Format(PyExc_IndexError,"flag_metals=%d --> METALS NOT TRACKED",header.flag_metals);
     
-    if(Ngas==0 && Nstar==0 || header.flag_metals==0){
+    if((Ngas==0 && Nstar==0) || (header.flag_metals==0)){
       if(Ngas==0 && Nstar==0) PyErr_Format(PyExc_IndexError,"Nstar=0 and Ngas=0 - No metallicity to read!");
       if(header.flag_metals==0) PyErr_Format(PyExc_IndexError,"flag_metals=%d - No metallicity to read!",header.flag_metals);
     }
@@ -110,7 +110,7 @@ void gadget_readmetals()
     if(header.flag_metals==0)
       PyErr_Format(PyExc_IndexError,"flag_metals=%d --> METALS NOT TRACKED",header.flag_metals);
 
-    if(Ngas==0 && Nstar==0 || header.flag_metals==0){
+    if((Ngas==0 && Nstar==0) || header.flag_metals==0){
       if(Ngas==0 && Nstar==0) PyErr_Format(PyExc_IndexError,"Nstar=0 and Ngas=0 - No metallicity to read!");
       if(header.flag_metals==0) PyErr_Format(PyExc_IndexError,"flag_metals=%d - No metallicity to read!",header.flag_metals);
     }

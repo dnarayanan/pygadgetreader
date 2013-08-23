@@ -12,7 +12,7 @@ void readpid()
   unsigned int *simdata;
   int ndim = 1;
 
-  int k;
+  //int k;
   int i;
   unsigned int n;
   unsigned int pc = 0;

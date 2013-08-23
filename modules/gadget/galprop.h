@@ -72,6 +72,7 @@ galprop(PyObject *self, PyObject *args, PyObject *keywds)
   else if(strcmp(Value,HIMASS)==0 && HIH2==1) value = 11;
   else if(strcmp(Value,H2MASS)==0 && HIH2==1) value = 12;
   else{
+    value = -1;
     PyErr_Format(PyExc_IndexError,"wrong values type selected");
     //return NULL;
   }
@@ -292,7 +293,7 @@ galdata(PyObject *self, PyObject *args, PyObject *keywds)
   int galnum;
   float x,y,z;
   unsigned int id;
-  int Numfiles;
+  //int Numfiles;
   double tempIndex;  
 
   static char *kwlist[]={"file","dir","snapnumber","galnum",NULL};
@@ -467,7 +468,7 @@ return_index(int NumFiles, unsigned int *s_tallies, unsigned int *g_tallies, uns
 {
   int i;
   id = id - 1;
-  unsigned int new_id;
+  unsigned int new_id = 999999;
   int escape = 0;
 
   if(NumFiles > 1){
@@ -520,7 +521,7 @@ galdataonly(PyObject *self, PyObject *args, PyObject *keywds)
   int galnum;
   float x,y,z;
   unsigned int id;
-  int Numfiles;
+  //int Numfiles;
 
   static char *kwlist[]={"dir","snapnumber","galnum",NULL};
   if(!PyArg_ParseTupleAndKeywords(args,keywds,"sii",kwlist,&Directory,&Snap,&galnum)){
@@ -637,3 +638,6 @@ test(PyObject *self, PyObject *args)
   read_header();
   return Py_None;
 }
+
+
+

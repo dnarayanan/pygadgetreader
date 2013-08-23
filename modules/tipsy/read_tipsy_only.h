@@ -126,7 +126,10 @@ void read_tipsy_envira()
       //return NULL;
     }
 
-    array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
+    if(values==28)
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_INT32);
+    else
+      array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
 
     printf("file read, array allocated, starting loop\n");
 

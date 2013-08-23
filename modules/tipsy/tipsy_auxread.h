@@ -9,6 +9,7 @@
 void tipsy_auxmetals(){
   int ndim = 2;
   unsigned int n;
+  int i;
   
   char auxfile[500];
   unsigned int nselect = 0;

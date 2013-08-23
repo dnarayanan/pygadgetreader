@@ -13,7 +13,6 @@
 
 #define NSPAWNDATA(a,i)*((int *) PyArray_GETPTR1(a,i))
 
-
 #define METALFACTOR 0.0189/0.0147
 #define H_MASSFRAC 0.76
 #define BOLTZMANN 1.3806e-16
