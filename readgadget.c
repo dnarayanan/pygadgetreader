@@ -138,10 +138,11 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
   Units=0;
   ERR=0;
   Debug=0;
+  Supress=0;
   int filepresent = 0;
 
-  static char *kwlist[]={"file","data","type","numfiles","units","tipsy","future","debug",NULL};
-  if(!PyArg_ParseTupleAndKeywords(args,keywds,"sss|iiiii",kwlist,&filename,&Values,&Type,&NumFiles,&Units,&Tipsy,&Future,&Debug)){
+  static char *kwlist[]={"file","data","type","numfiles","units","tipsy","future","debug","supress_output",NULL};
+  if(!PyArg_ParseTupleAndKeywords(args,keywds,"sss|iiiiii",kwlist,&filename,&Values,&Type,&NumFiles,&Units,&Tipsy,&Future,&Debug,&Supress)){
     PyErr_Format(PyExc_TypeError,"wrong input!  must provide filename, data block, and particle type of interest - see readme.txt");
     //return NULL;
   }
@@ -199,20 +200,22 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
     if(values==24 || values==25 || values==26)
       PyErr_Format(PyExc_IndexError,"Only valid for Future files!!  turn future=1 flag on!");
 
-    printf("\ninput (%d files): %s \n",NumFiles,filename);
-    printf("extracting %s data for %s\n",Values,Type);
-    if(Units==0){
-      if(values==5)  printf("returning PHYSICAL density in CODE units\n\n");
-      if(values==13) printf("returning PHYSICAL surface density in CODE units\n\n");
-      else           printf("returning code units\n\n");
-    }
-    if(Units==1){
-      if(values==3)       printf("returning units of Msun \n\n");
-      else if(values==4)  printf("returning units of Kelvin \n\n");
-      else if(values==5)  printf("returning PHYSICAL density in units of g/cm^3 \n\n");
-      else if(values==13) printf("returning PHYSICAL surface density in units of g/cm^2 \n\n");
-      else if(values==15) printf("returning units of Kelvin \n\n");
-      else                printf("returning code units\n\n");
+    if(Supress==0){
+      printf("\ninput (%d files): %s \n",NumFiles,filename);
+      printf("extracting %s data for %s\n",Values,Type);
+      if(Units==0){
+	if(values==5)  printf("returning PHYSICAL density in CODE units\n\n");
+	if(values==13) printf("returning PHYSICAL surface density in CODE units\n\n");
+	else           printf("returning code units\n\n");
+      }
+      if(Units==1){
+	if(values==3)       printf("returning units of Msun \n\n");
+	else if(values==4)  printf("returning units of Kelvin \n\n");
+	else if(values==5)  printf("returning PHYSICAL density in units of g/cm^3 \n\n");
+	else if(values==13) printf("returning PHYSICAL surface density in units of g/cm^2 \n\n");
+	else if(values==15) printf("returning units of Kelvin \n\n");
+	else                printf("returning code units\n\n");
+      }
     }
     
     //printf("j=%d\n",j);

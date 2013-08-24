@@ -31,6 +31,7 @@ FILE *futfp;
 char infile[500];
 int NumFiles, Units, j, dummy;
 int Debug;
+int Supress;
 int ERR;
 int Tipsy = 0;
 int Future = 0;

@@ -35,7 +35,7 @@ void gadget_mass()
     */
     
     if(header.mass[type]>0 && header.npart[type]>0){
-      printf("non-zero header mass detected - using header mass for %s\n",Type);
+      if(Supress==0) printf("non-zero header mass detected - using header mass for %s\n",Type);
       for(n=0;n<header.npart[type];n++)
 	{
 	  if(Units==0) MDATA(array,pc)=header.mass[type];
@@ -44,7 +44,7 @@ void gadget_mass()
 	}
     }
     else{
-      printf("reading mass block for %s\n",Type);
+      if(Supress==0) printf("reading mass block for %s\n",Type);
       simdata=(float*)malloc(header.npart[type]*sizeof(float));
       
       fread(&skip1,sizeof(int),1,infp);
