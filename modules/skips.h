@@ -349,9 +349,13 @@ void skiprho(){ //skip RHO
   return;
 }
 void skipgas(){
-  Skip;
+  char* blocklabel;
+  unsigned int skip1, skip2;
+  fread(&skip1,sizeof(int),1,infp);
   fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
-  Skip;
+  fread(&skip2,sizeof(int),1,infp);
+  blocklabel="RHO";
+  errorcheck(skip1,skip2,blocklabel);
   return;
 }
 
