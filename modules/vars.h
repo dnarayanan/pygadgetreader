@@ -38,6 +38,7 @@ int Future = 0;
 int MAXDIM = 3;
 int NMETALS = 4;
 int nth_Particle;
+unsigned int nread_total;
 
 PyArrayObject *array;
 

@@ -191,6 +191,26 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
 
   init_tconvert();
 
+  if(nth_Particle){
+    nread_total = ceil((float)header.npart[type]/(float)nth_Particle);
+    for(j=1;j<NumFiles;j++){
+      filepresent = read_header();
+      if(filepresent == 0){
+	printf("%d file not found...\n",j);
+	PyErr_Format(PyExc_IndexError,"cannot open file : '%s!'",filename);
+      }
+      nread_total += ceil((float)header.npart[type]/(float)nth_Particle);
+      fclose(infp);
+    }
+  }
+  else
+    nread_total = header.npartTotal[type];
+
+  if(Debug && nth_Particle && Supress==0)
+    printf("total particles being read in %d/%d\n",nread_total, header.npartTotal[type]);
+  if(Supress==0)
+    printf("READING EVERY %dth PARTICLE\n",nth_Particle);
+
   if(Tipsy==1) Units=1;
   if(Future>0){
     read_tipsy_future(Future,values);

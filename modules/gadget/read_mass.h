@@ -17,24 +17,17 @@ void gadget_mass()
   int k;
   unsigned int pc = 0;
   unsigned int nread;
+  unsigned int cnt = 0;
 
   unsigned int skip1, skip2;
   char* blocklabel = "MASS";
 
   double convert = UnitMass_in_g / SOLARMASS;
 
-  if(nth_Particle)
-    nread = ceil((float)header.npart[type]/(float)nth_Particle);
-  else
-    nread = header.npart[type];
-  
-  if(Debug && nth_Particle && Supress==0)
-    printf("particles being read in %d/%d\n",nread,header.npart[type]);
-
   for(j=0;j<NumFiles;j++){
     skip_blocks(values);
     if(j==0){
-      npy_intp dims[1]={nread};
+      npy_intp dims[1]={nread_total};
       array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
     }
     /*
@@ -42,6 +35,14 @@ void gadget_mass()
       printf("### RETURNING MASS IN GADGET UNITS, MULTIPLY BY 1.98892e43 TO CONVER TO GRAMS ###\n");
       }
     */
+
+    if(nth_Particle)
+      nread = ceil((float)header.npart[type]/(float)nth_Particle);
+    else
+      nread = header.npart[type];
+    
+    if(Debug && nth_Particle && Supress==0)
+      printf("particles being read in %d/%d\n",nread,header.npart[type]);
     
     if(header.mass[type]>0 && header.npart[type]>0){
       if(Supress==0) printf("non-zero header mass detected - using header mass for %s\n",Type);
@@ -59,9 +60,7 @@ void gadget_mass()
       fread(&skip1,sizeof(int),1,infp);
 
       if(nth_Particle){
-	if(Supress==0)
-	  printf("READING EVERY %dth PARTICLE\n",nth_Particle);
-	unsigned int cnt = 0;
+	cnt = 0;
 
 	if(type==0){
 	  for(i=0;i<header.npart[type];i++){
@@ -151,7 +150,7 @@ void gadget_mass()
 	}
     }
   }
-  if(pc!=nread){
+  if(pc!=nread_total){
     PyErr_Format(PyExc_IndexError,"particle count mismatch! pc=%d  npartTotal[%d]=%d",pc,type,header.npartTotal[type]);
     //return NULL;
   }

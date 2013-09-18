@@ -16,17 +16,10 @@ void gadget_readpotential()
   unsigned int n;
   unsigned int pc = 0;
   unsigned int nread;
+  unsigned int cnt = 0;
 
   unsigned int skip1,skip2;
   char* blocklabel = "POTENTIAL";
-
-  if(nth_Particle)
-    nread = ceil((float)header.npart[type]/(float)nth_Particle);
-  else
-    nread = header.npart[type];
-
-  if(Debug && nth_Particle && Supress==0)
-    printf("particles being read in %d/%d\n",nread,header.npart[type]);
 
   for(j=0;j<NumFiles;j++){
     skip_blocks(values);
@@ -34,9 +27,17 @@ void gadget_readpotential()
       PyErr_Format(PyExc_IndexError,"flag_potential=%d --> potentials not output",header.flag_potential);
     
     if(j==0){
-      npy_intp dims[1]={nread};
+      npy_intp dims[1]={nread_total};
       array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
     }
+
+    if(nth_Particle)
+      nread = ceil((float)header.npart[type]/(float)nth_Particle);
+    else
+      nread = header.npart[type];
+    
+    if(Debug && nth_Particle && Supress==0)
+      printf("particles being read in %d/%d\n",nread,header.npart[type]);
     
     simdata=(float*)malloc(nread*sizeof(float));
     
@@ -47,9 +48,7 @@ void gadget_readpotential()
     }
 
     if(nth_Particle){
-      if(Supress==0)
-	printf("READING EVERY %dnth PARTICLE\n",nth_Particle);
-      unsigned int cnt = 0;
+      cnt = 0;
       for(i=0;i<header.npart[type];i++){
 	if(i % nth_Particle == 0){
 	  fread(&simdata[cnt],sizeof(float),1,infp);
@@ -76,7 +75,7 @@ void gadget_readpotential()
 	pc++;
       }
   }
-  if(pc!=nread)
+  if(pc!=nread_total)
       PyErr_Format(PyExc_IndexError,"particle count mismatch!");
   return;
 }
