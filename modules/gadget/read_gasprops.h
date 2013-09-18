@@ -16,6 +16,7 @@ void gas_props()
   unsigned int n;
   unsigned int pc = 0;
   unsigned int skip1,skip2;
+  unsigned int nread;
 
   char* blocklabel = "READ BLOCK";
 
@@ -41,6 +42,14 @@ void gas_props()
       convert = UnitMass_in_g / pow(UnitLength_in_cm,2);
   }
 
+  if(nth_Particle)
+    nread = ceil((float)header.npart[type]/(float)nth_Particle);
+  else
+    nread = header.npart[type];
+
+  if(Debug && nth_Particle && Supress==0)
+    printf("particles being read in %d/%d\n",nread,header.npart[type]);
+
   for(j=0;j<NumFiles;j++){
     skip_blocks(values);
     if(Ngas==0)
@@ -50,32 +59,76 @@ void gas_props()
       if(type!=0)
 	PyErr_Format(PyExc_IndexError,"%s can only be read for gas!!",Values);
       
-      npy_intp dims[1]={header.npartTotal[type]};
+      //npy_intp dims[1]={header.npartTotal[type]};
+      npy_intp dims[1]={nread};
       array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
+    }    
+
+    simdata=(float*)malloc(nread*sizeof(float)); 
+    if(values==4) 
+      Ne=(float*)malloc(nread*sizeof(float)); 
+
+    //simdata=(float*)malloc(header.npart[type]*sizeof(float)); 
+    //if(values==4) 
+    //  Ne=(float*)malloc(header.npart[type]*sizeof(float)); 
+
+    // read each nth_Particle
+    if(nth_Particle){
+      if(Supress==0) 
+	printf("READING EVERY %dth PARTICLE\n",nth_Particle);
+      unsigned int cnt = 0;
+      fread(&skip1,sizeof(int),1,infp);
+      for(i=0;i<header.npart[type];i++){
+	if(i % nth_Particle == 0){
+	  fread(&simdata[cnt],sizeof(float),1,infp);
+	  cnt++;
+	}
+	else
+	  fseek(infp,sizeof(float),SEEK_CUR);
+      }
+      fread(&skip2,sizeof(int),1,infp);
+      errorcheck(skip1,skip2,blocklabel);
+
+      if(values==4 && Units==1){
+	cnt = 0;
+	skiprho();
+	fread(&skip1,sizeof(int),1,infp);
+	for(i=0;i<header.npart[type];i++){
+	  if(i % nth_Particle == 0){
+	    fread(&Ne[cnt],sizeof(float),1,infp);
+	    cnt++;
+	  }
+	  else
+	    fseek(infp,sizeof(float),SEEK_CUR);
+	}
+	fread(&skip2,sizeof(int),1,infp);
+	blocklabel="NEforU";
+	errorcheck(skip1,skip2,blocklabel);
+      }
     }
     
-    simdata=(float*)malloc(header.npart[type]*sizeof(float)); 
-    if(values==4) 
-      Ne=(float*)malloc(header.npart[type]*sizeof(float)); 
-
-    // read block
-    fread(&skip1,sizeof(int),1,infp);
-    fread(simdata,header.npart[type]*sizeof(float),1,infp);
-    fread(&skip2,sizeof(int),1,infp);
-    errorcheck(skip1,skip2,blocklabel);
-    
-    // read in Ne for U
-    if(values==4 && Units==1){
-      skiprho();
+    // reading all particles
+    else{
+      // read block
       fread(&skip1,sizeof(int),1,infp);
-      fread(Ne, header.npart[type]*sizeof(float),1,infp);
+      fread(simdata,header.npart[type]*sizeof(float),1,infp);
       fread(&skip2,sizeof(int),1,infp);
-      blocklabel="NEforU";
       errorcheck(skip1,skip2,blocklabel);
+      
+      // read in Ne for U
+      if(values==4 && Units==1){
+	skiprho();
+	fread(&skip1,sizeof(int),1,infp);
+	fread(Ne, header.npart[type]*sizeof(float),1,infp);
+	fread(&skip2,sizeof(int),1,infp);
+	blocklabel="NEforU";
+	errorcheck(skip1,skip2,blocklabel);
+      }
     }
     fclose(infp);
 
-    for(n=0;n<header.npart[type];n++)
+    //for(n=0;n<header.npart[type];n++)
+    for(n=0;n<nread;n++)
       {
 	if(values==4 && Units==1){
 	  MeanWeight = 4.0/(3.*H_MASSFRAC+1.+4.*H_MASSFRAC*Ne[n]) * PROTONMASS;
@@ -86,7 +139,7 @@ void gas_props()
 	pc++;
       }
   }
-  if(pc!=header.npartTotal[type]){
+  if(pc!=nread){
     PyErr_Format(PyExc_IndexError,"particle count mismatch!");
   }
   return;

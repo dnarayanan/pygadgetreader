@@ -16,10 +16,19 @@ void gadget_readZ()
   //int i;
   unsigned int n;
   unsigned int pc = 0;
-  
+  unsigned int nread;
+
   unsigned int skip1,skip2;
   char* blocklabel = "Z";
   
+  if(nth_Particle)
+    nread = ceil((float)header.npart[type]/(float)nth_Particle);
+  else
+    nread = header.npart[type];
+
+  if(Debug && nth_Particle && Supress==0)
+    printf("particles being read in %d/%d\n",nread,header.npart[type]);
+
   /* GADGET */
   for(j=0;j<NumFiles;j++){
     skip_blocks(values);
@@ -34,7 +43,7 @@ void gadget_readZ()
       if(type!=0 && type!=4)
 	PyErr_Format(PyExc_IndexError,"Z can only be read for gas or stars!!");
       
-      npy_intp dims[1]={header.npartTotal[type]};
+      npy_intp dims[1]={nread};
       array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
     }
     
@@ -68,18 +77,38 @@ void gadget_readZ()
     
     float tmp;
     float Z_tmp;
+
+    if(Supress==0 && nth_Particle)
+      printf("READING EVERY %dth PARTICLE\n",nth_Particle);
+
     for(n=0;n<header.npart[type];n++)
       {
 	Z_tmp = 0.;
-	for(k=0; k < header.flag_metals; k++)
-	  {
-	    fread(&tmp,sizeof(float),1,infp);
-	    Z_tmp += tmp;
+	if(nth_Particle){
+	  if(n % nth_Particle == 0){
+	    for(k=0; k<header.flag_metals; k++){
+	      fread(&tmp,sizeof(float),1,infp);
+	      Z_tmp += tmp;
+	    }
+	    Z_tmp *= METALFACTOR;
+	    
+	    MDATA(array,pc) = Z_tmp;
+	    pc++;
 	  }
-	Z_tmp *= METALFACTOR;
-	
-	MDATA(array,pc) = Z_tmp;
-	pc++;
+	  else
+	    fseek(infp,sizeof(float)*header.flag_metals,SEEK_CUR);
+	}
+	else{
+	  for(k=0; k < header.flag_metals; k++)
+	    {
+	      fread(&tmp,sizeof(float),1,infp);
+	      Z_tmp += tmp;
+	    }
+	  Z_tmp *= METALFACTOR;
+	  
+	  MDATA(array,pc) = Z_tmp;
+	  pc++;
+	}
       }
     if(type==0)
       fseek(infp,header.npart[4]*sizeof(float)*header.flag_metals,SEEK_CUR);
@@ -87,7 +116,7 @@ void gadget_readZ()
     errorcheck(skip1,skip2,blocklabel);
     fclose(infp);
   }
-  if(pc!=header.npartTotal[type])
+  if(pc!=nread)
     PyErr_Format(PyExc_IndexError,"particle count mismatch!");
   
   return;
@@ -100,9 +129,21 @@ void gadget_readmetals()
   unsigned int n;
   int i;
   unsigned int pc = 0;
+  unsigned int nread;
 
   unsigned int skip1,skip2;
   char* blocklabel = "METALARRAY";
+
+  if(nth_Particle)
+    nread = ceil((float)header.npart[type]/(float)nth_Particle);
+  else
+    nread = header.npart[type];
+
+  if(Debug && nth_Particle && Supress==0)
+    printf("particles being read in %d/%d\n",nread,header.npart[type]);
+
+  if(Supress==0 && nth_Particle)
+    printf("READING EVERY %dnth PARTICLE\n",nth_Particle);
 
   //#################
   for(j=0;j<NumFiles;j++){
@@ -118,7 +159,7 @@ void gadget_readmetals()
       if(type!=0 && type!=4)
 	PyErr_Format(PyExc_IndexError,"Z can only be read for gas or stars!!");
 
-      npy_intp dims[2]={header.npartTotal[type],header.flag_metals};
+      npy_intp dims[2]={nread,header.flag_metals};
       array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
     }
 
@@ -128,11 +169,25 @@ void gadget_readmetals()
     
     float tmp = 0.;
     for(n=0;n<header.npart[type];n++){
-      for(i=0;i<header.flag_metals;i++){
-	fread(&tmp,sizeof(float),1,infp);
-	DATA(array,n,i) = tmp;
+
+      if(nth_Particle){
+	if(n % nth_Particle == 0){
+	  for(i=0;i<header.flag_metals;i++){
+	    fread(&tmp,sizeof(float),1,infp);
+	    DATA(array,pc,i) = tmp;
+	  }
+	  pc++;
+	}
+	else
+	  fseek(infp,sizeof(float)*header.flag_metals,SEEK_CUR);
       }
-      pc++;
+      else{
+	for(i=0;i<header.flag_metals;i++){
+	  fread(&tmp,sizeof(float),1,infp);
+	  DATA(array,n,i) = tmp;
+	}
+	pc++;
+      }
     }
     if(type==0)
       fseek(infp,header.npart[4]*sizeof(float)*header.flag_metals,SEEK_CUR);
@@ -157,9 +212,10 @@ void gadget_readmetals()
     */
     
   } //end j loop
-  if(pc!=header.npartTotal[type])
+  if(pc!=nread){
+    printf("pc=%d  nread=%d\n",pc,nread);
     PyErr_Format(PyExc_IndexError,"particle count mismatch!");
-
+  }
   fclose(infp);
   return;
 }

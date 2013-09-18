@@ -37,6 +37,7 @@ int Tipsy = 0;
 int Future = 0;
 int MAXDIM = 3;
 int NMETALS = 4;
+int nth_Particle;
 
 PyArrayObject *array;
 

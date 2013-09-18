@@ -139,10 +139,11 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
   ERR=0;
   Debug=0;
   Supress=0;
+  nth_Particle = 0;
   int filepresent = 0;
 
-  static char *kwlist[]={"file","data","type","numfiles","units","tipsy","future","debug","supress_output",NULL};
-  if(!PyArg_ParseTupleAndKeywords(args,keywds,"sss|iiiiii",kwlist,&filename,&Values,&Type,&NumFiles,&Units,&Tipsy,&Future,&Debug,&Supress)){
+  static char *kwlist[]={"file","data","type","numfiles","units","tipsy","future","debug","supress_output","nth_particle",NULL};
+  if(!PyArg_ParseTupleAndKeywords(args,keywds,"sss|iiiiiii",kwlist,&filename,&Values,&Type,&NumFiles,&Units,&Tipsy,&Future,&Debug,&Supress,&nth_Particle)){
     PyErr_Format(PyExc_TypeError,"wrong input!  must provide filename, data block, and particle type of interest - see readme.txt");
     //return NULL;
   }
