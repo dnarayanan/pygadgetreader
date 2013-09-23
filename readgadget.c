@@ -8,7 +8,11 @@
 
 #include "modules/funcs.h"
 #include "modules/vars.h"
+#ifndef KENCODE
 #include "modules/skips.h"
+#else
+#include "modules/skips_ken.h"
+#endif
 #include "modules/director.h"
 
 // GADGET

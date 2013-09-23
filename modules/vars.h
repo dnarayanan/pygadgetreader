@@ -1,3 +1,7 @@
+/* -- enable this if you are in Ken's group --*/
+//#define KENCODE
+/*--------------------------------------------*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -13,7 +17,6 @@
 
 #define NSPAWNDATA(a,i)*((int *) PyArray_GETPTR1(a,i))
 
-#define METALFACTOR 0.0189/0.0147
 #define H_MASSFRAC 0.76
 #define BOLTZMANN 1.3806e-16
 #define PROTONMASS 1.6726e-24
@@ -24,6 +27,18 @@
 #define UnitVelocity_in_cm_per_s 1.e5
 #define SOLARMASS 1.989e33
 
+#ifndef KENCODE  //romeel's group
+#define METALFACTOR 0.0189/0.0147
+int NMETALS = 4;
+#else           //ken's group
+#define METALFACTOR 1.
+int NMETALS = 1;
+#endif
+
+int Tipsy = 0;
+int Future = 0;
+int MAXDIM = 3;
+
 const char *filename;  
 FILE *infp;
 FILE *auxfp;
@@ -33,10 +48,6 @@ int NumFiles, Units, j, dummy;
 int Debug;
 int Supress;
 int ERR;
-int Tipsy = 0;
-int Future = 0;
-int MAXDIM = 3;
-int NMETALS = 4;
 int nth_Particle;
 unsigned int nread_total;
 
@@ -204,7 +215,7 @@ int read_header()
       PyErr_Format(PyExc_IndexError,"NumFiles(%d) != header.num_files(%d)!",NumFiles,header.num_files);
       //return NULL;
     }
-    if(NMETALS != header.flag_metals)
+    if(header.flag_metals > 0 && NMETALS != header.flag_metals)
       printf("WARNING: NMETALS(%d) != header.flag_metals(%d)!\n",NMETALS,header.flag_metals);
       //PyErr_Format(PyExc_IndexError,"NMETALS(%d) != header.flag_metals(%d)!",NMETALS,header.flag_metals);
 

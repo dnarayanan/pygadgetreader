@@ -1,5 +1,5 @@
-//#ifndef H_FUNCS
-//#define H_FUNCS
+
+#ifndef KENCODE
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -22,6 +22,9 @@ void errorcheck(unsigned int skip1, unsigned int skip2, char *blocklabel){
 
 
 void skip_blocks(int blockval){
+
+  if(Debug)
+    printf("IN ROMEEL'S SKIPS\n");
 
   unsigned int skip1, skip2;
   int k;
@@ -365,5 +368,4 @@ void skipgas(){
 then u call SKIPGAS(infp, header.npart[0]);
 */
 
-
-//#endif
+#endif
