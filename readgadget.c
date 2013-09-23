@@ -208,7 +208,7 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
 
   if(Debug && nth_Particle && Supress==0)
     printf("total particles being read in %d/%d\n",nread_total, header.npartTotal[type]);
-  if(Supress==0)
+  if(nth_Particle && Supress==0)
     printf("READING EVERY %dth PARTICLE\n",nth_Particle);
 
   if(Tipsy==1) Units=1;
