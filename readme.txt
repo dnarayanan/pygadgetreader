@@ -1,4 +1,4 @@
-This module contains a function for reading in data from Gadget type 1 snapshot files, reading in Gadget type 1 header information, and one for reading data from the PStarGroupFinder properties file (galprop).  These functions are described below:
+This module contains a function for reading in particle data from Gadget (type 1) binary files, TIPSY binary files, TIPSY aux/envira/future files, PStarGroupFinder property files (galprop), and Gadget/TIPSY header files.  These functions are described below:
 
 REQUIREMENTS:
  -python
@@ -8,6 +8,13 @@ REQUIREMENTS:
 INSTALL:
 python setup.py build     --> this builds the module
 python setup.py install   --> this installs the module, may require sudo
+
+INSTALL NOTES:
+There are 2 optional parameters found at the top of modules/vars.h, they MUST be enabled/disabled before compilation (steps above).
+      #define KENCODE  //default = off, only enable this if you are using K.Nagamine's Gadget.
+      #define TISPY    //default = off, enable this to always read TIPSY files for default
+      	      	       //(no need to set tipsy=1 in the call).  You can set tipsy=0 in the call
+		       //to instead read gadget binaries in this case.
 
 FUNCTIONS:  
 (in order to use these functions one must put 'from readgadget import *' at the top of your .py script to import the module)
@@ -111,7 +118,7 @@ readsnap - This function does the bulk of the work.  It reads data blocks from t
 	   bndry       - Boundary particles
 	   
 
-Definition:	readsnap('a','b','c',numfiles=0,units=0,tipsy=0,future=0,debug=0)
+Definition:	readsnap('a','b','c',numfiles=0,units=0,tipsy=0,future=0,debug=0,nth_Particle = 1)
 
 		Parameters
 		----------
@@ -124,13 +131,15 @@ Definition:	readsnap('a','b','c',numfiles=0,units=0,tipsy=0,future=0,debug=0)
 		
 		Optional
 		--------
-		numfiles: Number of files the snapshot is broken up into. Assumed to be 1 if it is not included.
+		numfiles: Number of files the snapshot is broken up into. Assumed to be 1 if it is not included. (obsolete)
 		   units: Can either be 0 for code units or 1 for real units.  Assumed to be 0 if not included.  
 		          This parameter allows for the data to be returned in real units(1) rather than code units(0).
 			  Currently only active for density (rho), internal energy 
 			  (u - returns temperature in K), Mass (returns Msun), and Sigma (returns g/cm^2).
 		   tipsy: Must be set to 1 if reading in tipsy binary/aux/envira files.
 		  future: integer value for the future file.
+		   debug: Shows debug information
+	    nth_Particle: Allows the user to read in a subset of data rather than the full dataset
 			  
 
 Example:
@@ -222,6 +231,5 @@ This code is heavily inspired by gadgetpyio written by Matthew Becker, Matthew T
 
 Any comments or suggestsions feel free to contact me:
 Robert Thompson
-UNLV Physics & Astronomy
-rthompson@physics.unlv.edu
+rthompsonj@gmail.com
 

@@ -15,17 +15,28 @@ void read_tipsy()
     
     if(type==0 && values==19)
       PyErr_Format(PyExc_IndexError,"MUST SELECT STARS FOR S_AGE\n");
-    
+
     int ndim = 1;
     int n;
+    unsigned int nread = 0;
     
     char auxfile[500];
     unsigned int nselect = 0;
     read_header();
     if(type==4) nselect = t_header.nstar;
     else PyErr_Format(PyExc_IndexError,"Must select star!\n");
+
+    if(nth_Particle)
+      nread = (float)nselect / (float)nth_Particle;
+    else{
+      nread = nselect;
+      nth_Particle = 1;
+    }
+  
+    if(Debug && nth_Particle && Supress==0)
+      printf("particles being read in %d/%d\n",nselect, nread);
     
-    npy_intp dims[1]={nselect};
+    npy_intp dims[1]={nread};
     
     fclose(infp);
     strcpy(auxfile, filename);
@@ -37,9 +48,8 @@ void read_tipsy()
     if(auxfile[strlen(auxfile)-1] == 'n')
       auxfile[strlen(auxfile)-1] = 'x';
     
-
-    printf("reading s_age from %s\n", auxfile);
-
+    if(Supress == 0)
+      printf("reading s_age from %s\n", auxfile);
 
     sprintf(infile,"%s",auxfile);
     if(!(auxfp=fopen(infile,"r"))) {
@@ -51,6 +61,7 @@ void read_tipsy()
     array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
     
     float tmp=0.;
+    unsigned int pc = 0;
     if(type==4){
       fseek(infp,t_header.ngas * sizeof(struct tipsy_gas_aux),SEEK_CUR);
       for(n=0;n<nselect;n++){
@@ -58,7 +69,11 @@ void read_tipsy()
 	fread(&tmp,sizeof(float),1,infp);
 	fseek(infp,sizeof(float),SEEK_CUR);
 	fseek(infp,sizeof(int),SEEK_CUR);
-	MDATA(array,n) = tmp;
+
+	if(n % nth_Particle == 0){
+	  MDATA(array,pc) = tmp;
+	  pc++;
+	}
       }
     }
     fclose(auxfp);
@@ -79,6 +94,7 @@ void read_tipsy_envira()
     
     char auxfile[500];
 
+    unsigned int nread = 0;
     unsigned int nselect = 0;
     read_header();
     if(type==0) nselect = t_header.ngas;
@@ -86,7 +102,17 @@ void read_tipsy_envira()
     //else if(type==4) nselect = t_header.nstar;
     else PyErr_Format(PyExc_IndexError,"Must select gas,dm,star!\n");
     
-    npy_intp dims[1]={nselect};
+    if(nth_Particle)
+      nread = (float)nselect / (float)nth_Particle;
+    else{
+      nread = nselect;
+      nth_Particle = 1;
+    }
+    
+    if(Debug && nth_Particle && Supress==0)
+      printf("particles being read in %d/%d\n",nselect, nread);
+
+    npy_intp dims[1]={nread};
 
     fclose(infp);
     strcpy(auxfile, filename);
@@ -100,18 +126,20 @@ void read_tipsy_envira()
 
     strcat(auxfile,"ira");
 
-    if(values==20)
-      printf("reading Mhalo from %s\n", auxfile);
-    if(values==21)
-      printf("reading wind_age from %s\n", auxfile);
-    if(values==22)
-      printf("reading rvir from %s\n", auxfile);
-    if(values==23)
-      printf("reading vvir from %s\n", auxfile);
-    if(values==27)
-      printf("reading satswitch from %s\n", auxfile);
-    if(values==28)
-      printf("reading skid_id from %s\n", auxfile);
+    if(Supress == 0){
+      if(values==20)
+	printf("reading Mhalo from %s\n", auxfile);
+      if(values==21)
+	printf("reading wind_age from %s\n", auxfile);
+      if(values==22)
+	printf("reading rvir from %s\n", auxfile);
+      if(values==23)
+	printf("reading vvir from %s\n", auxfile);
+      if(values==27)
+	printf("reading satswitch from %s\n", auxfile);
+      if(values==28)
+	printf("reading skid_id from %s\n", auxfile);
+    }
     
 
     /*
@@ -131,10 +159,12 @@ void read_tipsy_envira()
     else
       array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
 
-    printf("file read, array allocated, starting loop\n");
+    if(Debug)
+      printf("file read, array allocated, starting loop\n");
 
     float tmp=0.;
     int itmp=0;
+    unsigned int pc = 0;
     if(type==0){
       for(n=0;n<nselect;n++){
 	fseek(infp,sizeof(int),SEEK_CUR); //ID
@@ -175,12 +205,16 @@ void read_tipsy_envira()
 
 	fseek(infp,sizeof(float),SEEK_CUR); //skid_rad
 	
-	if(values==27 || values==28)
-	  NSPAWNDATA(array,n) = itmp;
-	else
-	  MDATA(array,n) = tmp;
+	if(n % nth_Particle == 0){
+	  if(values==27 || values==28)
+	    NSPAWNDATA(array,pc) = itmp;
+	  else
+	    MDATA(array,pc) = tmp;
+	  pc++;
+	}
       }
-      printf("finished gas loop\n");
+      if(Debug)
+	printf("finished gas loop\n");
     }
     fclose(auxfp);
   }
@@ -201,6 +235,7 @@ void read_tipsy_future(int Future,int values)
     
     char futurefile[500];
 
+    unsigned int nread;
     unsigned int nselect = 0;
     read_header();
     fclose(infp);
@@ -208,7 +243,17 @@ void read_tipsy_future(int Future,int values)
     if(type==0) nselect = t_header.ngas;
     else PyErr_Format(PyExc_IndexError,"Must select gas!\n");
     
-    npy_intp dims[1]={nselect};
+    if(nth_Particle)
+      nread = (float)nselect / (float)nth_Particle;
+    else{
+      nread = nselect;
+      nth_Particle = 1;
+    }
+    
+    if(Debug && nth_Particle && Supress==0)
+      printf("particles being read in %d/%d\n",nselect, nread);
+
+    npy_intp dims[1]={nread};
 
     strcpy(futurefile, filename);
     
@@ -218,8 +263,9 @@ void read_tipsy_future(int Future,int values)
       futurefile[strlen(futurefile)-2] = 'u';
     if(futurefile[strlen(futurefile)-1] == 'n')
       futurefile[strlen(futurefile)-1] = 't';
-
-    printf("reading %s%03d \n",futurefile,Future);
+    
+    if(Supress == 0)
+      printf("reading %s%03d \n",futurefile,Future);
     sprintf(infile,"%s%03d",futurefile,Future);
     if(!(futfp=fopen(infile,"r"))) {
       ERR = 1;
@@ -233,6 +279,7 @@ void read_tipsy_future(int Future,int values)
 
     //printf("file read, array allocated, starting loop\n");
 
+    unsigned int pc = 0;
     float tmp=0.;
     int itmp=0;
     if(type==0){
@@ -278,11 +325,14 @@ void read_tipsy_future(int Future,int values)
 	
 	fseek(infp,sizeof(int),SEEK_CUR); //i
 
-	//assign to array
-	if(values==26)
-	  NSPAWNDATA(array,n) = itmp;
-	else
-	  MDATA(array,n) = tmp;
+	if(n % nth_Particle == 0){
+	  //assign to array
+	  if(values==26)
+	    NSPAWNDATA(array,pc) = itmp;
+	  else
+	    MDATA(array,pc) = tmp;
+	  pc++;
+	}
       }
       //printf("finished gas loop\n");
     }

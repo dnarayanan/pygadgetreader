@@ -1,9 +1,6 @@
-//#ifndef H_FUNCS
-//#define H_FUNCS
-
 //void errorcheck(unsigned int, unsigned int, char);
 //void errorcheck(int, int, char);
-void errorcheck(unsigned int, unsigned int, char*);
+int errorcheck(unsigned int, unsigned int, char*);
 
 void init_tconvert(void);
 void assign_type(void);
@@ -33,4 +30,3 @@ void read_tipsy_envira(void);
 void read_tipsy_future(int, int);
 
 
-//#endif

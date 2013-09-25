@@ -12,6 +12,7 @@ void tipsy_auxmetals(){
   int i;
   
   char auxfile[500];
+  unsigned int nread = 0;
   unsigned int nselect = 0;
   read_header();
   if(type==0) nselect = t_header.ngas;
@@ -34,26 +35,42 @@ void tipsy_auxmetals(){
     auxfile[strlen(auxfile)-1] = 'x';
   }
   
-  printf("reading METAL ARRAY from %s\n", auxfile);
+  if(Supress == 0)
+    printf("reading METAL ARRAY from %s\n", auxfile);
   sprintf(infile,"%s",auxfile);
   if(!(auxfp=fopen(infile,"r"))) {
     ERR = 1;
     PyErr_Format(PyExc_TypeError,"can't open file : '%s'",infile);
   }
   
-  npy_intp dims[2]={nselect,4};
+  if(nth_Particle)
+    nread = (float)nselect / (float)nth_Particle;
+  else{
+    nread = nselect;
+    nth_Particle = 1;
+  }
+  
+  if(Debug && nth_Particle && Supress==0)
+    printf("particles being read in %d/%d\n",nselect, nread);  
+
+  npy_intp dims[2]={nread,4};
   array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
   
   if(type==4)
     fseek(infp,t_header.ngas * sizeof(struct tipsy_gas_aux),SEEK_CUR);
 
   float tmp;
+  unsigned int pc = 0;
   for(n=0;n<nselect;n++){
     if(type==0){
+
       for(i=0;i<NMETALS;i++){
 	fread(&tmp, sizeof(float),1,infp);
-	DATA(array,n,i) = tmp;
+	if(n % nth_Particle == 0)
+	  DATA(array,pc,i) = tmp;
       }
+      if(n % nth_Particle == 0)
+	pc++;
 
       fseek(infp,sizeof(float),SEEK_CUR);         //sfr
       fseek(infp,sizeof(float),SEEK_CUR);         //tmax
@@ -63,10 +80,14 @@ void tipsy_auxmetals(){
       fseek(infp,sizeof(int),SEEK_CUR);           //nspawn      
     }
     else{
+
       for(i=0;i<NMETALS;i++){
 	fread(&tmp, sizeof(float),1,infp);
-	DATA(array,n,i) = tmp;
+	if(n % nth_Particle == 0)
+	  DATA(array,pc,i) = tmp;
       }
+      if(n % nth_Particle == 0)
+	pc++;
       fseek(infp,sizeof(float)*2,SEEK_CUR);
       fseek(infp,sizeof(int),SEEK_CUR);
     }
@@ -81,6 +102,7 @@ void tipsy_aux(){
   unsigned int n;
 
   char auxfile[500];
+  unsigned int nread = 0;
   unsigned int nselect = 0;
   read_header();
   if(type==0) nselect = t_header.ngas;
@@ -112,14 +134,25 @@ void tipsy_aux(){
   
   //printf("FILENAME=%s, auxfile=%s,  nselect=%d \n",filename,auxfile,nselect);
   
-  printf("reading from %s\n",auxfile);
+  if(Supress == 0)
+    printf("reading from %s\n",auxfile);
   sprintf(infile,"%s",auxfile);
   if(!(auxfp=fopen(infile,"r"))) {
     ERR = 1;
     PyErr_Format(PyExc_TypeError,"can't open file : '%s'",infile);
   }
   
-  npy_intp dims[1]={nselect};
+  if(nth_Particle)
+    nread = (float)nselect / (float)nth_Particle;
+  else{
+    nread = nselect;
+    nth_Particle = 1;
+  }
+  
+  if(Debug && nth_Particle && Supress==0)
+    printf("particles being read in %d/%d\n",nselect, nread);  
+
+  npy_intp dims[1]={nread};
   if(values==17)
     array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_INT32);
   else
@@ -127,7 +160,7 @@ void tipsy_aux(){
   
   float tmp=0.;
   int itmp = 0;
-
+  unsigned int pc = 0;
 
   if(type==0){
     for(n=0;n<nselect;n++){
@@ -169,10 +202,13 @@ void tipsy_aux(){
       else
 	fseek(infp,sizeof(int),SEEK_CUR);
       
-      if(values==17)
-	NSPAWNDATA(array,n) = itmp;
-      else
-	MDATA(array,n) = tmp;
+      if(n % nth_Particle == 0){
+	if(values==17)
+	  NSPAWNDATA(array,pc) = itmp;
+	else
+	  MDATA(array,pc) = tmp;
+	pc++;
+      }
     }
   }
 
@@ -199,10 +235,13 @@ void tipsy_aux(){
       else
 	fseek(infp,sizeof(int),SEEK_CUR);
 
-      if(values==17)
-	NSPAWNDATA(array,n) = itmp;
-      else
-	MDATA(array,n) = tmp;
+      if(n % nth_Particle == 0){
+	if(values==17)
+	  NSPAWNDATA(array,pc) = itmp;
+	else
+	  MDATA(array,pc) = tmp;
+	pc++;
+      }
     }
   }
 

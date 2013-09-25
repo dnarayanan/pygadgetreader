@@ -184,10 +184,17 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
   filepresent = read_header();
   if(Debug) printf("filepresent=%d\n",filepresent);
   
+  //if we don't find the file return error
   if(filepresent == 0) {
     printf("file not found...\n");
-    PyErr_Format(PyExc_IndexError,"cannot open file : '%s!'",filename);
+    PyErr_Format(PyExc_IndexError,"cannot open file : '%s'",filename);
     return NULL;
+  }
+  //if the before and after skips don't match return error
+  if(filepresent == 2){
+    printf("header mismatch...\n");
+    PyErr_Format(PyExc_IndexError,"header mismatch in '%s!' (tipsy=%d)",filename,Tipsy);
+    return NULL;    
   }
   fclose(infp);
   
@@ -215,7 +222,11 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
   if(nth_Particle && Supress==0)
     printf("READING EVERY %dth PARTICLE\n",nth_Particle);
 
-  if(Tipsy==1) Units=1;
+  if(Tipsy==1){
+    Units=1;
+    if(Supress==0)
+      printf("READING TIPSY\n");
+  }
   if(Future>0){
     read_tipsy_future(Future,values);
   }

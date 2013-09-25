@@ -2,6 +2,10 @@
 //#define KENCODE
 /*--------------------------------------------*/
 
+/* -- enable this to read tipsy by default  --*/
+//#define TIPSY
+/*--------------------------------------------*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -35,7 +39,11 @@ int NMETALS = 4;
 int NMETALS = 1;
 #endif
 
+#ifdef TIPSY
+int Tipsy = 1;
+#else
 int Tipsy = 0;
+#endif
 int Future = 0;
 int MAXDIM = 3;
 
@@ -205,8 +213,15 @@ int read_header()
     fread(&skip1,sizeof(int),1,infp);
     fread(&header,sizeof(header),1,infp);
     fread(&skip2,sizeof(int),1,infp);
-    errorcheck(skip1,skip2,blocklabel);
-    
+
+    if(Debug)
+      printf("HEADER: skip1=%d  skip2=%d\n",skip1,skip2);
+
+    if(errorcheck(skip1,skip2,blocklabel)){
+       PyErr_Format(PyExc_IndexError,"skips before and after %s don't match!  %d vs %d",blocklabel,skip1,skip2); 
+       return 2;
+    }
+        
     //printf("numfiles=%d \t\t header.num_files=%d \n",NumFiles,header.num_files);
     
     NumFiles = header.num_files;

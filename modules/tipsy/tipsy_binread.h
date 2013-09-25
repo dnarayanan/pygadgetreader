@@ -11,16 +11,28 @@ void tipsy_posvel(){
   int ndim = 2;
   unsigned int n;
 
+  unsigned int nread = 0;
   unsigned int nselect = 0;
   read_header();
   if(type==0) nselect = t_header.ngas;
   else if(type==1) nselect = t_header.ndark;
   else if(type==4) nselect = t_header.nstar;
   else PyErr_Format(PyExc_IndexError,"Must select gas, dm, or stars!\n");
+
+  if(nth_Particle)
+    nread = (float)nselect / (float)nth_Particle;
+  else{
+    nread = nselect;
+    nth_Particle = 1;
+  }
   
-  npy_intp dims[2]={nselect,3};
+  if(Debug && nth_Particle && Supress==0)
+    printf("particles being read in %d/%d\n",nselect, nread);
+
+  npy_intp dims[2]={nread,3};
   array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
   
+  unsigned int pc = 0;
   float tmp0,tmp1,tmp2=0.;
   if(type==0){  //GAS
     for(n=0;n<nselect;n++){
@@ -45,10 +57,13 @@ void tipsy_posvel(){
 	fseek(infp,sizeof(float)*3,SEEK_CUR);
 
       fseek(infp,sizeof(float)*5,SEEK_CUR);
-      
-      DATA(array,n,0) = tmp0;
-      DATA(array,n,1) = tmp1;
-      DATA(array,n,2) = tmp2;
+
+      if(n % nth_Particle == 0){
+	DATA(array,pc,0) = tmp0;
+	DATA(array,pc,1) = tmp1;
+	DATA(array,pc,2) = tmp2;
+	pc++;
+      }
     }
   }
   else if(type==1){  //DM
@@ -76,9 +91,12 @@ void tipsy_posvel(){
 
       fseek(infp, sizeof(float)*2,SEEK_CUR); //eps & phi
       
-      DATA(array,n,0) = tmp0;
-      DATA(array,n,1) = tmp1;
-      DATA(array,n,2) = tmp2;
+      if(n % nth_Particle == 0){
+	DATA(array,pc,0) = tmp0;
+	DATA(array,pc,1) = tmp1;
+	DATA(array,pc,2) = tmp2;
+	pc++;
+      }
     }
   }
   else if(type==4){  //STAR
@@ -107,9 +125,12 @@ void tipsy_posvel(){
 
       fseek(infp, sizeof(float)*4,SEEK_CUR); //metals, tform, eps, phi
       
-      DATA(array,n,0) = tmp0;
-      DATA(array,n,1) = tmp1;
-      DATA(array,n,2) = tmp2;
+      if(n % nth_Particle == 0){
+	DATA(array,pc,0) = tmp0;
+	DATA(array,pc,1) = tmp1;
+	DATA(array,pc,2) = tmp2;
+	pc++;
+      }
     }
   }
   fclose(infp); 
@@ -128,6 +149,7 @@ void tipsy_bin(){
   int ndim = 1;
   unsigned int n;
 
+  unsigned int nread = 0;
   unsigned int nselect = 0;
   read_header();
   if(type==0) nselect = t_header.ngas;
@@ -135,11 +157,21 @@ void tipsy_bin(){
   else if(type==4) nselect = t_header.nstar;
   else PyErr_Format(PyExc_IndexError,"Must select gas/dm/star!\n");
   
-  npy_intp dims[1]={nselect};
+  if(nth_Particle)
+    nread = (float)nselect / (float)nth_Particle;
+  else{
+    nread = nselect;
+    nth_Particle = 1;
+  }
+  
+  if(Debug && nth_Particle && Supress==0)
+    printf("particles being read in %d/%d\n",nselect, nread);
+
+  npy_intp dims[1]={nread};
   array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
   
   float tmp=0.;
-  
+  unsigned int pc = 0;
   if(type==0){ //GAS
     for(n=0;n<nselect;n++){
       //MASS
@@ -180,7 +212,10 @@ void tipsy_bin(){
       else
 	fseek(infp,sizeof(float),SEEK_CUR);
 
-      MDATA(array,n) = tmp;
+      if(n % nth_Particle == 0){
+	MDATA(array,pc) = tmp;
+	pc++;
+      }
     }
   }
   else if(type==1){ //DM
@@ -200,7 +235,10 @@ void tipsy_bin(){
       else
 	fseek(infp,sizeof(float),SEEK_CUR);
             
-      MDATA(array,n) = tmp;
+      if(n % nth_Particle == 0){
+	MDATA(array,pc) = tmp;
+	pc++;
+      }
     }
   }
   else if(type==4){
@@ -235,7 +273,10 @@ void tipsy_bin(){
       else
 	fseek(infp,sizeof(float),SEEK_CUR);
       
-      MDATA(array,n) = tmp;
+      if(n % nth_Particle == 0){
+	MDATA(array,pc) = tmp;
+	pc++;
+      }
     }
   }
   fclose(infp);
