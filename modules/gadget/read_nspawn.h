@@ -12,7 +12,7 @@ void gadget_readnspawn()
   int *simdata;
   int ndim = 1;
 
-  //int i;
+  int i;
   unsigned int n;
   unsigned int pc = 0;
   unsigned int nread = 0;

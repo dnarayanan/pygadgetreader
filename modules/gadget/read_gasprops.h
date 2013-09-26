@@ -12,7 +12,7 @@ void gas_props()
   float *Ne;
   int ndim  = 1;
 
-  //int i;
+  int i;
   unsigned int n;
   unsigned int pc = 0;
   unsigned int skip1,skip2;
