@@ -61,6 +61,7 @@ unsigned int nread_total;
 
 PyArrayObject *array;
 
+#ifndef KENCODE
 struct io_header
 {
   unsigned int      npart[6];
@@ -93,6 +94,38 @@ struct io_header
 
   char     fill[32];  /* fills to 256 Bytes */
 } header;
+#else //Ken's header
+struct io_header
+{
+  unsigned int      npart[6];
+  double   mass[6];
+  double   time;
+  double   redshift;
+  int      flag_sfr;
+  int      flag_feedback;
+  unsigned int      npartTotal[6];
+  int      flag_cooling;
+  int      num_files;
+  double   BoxSize;
+  double   Omega0;
+  double   OmegaLambda;
+  double   HubbleParam; 
+  int      flag_stellarage;
+  int      flag_metals;
+  unsigned int      npartTotalHighWord[6];
+  int      flag_entropy_instead_u;
+  int      flag_doubleprecision;
+
+  int flag_potential;
+  int flag_fH2;
+
+  int flag_delaytime;  //DUMMY
+  int flag_tmax;       //DUMMY
+
+  char     fill[40];  /* fills to 256 Bytes */
+} header;
+#endif
+
 
 struct tipsy_io_header
 {
