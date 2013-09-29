@@ -46,6 +46,7 @@ int Tipsy = 0;
 #endif
 int Future = 0;
 int MAXDIM = 3;
+int i = 0;
 
 const char *filename;  
 FILE *infp;
@@ -170,6 +171,18 @@ struct tipsy_dm
   float phi;
 } t_dm;
 
+
+int errorcheck(unsigned int skip1, unsigned int skip2, char *blocklabel){
+  if(Debug) printf("checking block %s -- %d  vs  %d\n",blocklabel,skip1,skip2);
+  if(skip1 != skip2){
+    PyErr_Format(PyExc_IndexError,"skips before and after %s don't match!  %d vs %d",blocklabel,skip1,skip2); 
+    return 1;
+    //printf("EXITING\n");
+    //exit(0);
+  }
+  else
+    return 0;
+}
 
 
 int Ngas,Ndm,Ndisk,Nbulge,Nstar,Nbdry,Ntotal;

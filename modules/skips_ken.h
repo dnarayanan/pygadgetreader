@@ -9,20 +9,6 @@
 #include <Python.h>
 #include <numpy/arrayobject.h>
 
-int i = 0;
-
-
-int errorcheck(unsigned int skip1, unsigned int skip2, char *blocklabel){
-  if(Debug) printf("checking block %s -- %d  vs  %d\n",blocklabel,skip1,skip2);
-  if(skip1 != skip2){
-    PyErr_Format(PyExc_IndexError,"skips before and after %s don't match!  %d vs %d",blocklabel,skip1,skip2);  
-    return 1;
-  }
-  else
-    return 0;
-}
-
-
 void skip_blocks(int blockval){
 
   if(Debug)
