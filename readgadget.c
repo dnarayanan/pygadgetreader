@@ -94,6 +94,12 @@ readhead(PyObject *self, PyObject *args, PyObject *keywds)
     PyErr_Format(PyExc_IndexError,"cannot open file : '%s!'",filename);
     return NULL;
   }
+  //if the before and after skips don't match return error
+  if(filepresent == 2){
+    printf("header mismatch...\n");
+    PyErr_Format(PyExc_IndexError,"header mismatch in '%s!' (tipsy=%d)",filename,Tipsy);
+    return NULL;    
+  }
   fclose(infp);
 
   if(Tipsy==1){
