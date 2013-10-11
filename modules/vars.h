@@ -32,10 +32,12 @@
 #define SOLARMASS 1.989e33
 
 #ifndef KENCODE  //romeel's group
-#define METALFACTOR 0.0189/0.0147
+//#define METALFACTOR 0.0189/0.0147
+float METALFACTOR = 0.0189/0.0147;
 int NMETALS = 4;
 #else           //ken's group
-#define METALFACTOR 1.
+//#define METALFACTOR 1.
+float METALFACTOR = 1.;
 int NMETALS = 1;
 #endif
 
@@ -58,6 +60,7 @@ int Debug;
 int Supress;
 int ERR;
 int nth_Particle;
+int nMetals;
 unsigned int nread_total;
 
 PyArrayObject *array;

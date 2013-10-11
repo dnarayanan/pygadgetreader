@@ -150,13 +150,27 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
   Debug=0;
   Supress=0;
   nth_Particle = 0;
+  nMetals = 0;
   int filepresent = 0;
 
-  static char *kwlist[]={"file","data","type","numfiles","units","tipsy","future","debug","supress_output","nth_particle",NULL};
-  if(!PyArg_ParseTupleAndKeywords(args,keywds,"sss|iiiiiii",kwlist,&filename,&Values,&Type,&NumFiles,&Units,&Tipsy,&Future,&Debug,&Supress,&nth_Particle)){
+  static char *kwlist[]={"file","data","type","numfiles","units","tipsy","future","debug","supress_output","nth_particle","nmetals",NULL};
+  if(!PyArg_ParseTupleAndKeywords(args,keywds,"sss|iiiiiiii",kwlist,&filename,&Values,&Type,&NumFiles,&Units,&Tipsy,&Future,&Debug,&Supress,&nth_Particle,&nMetals)){
     PyErr_Format(PyExc_TypeError,"wrong input!  must provide filename, data block, and particle type of interest - see readme.txt");
     //return NULL;
   }
+
+  if(nMetals == 1 && METALFACTOR != 1.0){
+    if(Debug)
+      printf("switching METALFACTOR from %f to 1.0\n",METALFACTOR);
+    METALFACTOR = 1.0;
+  }
+  /*
+    if(header.flag_metals == 1 && METALFACTOR != 1.0){
+    if(Debug)
+      printf("header.flag_metals(%d), switching METALFACTOR from %f to 1.0\n",header.flag_metals,METALFACTOR);
+    METALFACTOR = 1.0;
+  }
+  */
 
   if(Units>1 || Units<0){
     PyErr_Format(PyExc_IndexError,"Units flag must be 0 or 1!");
