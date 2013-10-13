@@ -14,7 +14,8 @@ void skipgas(void);
 void gadget_readtmax(void);
 void gadget_readpotential(void);
 void gadget_posvel(void);
-void readpid(void);
+//void readpid(void);
+void gadget_readpid(void);
 void gadget_readnspawn(void);
 void gadget_readZ(void);
 void gadget_readmetals(void);
@@ -28,5 +29,6 @@ void tipsy_aux(void);
 void read_tipsy(void);
 void read_tipsy_envira(void);
 void read_tipsy_future(int, int);
+void read_tipsy_ID(void);
 
 

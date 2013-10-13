@@ -142,4 +142,9 @@ void readpotential(){
   return;
 }
 
-
+void readpid(){
+  if(Tipsy)
+    read_tipsy_ID();
+  else
+    gadget_readpid();
+}

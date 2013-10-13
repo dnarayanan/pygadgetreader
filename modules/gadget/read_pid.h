@@ -7,7 +7,8 @@
 #include <numpy/arrayobject.h>
 
 /*######################### PID ########################################*/
-void readpid()
+//void readpid()
+void gadget_readpid()
 {
   unsigned int *simdata;
   int ndim = 1;

@@ -340,3 +340,81 @@ void read_tipsy_future(int Future,int values)
   }
   return;
 }
+
+
+//read from the future file.
+void read_tipsy_ID()
+{
+  printf("IN READ TIPSY ID\n");
+
+  if(Tipsy==0)
+    PyErr_Format(PyExc_IndexError,"Not a Tipsy file!\n");
+  else{
+    int ndim = 1;
+    int n;
+    
+    char IDfile[500];
+
+    unsigned int nread;
+    unsigned int nselect = 0;
+    read_header();
+    fclose(infp);
+
+    if(type==0) nselect = t_header.ngas;
+    else if(type==1) nselect = t_header.ndark;
+    else if(type==4) nselect = t_header.nstar;
+    else PyErr_Format(PyExc_IndexError,"Must select gas/dm/star!\n");
+    
+    if(nth_Particle)
+      nread = (float)nselect / (float)nth_Particle;
+    else{
+      nread = nselect;
+      nth_Particle = 1;
+    }
+    
+    if(Debug && nth_Particle && Supress==0)
+      printf("particles being read in %d/%d\n",nselect, nread);
+
+    npy_intp dims[1]={nread};
+
+    strcpy(IDfile, filename);
+    
+    if(IDfile[strlen(IDfile)-3] == 'b')
+      IDfile[strlen(IDfile)-3] = 'i';
+    if(IDfile[strlen(IDfile)-2] == 'i')
+      IDfile[strlen(IDfile)-2] = 'd';
+    if(IDfile[strlen(IDfile)-1] == 'n')
+      IDfile[strlen(IDfile)-1] = 'n';
+    
+
+    if(Supress == 0)
+      printf("reading %sum \n",IDfile);
+    sprintf(infile,"%sum",IDfile);
+    if(!(futfp=fopen(infile,"r"))) {
+      ERR = 1;
+      PyErr_Format(PyExc_TypeError,"can't open file : '%s'",infile);
+    }
+
+    array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_UINT32);
+
+    unsigned int pc = 0;
+    unsigned int itmp=0;
+
+    if(type==1)
+      fseek(infp,sizeof(int)*t_header.ngas,SEEK_CUR);
+    if(type==4)
+      fseek(infp,sizeof(int)*(t_header.ngas+t_header.ndark),SEEK_CUR);
+
+    for(n=0;n<nselect;n++){
+      fread(&itmp,sizeof(int),1,infp);
+      
+      if(n % nth_Particle == 0){
+	PIDDATA(array,pc) = itmp;
+	pc++;
+      }
+      //printf("finished gas loop\n");
+    }
+    fclose(futfp);
+  }
+  return;
+}
