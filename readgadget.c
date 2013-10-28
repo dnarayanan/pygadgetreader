@@ -26,6 +26,7 @@
 #include "modules/gadget/read_age.h"
 #include "modules/gadget/read_tmax.h"
 #include "modules/gadget/read_potential.h"
+#include "modules/gadget/read_nrec.h"
 
 // TIPSY
 #include "modules/tipsy/tipsy_binread.h"
@@ -158,6 +159,10 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
     PyErr_Format(PyExc_TypeError,"wrong input!  must provide filename, data block, and particle type of interest - see readme.txt");
     //return NULL;
   }
+
+  //if user specifies nMetals then switch it!
+  if(nMetals != 0)
+    NMETALS = nMetals;
 
   if(nMetals == 1 && METALFACTOR != 1.0){
     if(Debug)
@@ -297,6 +302,7 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
     else if(values==17) readnspawn();
     else if(values==18) readpotential();
     else if(values==19) read_tipsy();
+    else if(values==29) readnrec();
     else if(values==20 || values==21 || values==22 || values==23 || values==27 || values==28) read_tipsy_envira();
     else printf("houston we have a problem...no values returned\n");
     j=0;

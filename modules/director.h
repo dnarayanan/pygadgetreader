@@ -148,3 +148,10 @@ void readpid(){
   else
     gadget_readpid();
 }
+
+void readnrec(){
+  if(Tipsy){
+  }
+  else
+    gadget_readnrec();
+}

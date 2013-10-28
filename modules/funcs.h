@@ -30,5 +30,6 @@ void read_tipsy(void);
 void read_tipsy_envira(void);
 void read_tipsy_future(int, int);
 void read_tipsy_ID(void);
+void gadget_readnrec(void);
 
 

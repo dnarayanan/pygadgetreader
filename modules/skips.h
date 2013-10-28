@@ -208,6 +208,16 @@ void skip_blocks(int blockval){
     errorcheck(skip1,skip2,blocklabel);
   }
 
+  // NREC
+  if(blockval==29) return;
+  
+  //to read after...not used!
+  fread(&skip1,sizeof(int),1,infp);
+  
+  fread(&skip2,sizeof(int),1,infp);
+  blocklabel="NREC";
+  errorcheck(skip1,skip2,blocklabel);
+
   return;
 }
 

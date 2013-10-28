@@ -21,6 +21,8 @@
 
 #define NSPAWNDATA(a,i)*((int *) PyArray_GETPTR1(a,i))
 
+#define NRECDATA(a,i)*((short int *) PyArray_GETPTR1(a,i))
+
 #define H_MASSFRAC 0.76
 #define BOLTZMANN 1.3806e-16
 #define PROTONMASS 1.6726e-24
@@ -334,6 +336,7 @@ char* fh2   = "fh2";
 char* SIGMA = "Sigma";
 char* sigma = "sigma";
 char* DELAYT= "delaytime";
+char* NREC  = "nrec";
 char* Values;
 int values;
 
@@ -405,6 +408,7 @@ void assign_type()
   else if(strcmp(Values,RELAUNCH)==0) values = 26;
   else if(strcmp(Values,SATSW)==0)    values = 27;
   else if(strcmp(Values,SKIDID)==0)   values = 28;
+  else if(strcmp(Values,NREC)==0)     values = 29;
   else{
     PyErr_Format(PyExc_IndexError,"wrong values type selected");
     //return NULL;
