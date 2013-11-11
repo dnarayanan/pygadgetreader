@@ -307,6 +307,7 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
     else printf("houston we have a problem...no values returned\n");
     j=0;
   } 
+  if(Debug) printf("returning array...\n");
   return PyArray_Return(array);
 }
   

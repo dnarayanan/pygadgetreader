@@ -251,7 +251,7 @@ void read_tipsy_future(int Future,int values)
     }
     
     if(Debug && nth_Particle && Supress==0)
-      printf("particles being read in %d/%d\n",nselect, nread);
+      printf("particles being read in %d/%d\n", nread, nselect);
 
     npy_intp dims[1]={nread};
 
