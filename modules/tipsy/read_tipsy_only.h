@@ -84,7 +84,8 @@ void read_tipsy()
 //read from the envira file.  20=Mhalo, 21=wind form age
 void read_tipsy_envira()
 {
-  printf("IN READ TIPSY ENVIRA\n");
+  if(Debug)
+    printf("IN READ TIPSY ENVIRA\n");
 
   if(Tipsy==0)
     PyErr_Format(PyExc_IndexError,"Not a Tipsy file!\n");
@@ -225,7 +226,8 @@ void read_tipsy_envira()
 //read from the future file.
 void read_tipsy_future(int Future,int values)
 {
-  printf("IN READ TIPSY FUT%03d\n",Future);
+  if(Debug)
+    printf("IN READ TIPSY FUT%03d\n",Future);
 
   if(Tipsy==0)
     PyErr_Format(PyExc_IndexError,"Not a Tipsy file!\n");
@@ -345,7 +347,8 @@ void read_tipsy_future(int Future,int values)
 //read from the future file.
 void read_tipsy_ID()
 {
-  printf("IN READ TIPSY ID\n");
+  if(Debug)
+    printf("IN READ TIPSY ID\n");
 
   if(Tipsy==0)
     PyErr_Format(PyExc_IndexError,"Not a Tipsy file!\n");
