@@ -14,23 +14,23 @@ E-mail: rthompsonj@gmail.com
   * [readsnap( )](#READSNAP)
     
     
-## <a name="SUM"></a>Summary ##
+## Summary ##
 This module contains a function for reading in particle data from Gadget (type 1) binary files, TIPSY binary files, TIPSY aux/envira/future files, PStarGroupFinder property files (galprop), and Gadget/TIPSY header files.  These functions are described below in the following sections.
 
-## <a name="REQ"></a>REQUIREMENTS ##
+## REQUIREMENTS ##
     - python2.7.x (not tested with other versions)
     - numpy
     - c compiler
     - mercurial
 
-## <a name="OBT"></a>Obtaining the code ##
+## Obtaining the code ##
 The easiest way to download the code and stay up to date is to clone a version from bitbucket to your local computer:
 
     https://bitbucket.org/rthompson/pygadgetreader
 
 If you do not have access to this repository simply send me an email and I will be happy to grant access rights.
 
-## <a name="CUST"></a>Customization ##
+## Customization ##
 Before we build the module, there are a few additional parameters that you may want to adjust, both located in *modules/vars.h*.  These must be enabled/disabled before compilation; by default they are both commented out:
 
     //#define KENCODE		//default = off, only uncomment this if you are using K.Nagamine's Gadget.
@@ -40,7 +40,7 @@ KENCODE defines a different *skips.h* file to allow for the proper reading of hi
 
 TIPSY allows for the omission of tipsy=1 in your read commands (below).  By uncommenting this the code will automatically try and read TIPSY files by default; one can still read GADGET files via passing tipsy=0 to the read commands.
 
-## <a name="INST"></a>Installation ##
+## Installation ##
 Once the code is downloaded there are two methods of installation depending on your access rights.  If you have write access to your python distribution, then the preferred method is to execute the following commands:
 
     python setup.py build      ## this builds the module
@@ -53,7 +53,7 @@ If you do *not* have write access to your python install we can build the module
 this will produce a *readgadget.so* file in the root directory of pygadget reader.  If you elect to use this method then you should add the location of the *readgadget.so* file to your PYTHONPATH environment variable.
 
 *****
-# <a name="USAGE"></a>Usage #
+# Usage #
 There are multiple functions contained within this module, I will go through each and its options below.  In order to use this module in your python scripts one should add the following to the top of their scripts:
 
     from readgadget import *
@@ -68,7 +68,7 @@ All functions have a few universal arguments:
     supress_output=0	//supresses output messages
 	numfiles=1			//depreciated, now read from the header
 
-### <a name="READHEAD"></a>readhead() ###
+### readhead( ) ###
 This function reads in the header and returns values of interest.  The values it can read in are as follows:
 
 	 time	       - scale factor of the snapshot
@@ -114,7 +114,7 @@ This function reads in the header and returns values of interest.  The values it
 	      		- reads hubble param and assigns it to the h variable, then reads in the boxsize, 
 			      converts it to Mpc^3.
 
-### <a name="READSNAP"></a>readsnap() ###
+### readsnap( ) ###
 This function does the bulk of the work.  It reads data blocks from the snapshot file and returns the requested data for a specified particle type.
 
 	   Supported data blocks are:
@@ -199,7 +199,7 @@ This function does the bulk of the work.  It reads data blocks from the snapshot
 		gtemp=readsnap('snap_005','u','gas',numfiles=2,units=1)
 			- reads a multi-file snapshot (2) and returns density and temperature in cgs units.
 
-#### galprop() ####
+#### galprop( ) ####
 This function reads in property files output by P-StarGroupFinder.  It returns one of the following:
 
 	 mstar	       - Mass of the stars within a group
@@ -237,7 +237,7 @@ This function reads in property files output by P-StarGroupFinder.  It returns o
 			    - reads in group center of mass positions and returns an NgroupX3 array.
 			      hsplit is then used to split the array into gx,gy,gz positions.
 
-#### galdata() ####
+#### galdata( ) ####
 Returns data from all baryonic particles contained within a specified galprop group.  The data returned is an array with the following particle properties at each index:
 
 	 xpos	       - x-position of the particle (index 0)
