@@ -152,6 +152,7 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
   Supress=0;
   nth_Particle = 0;
   nMetals = 0;
+  Future = 0;
   int filepresent = 0;
 
   static char *kwlist[]={"file","data","type","numfiles","units","tipsy","future","debug","supress_output","nth_particle","nmetals",NULL};
