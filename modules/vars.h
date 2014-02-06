@@ -62,6 +62,7 @@ int Debug;
 int Supress;
 int ERR;
 int nth_Particle;
+float nth_P;
 int nMetals;
 unsigned int nread_total;
 
@@ -190,7 +191,7 @@ int errorcheck(unsigned int skip1, unsigned int skip2, char *blocklabel){
 }
 
 
-int Nth(int n_to_read, unsigned int total){
+int Nth(double n_to_read, unsigned int total){
   unsigned int nread;
 
   if(n_to_read)

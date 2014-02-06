@@ -151,18 +151,26 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
   Debug=0;
   Supress=0;
   nth_Particle = 0;
+  nth_P = 0.;
   nMetals = 0;
   Future = 0;
   int filepresent = 0;
 
   static char *kwlist[]={"file","data","type","numfiles","units","tipsy","future","debug","supress_output","nth_particle","nmetals",NULL};
-  if(!PyArg_ParseTupleAndKeywords(args,keywds,"sss|iiiiiiii",kwlist,&filename,&Values,&Type,&NumFiles,&Units,&Tipsy,&Future,&Debug,&Supress,&nth_Particle,&nMetals)){
+  if(!PyArg_ParseTupleAndKeywords(args,keywds,"sss|iiiiiifi",kwlist,&filename,&Values,&Type,&NumFiles,&Units,&Tipsy,&Future,&Debug,&Supress,&nth_P,&nMetals)){
     PyErr_Format(PyExc_TypeError,"wrong input!  must provide filename, data block, and particle type of interest - see readme.txt");
     //return NULL;
   }
+  
+  //printf("nth_P=%f\n",nth_P);
 
-  if(Debug)
-    printf("nth_Particle=%d\n",nth_Particle);
+  nth_Particle = (int)nth_P;
+
+  //printf("nth_part = %f\n",nth_tmp);
+  //nth_Particle = (int)nth_tmp;
+
+  //if(Debug)
+  //  printf("nth_Particle=%d\n",nth_Particle);
 
   //if user specifies nMetals then switch it!
   if(nMetals != 0)
