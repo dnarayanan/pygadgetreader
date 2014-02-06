@@ -43,6 +43,7 @@ void tipsy_auxmetals(){
     PyErr_Format(PyExc_TypeError,"can't open file : '%s'",infile);
   }
   
+  /*
   if(nth_Particle)
     nread = (float)nselect / (float)nth_Particle;
   else{
@@ -52,6 +53,9 @@ void tipsy_auxmetals(){
   
   if(Debug && nth_Particle && Supress==0)
     printf("particles being read in %d/%d\n",nselect, nread);  
+    */
+
+      nread = Nth(nth_Particle,nselect);
 
   npy_intp dims[2]={nread,4};
   array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
@@ -142,6 +146,7 @@ void tipsy_aux(){
     PyErr_Format(PyExc_TypeError,"can't open file : '%s'",infile);
   }
   
+  /*
   if(nth_Particle)
     nread = (float)nselect / (float)nth_Particle;
   else{
@@ -151,6 +156,9 @@ void tipsy_aux(){
   
   if(Debug && nth_Particle && Supress==0)
     printf("particles being read in %d/%d\n",nselect, nread);  
+  */
+
+    nread = Nth(nth_Particle,nselect);
 
   npy_intp dims[1]={nread};
   if(values==17)

@@ -30,6 +30,7 @@ void gadget_readpid()
       array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_UINT32);
     }
 
+    /*
     if(nth_Particle)
       nread = ceil((float)header.npart[type]/(float)nth_Particle);
     else
@@ -37,6 +38,9 @@ void gadget_readpid()
     
     if(Debug && nth_Particle && Supress==0)
       printf("particles being read in %d/%d\n",nread,header.npart[type]);
+    */
+
+    nread = Nth(nth_Particle,header.npart[type]);
 
     simdata=(unsigned int*)malloc(nread*sizeof(int));
     

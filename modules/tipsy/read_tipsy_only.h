@@ -26,6 +26,7 @@ void read_tipsy()
     if(type==4) nselect = t_header.nstar;
     else PyErr_Format(PyExc_IndexError,"Must select star!\n");
 
+    /*
     if(nth_Particle)
       nread = (float)nselect / (float)nth_Particle;
     else{
@@ -35,6 +36,9 @@ void read_tipsy()
   
     if(Debug && nth_Particle && Supress==0)
       printf("particles being read in %d/%d\n",nselect, nread);
+      */
+
+    nread = Nth(nth_Particle,nselect);
     
     npy_intp dims[1]={nread};
     
@@ -103,6 +107,7 @@ void read_tipsy_envira()
     //else if(type==4) nselect = t_header.nstar;
     else PyErr_Format(PyExc_IndexError,"Must select gas,dm,star!\n");
     
+    /*
     if(nth_Particle)
       nread = (float)nselect / (float)nth_Particle;
     else{
@@ -112,6 +117,9 @@ void read_tipsy_envira()
     
     if(Debug && nth_Particle && Supress==0)
       printf("particles being read in %d/%d\n",nselect, nread);
+      */
+
+    nread = Nth(nth_Particle,nselect);
 
     npy_intp dims[1]={nread};
 
@@ -245,6 +253,8 @@ void read_tipsy_future(int Future,int values)
     if(type==0) nselect = t_header.ngas;
     else PyErr_Format(PyExc_IndexError,"Must select gas!\n");
     
+
+    /*
     if(nth_Particle)
       nread = (float)nselect / (float)nth_Particle;
     else{
@@ -254,6 +264,9 @@ void read_tipsy_future(int Future,int values)
     
     if(Debug && nth_Particle && Supress==0)
       printf("particles being read in %d/%d\n", nread, nselect);
+      */
+
+        nread = Nth(nth_Particle,nselect);
 
     npy_intp dims[1]={nread};
 
@@ -368,6 +381,7 @@ void read_tipsy_ID()
     else if(type==4) nselect = t_header.nstar;
     else PyErr_Format(PyExc_IndexError,"Must select gas/dm/star!\n");
     
+    /*
     if(nth_Particle)
       nread = (float)nselect / (float)nth_Particle;
     else{
@@ -377,6 +391,9 @@ void read_tipsy_ID()
     
     if(Debug && nth_Particle && Supress==0)
       printf("particles being read in %d/%d\n",nselect, nread);
+    */
+
+    nread = Nth(nth_Particle,nselect);
 
     npy_intp dims[1]={nread};
 

@@ -51,12 +51,12 @@ void skip_blocks(int blockval){
 
   // MASS
   if(blockval==3) return;
-  if(header.mass[0]==0 && header.npart[0]>0 || 
-     header.mass[1]==0 && header.npart[1]>0 ||
-     header.mass[2]==0 && header.npart[2]>0 ||
-     header.mass[3]==0 && header.npart[3]>0 ||
-     header.mass[4]==0 && header.npart[4]>0 ||
-     header.mass[5]==0 && header.npart[5]>0){
+  if((header.mass[0]==0 && header.npart[0]>0) || 
+     (header.mass[1]==0 && header.npart[1]>0) ||
+     (header.mass[2]==0 && header.npart[2]>0) ||
+     (header.mass[3]==0 && header.npart[3]>0) ||
+     (header.mass[4]==0 && header.npart[4]>0) ||
+     (header.mass[5]==0 && header.npart[5]>0)){
     fread(&skip1,sizeof(int),1,infp);
     if(header.mass[0]==0 && header.npart[0]>0) fseek(infp,header.npart[0]*sizeof(float),SEEK_CUR);
     if(header.mass[1]==0 && header.npart[1]>0) fseek(infp,header.npart[1]*sizeof(float),SEEK_CUR);

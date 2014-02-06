@@ -190,6 +190,21 @@ int errorcheck(unsigned int skip1, unsigned int skip2, char *blocklabel){
 }
 
 
+int Nth(int n_to_read, unsigned int total){
+  unsigned int nread;
+
+  if(n_to_read)
+    nread = ceil((float)total/(float)n_to_read);
+  else
+    nread = total;
+
+  if(Debug && Supress==0 && n_to_read)
+    printf("particles being read in %d/%d (%0.2f%%)\n",nread,total, \
+	   ((float)nread/(float)total) * 100.);
+  return nread;
+}
+
+
 int Ngas,Ndm,Ndisk,Nbulge,Nstar,Nbdry,Ntotal;
 int Ngas_local,Ndm_local,Ndisk_local,Nbulge_local,Nstar_local,Nbdry_local,Ntotal_local;
 int read_header()

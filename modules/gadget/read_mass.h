@@ -36,6 +36,7 @@ void gadget_mass()
       }
     */
 
+      /*
     if(nth_Particle)
       nread = ceil((float)header.npart[type]/(float)nth_Particle);
     else
@@ -43,6 +44,9 @@ void gadget_mass()
     
     if(Debug && nth_Particle && Supress==0)
       printf("particles being read in %d/%d\n",nread,header.npart[type]);
+      */
+
+    nread = Nth(nth_Particle,header.npart[type]);
     
     if(header.mass[type]>0 && header.npart[type]>0){
       if(Supress==0) printf("non-zero header mass detected - using header mass for %s\n",Type);
