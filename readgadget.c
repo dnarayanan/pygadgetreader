@@ -178,6 +178,9 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
   }
   */
 
+  if(Debug)
+    printf("nth_particle=%d\n",nth_Particle);
+
   if(Units>1 || Units<0){
     PyErr_Format(PyExc_IndexError,"Units flag must be 0 or 1!");
     //return NULL;
