@@ -195,8 +195,10 @@ int Nth(int n_to_read, unsigned int total){
 
   if(n_to_read)
     nread = ceil((float)total/(float)n_to_read);
-  else
+  else{
     nread = total;
+    nth_Particle = 1;
+  }
 
   if(Debug && Supress==0 && n_to_read)
     printf("particles being read in %d/%d (%0.2f%%)\n",nread,total, \

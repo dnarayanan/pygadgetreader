@@ -31,7 +31,7 @@ void tipsy_posvel(){
     printf("particles being read in %d/%d\n",nread, nselect);
     */
 
-      nread = Nth(nth_Particle,nselect);
+  nread = Nth(nth_Particle,nselect);
 
   npy_intp dims[2]={nread,3};
   array = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);

@@ -161,6 +161,9 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
     //return NULL;
   }
 
+  if(Debug)
+    printf("nth_Particle=%d\n",nth_Particle);
+
   //if user specifies nMetals then switch it!
   if(nMetals != 0)
     NMETALS = nMetals;
