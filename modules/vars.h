@@ -15,6 +15,7 @@
 #include <numpy/arrayobject.h>
 #define Skip fread(&dummy,sizeof(dummy),1,infp)
 #define DATA(a,i,j)*((double *) PyArray_GETPTR2(a,i,j))
+#define DMDATA(a,i,j)*((unsigned int *) PyArray_GETPTR2(a,i,j))
 #define PIDDATA(a,i)*((unsigned int *) PyArray_GETPTR1(a,i))
 #define MDATA(a,i)*((double *) PyArray_GETPTR1(a,i))
 #define GALIDDATA(a,i,j)*((int *) PyArray_GETPTR2(a,i,j))
@@ -32,6 +33,8 @@
 #define UnitMass_in_g 1.989e43
 #define UnitVelocity_in_cm_per_s 1.e5
 #define SOLARMASS 1.989e33
+
+#define BINARY_HEADER_SIZE 256
 
 #ifndef KENCODE  //romeel's group
 //#define METALFACTOR 0.0189/0.0147
@@ -176,6 +179,38 @@ struct tipsy_dm
   float eps;
   float phi;
 } t_dm;
+
+
+// ROCKSTAR STUFF
+struct rs_binary_output_header {
+  uint64_t magic;
+  int64_t snap, chunk;
+  float scale, Om, Ol, h0;
+  float bounds[6];
+  int64_t num_halos, num_particles;
+  float box_size, particle_mass;
+  int64_t particle_type;
+  char unused[BINARY_HEADER_SIZE - (sizeof(float)*12) - (sizeof(int64_t)*6)];
+} rs_header;
+struct rshalo {
+  int64_t id;
+  float pos[6], corevel[3], bulkvel[3];
+  float m, r, child_r, vmax_r, mgrav, vmax, rvmax, rs, klypin_rs, vrms,
+    J[3], energy, spin, alt_m[4], Xoff, Voff, b_to_a, c_to_a, A[3],
+    b_to_a2, c_to_a2, A2[3],
+    bullock_spin, kin_to_pot;
+  int64_t num_p, num_child_particles, p_start, desc, flags, n_core;
+  float min_pos_err, min_vel_err, min_bulkvel_err;
+} *rs_halos;
+struct rs_extra_halo_info {
+  int64_t child, next_cochild, prev_cochild;
+  int64_t sub_of, ph;
+  float max_metric;
+} rs_extra_halo;
+struct rspart {
+  int64_t id;
+  float pos[6];
+} *rs_particle;
 
 
 int errorcheck(unsigned int skip1, unsigned int skip2, char *blocklabel){

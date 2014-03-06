@@ -33,6 +33,9 @@
 #include "modules/tipsy/tipsy_auxread.h"
 #include "modules/tipsy/read_tipsy_only.h"
 
+// ROCKSTAR
+#include "modules/misc/read_rockstar.h"
+
 /*######################### READ HEADER ########################################*/
 static PyObject *
 readhead(PyObject *self, PyObject *args, PyObject *keywds)
@@ -325,12 +328,42 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
   if(Debug) printf("returning array...\n");
   return PyArray_Return(array);
 }
+
+
+static PyObject *
+readrockstar(PyObject *self, PyObject *args, PyObject *keywds)
+{
+  j=0;
+  int filepresent = 0;
+  Debug = 0;
+
+  static char *kwlist[]={"file","data","debug",NULL};
+  if(!PyArg_ParseTupleAndKeywords(args,keywds,"ss|i",kwlist,&filename,&Values,&Debug)){
+    PyErr_Format(PyExc_TypeError,"wrong input!  must provide filename - see readme.txt");
+  }
+
+  char* PARTICLES = "particles";
+  char* HALOS     = "halos";
+
+  if(strcmp(Values,HALOS)==0)          values = 0;
+  else if(strcmp(Values,PARTICLES)==0) values = 1;
+  else PyErr_Format(PyExc_IndexError,"wrong values type selected");
+
+  if(Debug) printf("reading in %s.0.bin\n",filename);
+
+  rockstar_halos(values);
+
+  if(Debug) printf("returning array...\n");
+  return PyArray_Return(array);
+}
+
   
 //Initialize Module
 PyMethodDef methods[] = {
   {"test",test, METH_VARARGS ,"test function"},
   {"readsnap",readsnap,METH_VARARGS | METH_KEYWORDS, "readsnap info"},
   {"readhead",readhead,METH_VARARGS | METH_KEYWORDS, "read header data"},
+  {"readrockstar",readrockstar,METH_VARARGS | METH_KEYWORDS, "read rockstar data"},
   {"readfof",readfof,METH_VARARGS | METH_KEYWORDS, "read fof data"},
   {"galprop",galprop,METH_VARARGS | METH_KEYWORDS, "read galaxy property data"},
   {"galdata",galdata,METH_VARARGS | METH_KEYWORDS, "return galaxy particle info"},
