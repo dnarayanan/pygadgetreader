@@ -78,17 +78,6 @@ readhead(PyObject *self, PyObject *args, PyObject *keywds)
 
   if(Debug) printf("metalfactor = %f\n",METALFACTOR);
 
-  /*
-  sprintf(infile,"%s",filename);
-  if(!(infp=fopen(infile,"r"))){
-    sprintf(infile,"%s.%d",filename,j);
-    if(!(infp=fopen(infile,"r"))) {
-      ERR = 1;
-      PyErr_Format(PyExc_TypeError,"can't open file : '%s'",infile);
-      //return NULL;
-    }
-  }
-  */
   int filepresent = 0;
   filepresent = read_header();
   if(Debug) printf("filepresent=%d\n",filepresent);
@@ -164,16 +153,8 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
     PyErr_Format(PyExc_TypeError,"wrong input!  must provide filename, data block, and particle type of interest - see readme.txt");
     //return NULL;
   }
-  
-  //printf("nth_P=%f\n",nth_P);
 
   nth_Particle = (int)nth_P;
-
-  //printf("nth_part = %f\n",nth_tmp);
-  //nth_Particle = (int)nth_tmp;
-
-  //if(Debug)
-  //  printf("nth_Particle=%d\n",nth_Particle);
 
   //if user specifies nMetals then switch it!
   if(nMetals != 0)
@@ -184,13 +165,6 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
       printf("switching METALFACTOR from %f to 1.0\n",METALFACTOR);
     METALFACTOR = 1.0;
   }
-  /*
-    if(header.flag_metals == 1 && METALFACTOR != 1.0){
-    if(Debug)
-      printf("header.flag_metals(%d), switching METALFACTOR from %f to 1.0\n",header.flag_metals,METALFACTOR);
-    METALFACTOR = 1.0;
-  }
-  */
 
   if(Debug)
     printf("nth_particle=%d\n",nth_Particle);
@@ -199,30 +173,6 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
     PyErr_Format(PyExc_IndexError,"Units flag must be 0 or 1!");
     //return NULL;
   }
-
-  /*
-  sprintf(infile,"%s",filename);
-  if(!(infp=fopen(infile,"r"))){
-    sprintf(infile,"%s.%d",filename,j);
-    if(!(infp=fopen(infile,"r"))) {
-      ERR = 1;
-      //PyErr_Format(PyExc_TypeError,"can't open file : '%s'",infile);
-      PyErr_Format(PyExc_IndexError,"can't open file : '%s'",infile);
-      //return NULL;
-    }
-  }
-
-  if(ERR==1){
-    //PyErr_Format(PyExc_TypeError,"readsnap: can't open file: '%s' ERR=%d",infile,ERR);
-    PyErr_Format(PyExc_IndexError,"readsnap: can't open file: '%s' ERR=%d",infile,ERR);
-    //return NULL;
-  }
-  
-  if(NumFiles!=header.num_files && Tipsy==0){
-    PyErr_Format(PyExc_IndexError,"NumFiles(%d) != header.num_files(%d)!",NumFiles,header.num_files);
-    //return NULL;
-  }
-  */
 
   filepresent = read_header();
   if(Debug) printf("filepresent=%d\n",filepresent);
@@ -336,9 +286,10 @@ readrockstar(PyObject *self, PyObject *args, PyObject *keywds)
   j=0;
   int filepresent = 0;
   Debug = 0;
+  Supress = 0;
 
-  static char *kwlist[]={"file","data","debug",NULL};
-  if(!PyArg_ParseTupleAndKeywords(args,keywds,"ss|i",kwlist,&filename,&Values,&Debug)){
+  static char *kwlist[]={"file","data","debug","supress_output",NULL};
+  if(!PyArg_ParseTupleAndKeywords(args,keywds,"ss|ii",kwlist,&filename,&Values,&Debug,&Supress)){
     PyErr_Format(PyExc_TypeError,"wrong input!  must provide filename - see readme.txt");
   }
 
@@ -350,6 +301,18 @@ readrockstar(PyObject *self, PyObject *args, PyObject *keywds)
   else PyErr_Format(PyExc_IndexError,"wrong values type selected");
 
   if(Debug) printf("reading in %s.0.bin\n",filename);
+
+  if(Supress==0){
+    printf("reading rockstar file %s.0.bin\n",filename);
+    if(values == 0){
+      printf("returning halo array:\n");
+      printf("ID[0], num_particles[1], mass[2], radius[3], xpos[4], ypos[5], zpos[6], Jx[7], Jy[8], Jz[9]\n");
+    }
+    if(values == 1){
+      printf("returning particle array:\n");
+      printf("PID[0], Halo[1]\n");
+    }
+  }
 
   rockstar_halos(values);
 
