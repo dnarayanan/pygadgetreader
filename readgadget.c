@@ -52,6 +52,7 @@ readhead(PyObject *self, PyObject *args, PyObject *keywds)
   char* bulgecount= "bulgecount";
   char* starcount = "starcount";
   char* bndrycount= "bndrycount";
+  char* nfiles    = "num_files";
   //FLAGS
   char* f_sfr     = "f_sfr";
   char* f_fb      = "f_fb";
@@ -126,6 +127,7 @@ readhead(PyObject *self, PyObject *args, PyObject *keywds)
     else if(strcmp(Value,f_tmax)==0)    return Py_BuildValue("i",header.flag_tmax);
     else if(strcmp(Value,f_pot)==0)     return Py_BuildValue("i",header.flag_potential);
     else if(strcmp(Value,f_dt)==0)      return Py_BuildValue("i",header.flag_delaytime);
+    else if(strcmp(Value,nfiles)==0)    return Py_BuildValue("i",header.num_files);
     else
       PyErr_Format(PyExc_TypeError,"incorrect header selection!");
   }
