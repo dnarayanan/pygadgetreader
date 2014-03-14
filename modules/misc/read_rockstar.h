@@ -76,24 +76,29 @@ void rockstar_halos(int values)
       }
     }
     
+    if(Debug) printf("reading header...\n");
     fread(&rs_header, sizeof(rs_header),1,infp);
 
+    if(Debug) printf("cycling through halos...\n");
     //read the next halo struct into the appropriate index
     hstart = hcounter;
     for(i=0; i<rs_header.num_halos; i++){
       fread(&rs_halos[hcounter],sizeof(struct rshalo),1,infp);
       hcounter += 1;
     }
-
+    
+    if(Debug) printf("cycling through halos to read in particle data\n");
     //cycle through halos and read in particle data
-    for(i=0; i<rs_header.num_halos; i++){
+    for(i=0; i<rs_header.num_halos; i++){	       
       for(k=0; k<rs_halos[hstart+i].num_p; k++){
+	//printf("index %d   nump=%e halo %d\n",k,(double)rs_halos[hstart+1].num_p,i);
 	fread(&pid, sizeof(int64_t),1,infp);
 	pids[pcounter]   = pid;
 	dmlist[pcounter] = rs_halos[hstart+i].id;
 	pcounter += 1;
       }
     }
+    if(Debug) printf("closing file...\n");
     fclose(infp);
   }
 
