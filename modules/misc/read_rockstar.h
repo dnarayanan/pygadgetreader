@@ -52,8 +52,10 @@ void rockstar_halos(int values)
 
     fclose(infp);
   }
+  /*
   if(breaker)
     fclose(infp);
+  */
   nread = n_files;
 
   //allocate memory
