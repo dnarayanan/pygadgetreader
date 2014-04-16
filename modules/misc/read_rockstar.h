@@ -15,7 +15,10 @@ void rockstar_halos(int values)
   int64_t pid;
   
   int ndim=2;
-  unsigned int n_particles, n_halos = 0;
+  int64_t n_particles = 0;
+  int64_t n_halos = 0;
+
+  int breaker = 0;
 
   int nread   = 5000;
   int n_files = 0;
@@ -32,6 +35,7 @@ void rockstar_halos(int values)
     if(!(infp=fopen(infile,"r"))){
       sprintf(infile,"%s.%d",filename,j);
       if(!(infp=fopen(infile,"r"))) {
+	breaker = 1;
 	break;
       }
     }
@@ -42,8 +46,14 @@ void rockstar_halos(int values)
     n_particles += rs_header.num_particles;
     n_halos     += rs_header.num_halos;
 
+    if(Debug)
+      printf("found %d particles and %d halos in file %d\n",
+	     rs_header.num_particles,rs_header.num_halos,j);
+
     fclose(infp);
   }
+  if(breaker)
+    fclose(infp);
   nread = n_files;
 
   //allocate memory
@@ -102,10 +112,12 @@ void rockstar_halos(int values)
     fclose(infp);
   }
 
+  /*
   if(Debug){
     for(i=0; i<n_particles; i++)
       printf("ID:%d  HID:%d\n",pids[i],dmlist[i]);
   }
+  */
 
   //assign values to the correct retrun array
   int pc = 0;
