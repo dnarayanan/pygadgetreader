@@ -7,7 +7,7 @@
 #include <numpy/arrayobject.h>
 
 void gadget_posvel(){
-  skip_blocks(values);
+  //skip_blocks(values);
   
   float *simdata;
   int ndim = 2;
