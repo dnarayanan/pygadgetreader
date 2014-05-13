@@ -15,6 +15,12 @@
 #endif
 #include "modules/director.h"
 
+//#ifdef ENABLE_HDF5
+//#include <hdf5.h>
+//#endif
+
+#define NPY_NO_DEPRECIATED_API NPY_1_7_API_VERSION
+
 // GADGET
 #include "modules/gadget/galprop.h"
 #include "modules/gadget/read_posvel.h"
@@ -28,6 +34,11 @@
 #include "modules/gadget/read_potential.h"
 #include "modules/gadget/read_nrec.h"
 
+#ifdef ENABLE_HDF5
+// HDF5 GADGET
+#include "modules/gadget/read_hdf5.h"
+#endif
+
 // TIPSY
 #include "modules/tipsy/tipsy_binread.h"
 #include "modules/tipsy/tipsy_auxread.h"
@@ -35,6 +46,12 @@
 
 // ROCKSTAR
 #include "modules/misc/read_rockstar.h"
+
+// HDF5 STUFF
+//PyObject *hdf5;
+//PyObject *pModule,*pDict, *pFunc, *pValue;
+//PyObject *pArgs;
+
 
 /*######################### READ HEADER ########################################*/
 static PyObject *
@@ -70,12 +87,17 @@ readhead(PyObject *self, PyObject *args, PyObject *keywds)
   NumFiles=1;
   Units=0;
   Debug=0;
+  HDF5_FILE = 0;
   
-  static char *kwlist[]={"file","value","numfiles","tipsy","debug",NULL};
-  if(!PyArg_ParseTupleAndKeywords(args,keywds,"ss|iii",kwlist,&filename,&Value,&NumFiles,&Tipsy,&Debug)){
+  static char *kwlist[]={"file","value","numfiles","tipsy","debug","hdf5",NULL};
+  if(!PyArg_ParseTupleAndKeywords(args,keywds,"ss|iiii",kwlist,&filename,&Value,&NumFiles,&Tipsy,&Debug,&HDF5_FILE)){
     PyErr_Format(PyExc_TypeError,"incorrect input!  must provide filename and value of interest - see readme.txt");
     //return NULL;
   }
+
+#if defined(HDF5_DEFAULT) && defined(ENABLE_HDF5)
+  HDF5_FILE = 1;
+#endif
 
   if(Debug) printf("metalfactor = %f\n",METALFACTOR);
 
@@ -149,12 +171,17 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
   nMetals = 0;
   Future = 0;
   int filepresent = 0;
+  HDF5_FILE = 0;
 
-  static char *kwlist[]={"file","data","type","numfiles","units","tipsy","future","debug","supress_output","nth_particle","nmetals",NULL};
-  if(!PyArg_ParseTupleAndKeywords(args,keywds,"sss|iiiiiifi",kwlist,&filename,&Values,&Type,&NumFiles,&Units,&Tipsy,&Future,&Debug,&Supress,&nth_P,&nMetals)){
+  static char *kwlist[]={"file","data","type","numfiles","units","tipsy","future","debug","supress_output","nth_particle","nmetals","hdf5",NULL};
+  if(!PyArg_ParseTupleAndKeywords(args,keywds,"sss|iiiiiifii",kwlist,&filename,&Values,&Type,&NumFiles,&Units,&Tipsy,&Future,&Debug,&Supress,&nth_P,&nMetals,&HDF5_FILE)){
     PyErr_Format(PyExc_TypeError,"wrong input!  must provide filename, data block, and particle type of interest - see readme.txt");
     //return NULL;
   }
+
+#if defined(HDF5_DEFAULT) && defined(ENABLE_HDF5)
+  HDF5_FILE = 1;
+#endif
 
   nth_Particle = (int)nth_P;
 
@@ -222,7 +249,12 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
     if(Supress==0)
       printf("READING TIPSY\n");
   }
-  if(Future>0){
+  if(HDF5_FILE){
+#ifdef ENABLE_HDF5
+    read_gadget_HDF5();
+#endif
+  }
+  else if(Future>0){
     read_tipsy_future(Future,values);
   }
   else{
@@ -276,7 +308,7 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
     else if(values==20 || values==21 || values==22 || values==23 || values==27 || values==28) read_tipsy_envira();
     else printf("houston we have a problem...no values returned\n");
     j=0;
-  } 
+  }
   if(Debug) printf("returning array...\n");
   return PyArray_Return(array);
 }

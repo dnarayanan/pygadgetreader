@@ -11,6 +11,8 @@ void skip_blocks(int);
 void skiprho(void);
 void skipgas(void);
 
+void read_gadget_HDF5(void);
+
 void gadget_readtmax(void);
 void gadget_readpotential(void);
 void gadget_posvel(void);

@@ -6,6 +6,14 @@
 //#define TIPSY
 /*--------------------------------------------*/
 
+//#define ENABLE_HDF5
+//#define HDF5_DEFAULT
+
+
+#ifdef ENABLE_HDF5
+#include <hdf5.h>
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -61,6 +69,7 @@ FILE *auxfp;
 FILE *futfp;
 char infile[500];
 int NumFiles, Units, j, dummy;
+int HDF5_FILE;
 int Debug;
 int Supress;
 int ERR;
@@ -255,6 +264,53 @@ int read_header()
   else 
     sprintf(infile,"%s",filename);
   */
+
+#ifdef ENABLE_HDF5
+  if(HDF5_FILE){
+    hid_t hdf5_file, hdf5_headergrp, hdf5_attribute;
+    
+    hdf5_file      = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+    hdf5_headergrp = H5Gopen1(hdf5_file, "/Header");
+
+    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "NumPart_ThisFile");
+    H5Aread(hdf5_attribute, H5T_NATIVE_INT, header.npart);
+    H5Aclose(hdf5_attribute);
+
+    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "NumPart_Total");
+    H5Aread(hdf5_attribute, H5T_NATIVE_INT, header.npartTotal);
+    H5Aclose(hdf5_attribute);
+
+    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Time");
+    H5Aread(hdf5_attribute, H5T_NATIVE_DOUBLE, &header.time);
+    H5Aclose(hdf5_attribute);
+
+    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Redshift");
+    H5Aread(hdf5_attribute, H5T_NATIVE_DOUBLE, &header.redshift);
+    H5Aclose(hdf5_attribute);
+
+    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "BoxSize");
+    H5Aread(hdf5_attribute, H5T_NATIVE_DOUBLE, &header.BoxSize);
+    H5Aclose(hdf5_attribute);
+
+    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "HubbleParam");
+    H5Aread(hdf5_attribute, H5T_NATIVE_DOUBLE, &header.HubbleParam);
+    H5Aclose(hdf5_attribute);
+
+    H5Gclose(hdf5_headergrp);
+    H5Fclose(hdf5_file);
+
+    // Assign TOTAL particle counts
+    Ngas   = header.npartTotal[0];
+    Ndm    = header.npartTotal[1];
+    Ndisk  = header.npartTotal[2];
+    Nbulge = header.npartTotal[3];
+    Nstar  = header.npartTotal[4];
+    Nbdry  = header.npartTotal[5];
+    Ntotal = Ngas+Ndm+Ndisk+Nbulge+Nstar+Nbdry;
+    return 1;
+  }
+#endif
+
 
   if(Debug) printf("reading file...ERR=%d\n",ERR);
 
