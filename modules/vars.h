@@ -309,6 +309,35 @@ int read_header()
     H5Aread(hdf5_attribute, H5T_NATIVE_DOUBLE, &header.HubbleParam);
     H5Aclose(hdf5_attribute);
 
+    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "OmegaLambda");
+    H5Aread(hdf5_attribute, H5T_NATIVE_DOUBLE, &header.OmegaLambda);
+    H5Aclose(hdf5_attribute);
+
+    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Omega0");
+    H5Aread(hdf5_attribute, H5T_NATIVE_DOUBLE, &header.Omega0);
+    H5Aclose(hdf5_attribute);
+
+    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "MassTable");
+    H5Aread(hdf5_attribute, H5T_NATIVE_DOUBLE, header.mass);
+    H5Aclose(hdf5_attribute);
+
+    //flags
+    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Flag_Metals");
+    H5Aread(hdf5_attribute, H5T_NATIVE_INT, &header.flag_metals);
+    H5Aclose(hdf5_attribute);
+    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Flag_Sfr");
+    H5Aread(hdf5_attribute, H5T_NATIVE_INT, &header.flag_sfr);
+    H5Aclose(hdf5_attribute);
+    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Flag_Cooling");
+    H5Aread(hdf5_attribute, H5T_NATIVE_INT, &header.flag_cooling);
+    H5Aclose(hdf5_attribute);
+    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Flag_StellarAge");
+    H5Aread(hdf5_attribute, H5T_NATIVE_INT, &header.flag_stellarage);
+    H5Aclose(hdf5_attribute);
+    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Flag_Feedback");
+    H5Aread(hdf5_attribute, H5T_NATIVE_INT, &header.flag_feedback);
+    H5Aclose(hdf5_attribute);
+
     H5Gclose(hdf5_headergrp);
     H5Fclose(hdf5_file);
 

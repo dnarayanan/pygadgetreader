@@ -11,6 +11,7 @@ void skip_blocks(int);
 void skiprho(void);
 void skipgas(void);
 
+void printer(void);
 void read_gadget_HDF5(void);
 
 void gadget_readtmax(void);
