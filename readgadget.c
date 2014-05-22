@@ -8,6 +8,7 @@
 
 #include "modules/funcs.h"
 #include "modules/vars.h"
+#include "modules/read_header.h"
 #ifndef KENCODE
 #include "modules/skips.h"
 #else
