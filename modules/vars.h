@@ -280,6 +280,8 @@ int read_header()
 
 #ifdef ENABLE_HDF5
   if(HDF5_FILE){
+    int status = 0;
+
     hid_t hdf5_file, hdf5_headergrp, hdf5_attribute;
     
     hdf5_file      = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -319,18 +321,35 @@ int read_header()
     hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Flag_Metals");
     H5Aread(hdf5_attribute, H5T_NATIVE_INT, &header.flag_metals);
     H5Aclose(hdf5_attribute);
-    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Flag_fH2");
-    H5Aread(hdf5_attribute, H5T_NATIVE_INT, &header.fH2);
-    H5Aclose(hdf5_attribute);
-    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Flag_Potential");
-    H5Aread(hdf5_attribute, H5T_NATIVE_INT, &header.potential);
-    H5Aclose(hdf5_attribute);
-    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Flag_DelayTime");
-    H5Aread(hdf5_attribute, H5T_NATIVE_INT, &header.delaytime);
-    H5Aclose(hdf5_attribute);
-    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Flag_TMax");
-    H5Aread(hdf5_attribute, H5T_NATIVE_INT, &header.tmax);
-    H5Aclose(hdf5_attribute);
+
+    if(H5Aexists(hdf5_headergrp, "Flag_fH2")){
+      hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Flag_fH2");
+      H5Aread(hdf5_attribute, H5T_NATIVE_INT, &header.flag_fH2);
+      H5Aclose(hdf5_attribute);
+    }
+    else
+      header.flag_fH2 = 0;
+    if(H5Aexists(hdf5_headergrp, "Flag_Potential")){
+      hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Flag_Potential");
+      H5Aread(hdf5_attribute, H5T_NATIVE_INT, &header.flag_potential);
+      H5Aclose(hdf5_attribute);
+    }
+    else
+      header.flag_potential = 0;
+    if(H5Aexists(hdf5_headergrp, "Flag_DelayTime")){
+      hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Flag_DelayTime");
+      H5Aread(hdf5_attribute, H5T_NATIVE_INT, &header.flag_delaytime);
+      H5Aclose(hdf5_attribute);
+    }
+    else
+      header.flag_delaytime = 0;
+    if(H5Aexists(hdf5_headergrp, "Flag_TMax")){
+      hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Flag_TMax");
+      H5Aread(hdf5_attribute, H5T_NATIVE_INT, &header.flag_tmax);
+      H5Aclose(hdf5_attribute);
+    }
+    else
+      header.flag_tmax = 0;
 
     hdf5_attribute = H5Aopen_name(hdf5_headergrp, "NumPart_Total");
     H5Aread(hdf5_attribute, H5T_NATIVE_INT, header.npartTotal);

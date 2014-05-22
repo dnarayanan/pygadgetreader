@@ -61,6 +61,67 @@ void read_gadget_HDF5(){
   hdf5_file    = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
   hdf5_grp     = H5Gopen1(hdf5_file, TYPE);
 
+  // CHECK IF DATASET EXISTS
+  int status = 0;
+  if(values == 0)
+    if(H5Lexists(hdf5_grp,"Coordinates",H5P_DEFAULT)==0)
+      status = 1;
+  if(values == 1)
+    if(H5Lexists(hdf5_grp,"Velocities",H5P_DEFAULT)==0)
+      status = 1;
+  if(values == 2)
+    if(H5Lexists(hdf5_grp,"ParticleIDs",H5P_DEFAULT)==0)
+      status = 1;
+  //if(H5Lexists(hdf5_grp,"Masses",H5P_DEFAULT)==0)
+  //  status = 1;
+  if(values == 6)
+    if(H5Lexists(hdf5_grp,"ElectronAbundance",H5P_DEFAULT)==0)
+      status = 1;
+  if(values == 4)
+    if(H5Lexists(hdf5_grp,"InternalEnergy",H5P_DEFAULT)==0)
+      status = 1;
+  if(values == 5)
+    if(H5Lexists(hdf5_grp,"Density",H5P_DEFAULT)==0)
+      status = 1;
+  if(values == 7)
+    if(H5Lexists(hdf5_grp,"NeutralHydrogenAbundance",H5P_DEFAULT)==0)
+      status = 1;
+  if(values == 8)
+    if(H5Lexists(hdf5_grp,"SmoothingLength",H5P_DEFAULT)==0)
+      status = 1;
+  if(values == 9)
+    if(H5Lexists(hdf5_grp,"StarFormationRate",H5P_DEFAULT)==0)
+      status = 1;
+  if(values == 10)
+    if(H5Lexists(hdf5_grp,"StarFormationTime",H5P_DEFAULT)==0)
+      status = 1;
+  if(values == 12)
+    if(H5Lexists(hdf5_grp,"FractionH2",H5P_DEFAULT)==0)
+      status = 1;
+  if(values == 13)
+    if(H5Lexists(hdf5_grp,"Sigma",H5P_DEFAULT)==0)
+      status = 1;
+  if(values == 15)
+    if(H5Lexists(hdf5_grp,"TemperatureMax",H5P_DEFAULT)==0)
+      status = 1;
+  if(values == 16)
+    if(H5Lexists(hdf5_grp,"DelayTime",H5P_DEFAULT)==0)
+      status = 1;
+  if(values == 18)
+    if(H5Lexists(hdf5_grp,"Potential",H5P_DEFAULT)==0)
+      status = 1;
+  if(values == 11 || values == 14)
+    if(H5Lexists(hdf5_grp,"Metallicity",H5P_DEFAULT)==0)
+      status = 1;
+  if(values == 17)
+    if(H5Lexists(hdf5_grp,"NstarsSpawn",H5P_DEFAULT)==0)
+      status = 1;
+  
+  if(status == 1){
+    PyErr_Format(PyExc_IndexError, "BLOCK NOT PRESENT!!, returning");
+    return;
+  }
+
 
   //pos or vel
   if(values == 0 || values == 1){
@@ -224,7 +285,7 @@ void read_gadget_HDF5(){
       }
     }
 
-  printf("CONVERT=%g, units=%d\n",convert,Units);
+  //printf("CONVERT=%g, units=%d\n",convert,Units);
 
   if(pc!=nread_total)
     PyErr_Format(PyExc_IndexError,"particle count mismatch!");
