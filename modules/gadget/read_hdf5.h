@@ -93,7 +93,7 @@ void read_gadget_HDF5(){
     if(H5Lexists(hdf5_grp,"StarFormationRate",H5P_DEFAULT)==0)
       status = 1;
   if(values == 10)
-    if(H5Lexists(hdf5_grp,"StarFormationTime",H5P_DEFAULT)==0)
+    if(H5Lexists(hdf5_grp,"StellarFormationTime",H5P_DEFAULT)==0)
       status = 1;
   if(values == 12)
     if(H5Lexists(hdf5_grp,"FractionH2",H5P_DEFAULT)==0)
@@ -117,8 +117,10 @@ void read_gadget_HDF5(){
     if(H5Lexists(hdf5_grp,"NstarsSpawn",H5P_DEFAULT)==0)
       status = 1;
   
+  int bypass = 0;
+
   if(status == 1){
-    PyErr_Format(PyExc_IndexError, "BLOCK NOT PRESENT!!, returning");
+    PyErr_Format(PyExc_IndexError, "BLOCK NOT PRESENT!! %d, returning",values);
     return;
   }
 
@@ -154,13 +156,15 @@ void read_gadget_HDF5(){
     array   = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
     simdata = (float*)malloc(header.npart[type]*sizeof(float));
     
-    if(header.mass[type] > 0 && header.npart[type] > 0){
+    if(header.mass[type] == 0 && header.npart[type] > 0){
       hdf5_dataset = H5Dopen1(hdf5_grp, "Masses");
       H5Dread(hdf5_dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, simdata);    
     }
-    else if(header.mass[type]>0)
+    else if(header.mass[type]>0){
       for(int i=0;i<header.npart[type];i++)
 	simdata[i] = header.mass[type];
+      bypass = 1;
+    }
   }
   //standard float values
   //else if((values > 2 && values < 10) || (values > 11 && values < 17) || values == 18){
@@ -187,7 +191,7 @@ void read_gadget_HDF5(){
     if(values == 8) hdf5_dataset = H5Dopen1(hdf5_grp, "SmoothingLength");
     if(values == 9) hdf5_dataset = H5Dopen1(hdf5_grp, "StarFormationRate");
 
-    if(values == 10) hdf5_dataset = H5Dopen1(hdf5_grp, "StarFormationTime");
+    if(values == 10) hdf5_dataset = H5Dopen1(hdf5_grp, "StellarFormationTime");
 
     if(values == 12) hdf5_dataset = H5Dopen1(hdf5_grp, "FractionH2");
     if(values == 13) hdf5_dataset = H5Dopen1(hdf5_grp, "Sigma");
@@ -241,7 +245,8 @@ void read_gadget_HDF5(){
     H5Dread(hdf5_dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, simdata);
   }
 
-  H5Dclose(hdf5_dataset);
+  if(bypass == 0)
+    H5Dclose(hdf5_dataset);
   H5Gclose(hdf5_grp);
   H5Fclose(hdf5_file);
 

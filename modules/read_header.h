@@ -110,6 +110,8 @@ int read_header()
     if(header.flag_metals == 1)
       METALFACTOR = 1.0;
 
+    header.num_files = 1;
+
     // Assign TOTAL particle counts
     Ngas   = header.npartTotal[0];
     Ndm    = header.npartTotal[1];
