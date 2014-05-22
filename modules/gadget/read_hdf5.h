@@ -102,7 +102,9 @@ void read_gadget_HDF5(){
 	simdata[i] = header.mass[type];
   }
   //standard float values
-  else if((values > 2 && values < 10) || (values > 11 && values < 17)){
+  //else if((values > 2 && values < 10) || (values > 11 && values < 17) || values == 18){
+  //else if((values > 3 && values < 11) || (values > 11 && values < 14) || values == 18){
+  else if(values!=0 && values!=1 && values!=2 && values!=3 && values!=11 && values!=14 && values!=17){
     ndim = 1;
     npy_intp dims[1]={nread_total};
     array   = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
@@ -124,10 +126,14 @@ void read_gadget_HDF5(){
     if(values == 8) hdf5_dataset = H5Dopen1(hdf5_grp, "SmoothingLength");
     if(values == 9) hdf5_dataset = H5Dopen1(hdf5_grp, "StarFormationRate");
 
+    if(values == 10) hdf5_dataset = H5Dopen1(hdf5_grp, "StarFormationTime");
+
     if(values == 12) hdf5_dataset = H5Dopen1(hdf5_grp, "FractionH2");
     if(values == 13) hdf5_dataset = H5Dopen1(hdf5_grp, "Sigma");
+
     if(values == 15) hdf5_dataset = H5Dopen1(hdf5_grp, "TemperatureMax");
     if(values == 16) hdf5_dataset = H5Dopen1(hdf5_grp, "DelayTime");
+    if(values == 18) hdf5_dataset = H5Dopen1(hdf5_grp, "Potential");
 
     H5Dread(hdf5_dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, simdata);    
   }
@@ -164,7 +170,15 @@ void read_gadget_HDF5(){
 	metalarray[i][j] = 0.0;
     H5Dread(hdf5_dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, metalarray);
   }
+  else if(values == 17){
+    ndim = 1;
+    npy_intp dims[1]={nread_total};
+    array   = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_INT32);
+    simdata = (int*)malloc(header.npart[type]*sizeof(int));
 
+    hdf5_dataset = H5Dopen1(hdf5_grp, "NstarsSpawn");
+    H5Dread(hdf5_dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, simdata);
+  }
 
   H5Dclose(hdf5_dataset);
   H5Gclose(hdf5_grp);
@@ -183,7 +197,7 @@ void read_gadget_HDF5(){
 	else if(values == 2)
 	  PIDDATA(array,pc) = piddata[n];
 	
-	else if((values > 2 && values < 10) || (values > 11 && values < 17)){
+	else if((values > 2 && values < 10) || (values > 11 && values < 17) || values == 18){
 	  
 	  if(values==4 && Units==1){
 	    MeanWeight = 4.0/(3.*H_MASSFRAC+1.+4.*H_MASSFRAC*Ne[n]) * PROTONMASS;

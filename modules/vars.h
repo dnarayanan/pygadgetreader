@@ -285,46 +285,25 @@ int read_header()
     hdf5_file      = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
     hdf5_headergrp = H5Gopen1(hdf5_file, "/Header");
 
-    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "NumPart_ThisFile");
-    H5Aread(hdf5_attribute, H5T_NATIVE_INT, header.npart);
-    H5Aclose(hdf5_attribute);
-
-    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "NumPart_Total");
-    H5Aread(hdf5_attribute, H5T_NATIVE_INT, header.npartTotal);
-    H5Aclose(hdf5_attribute);
-
     hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Time");
     H5Aread(hdf5_attribute, H5T_NATIVE_DOUBLE, &header.time);
     H5Aclose(hdf5_attribute);
-
     hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Redshift");
     H5Aread(hdf5_attribute, H5T_NATIVE_DOUBLE, &header.redshift);
     H5Aclose(hdf5_attribute);
-
     hdf5_attribute = H5Aopen_name(hdf5_headergrp, "BoxSize");
     H5Aread(hdf5_attribute, H5T_NATIVE_DOUBLE, &header.BoxSize);
     H5Aclose(hdf5_attribute);
-
+    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Omega0");
+    H5Aread(hdf5_attribute, H5T_NATIVE_DOUBLE, &header.Omega0);
+    H5Aclose(hdf5_attribute);
+    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "OmegaLambda");
+    H5Aread(hdf5_attribute, H5T_NATIVE_DOUBLE, &header.OmegaLambda);
+    H5Aclose(hdf5_attribute);
     hdf5_attribute = H5Aopen_name(hdf5_headergrp, "HubbleParam");
     H5Aread(hdf5_attribute, H5T_NATIVE_DOUBLE, &header.HubbleParam);
     H5Aclose(hdf5_attribute);
 
-    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "OmegaLambda");
-    H5Aread(hdf5_attribute, H5T_NATIVE_DOUBLE, &header.OmegaLambda);
-    H5Aclose(hdf5_attribute);
-
-    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Omega0");
-    H5Aread(hdf5_attribute, H5T_NATIVE_DOUBLE, &header.Omega0);
-    H5Aclose(hdf5_attribute);
-
-    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "MassTable");
-    H5Aread(hdf5_attribute, H5T_NATIVE_DOUBLE, header.mass);
-    H5Aclose(hdf5_attribute);
-
-    //flags
-    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Flag_Metals");
-    H5Aread(hdf5_attribute, H5T_NATIVE_INT, &header.flag_metals);
-    H5Aclose(hdf5_attribute);
     hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Flag_Sfr");
     H5Aread(hdf5_attribute, H5T_NATIVE_INT, &header.flag_sfr);
     H5Aclose(hdf5_attribute);
@@ -336,6 +315,20 @@ int read_header()
     H5Aclose(hdf5_attribute);
     hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Flag_Feedback");
     H5Aread(hdf5_attribute, H5T_NATIVE_INT, &header.flag_feedback);
+    H5Aclose(hdf5_attribute);
+    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Flag_Metals");
+    H5Aread(hdf5_attribute, H5T_NATIVE_INT, &header.flag_metals);
+    H5Aclose(hdf5_attribute);
+
+    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "NumPart_Total");
+    H5Aread(hdf5_attribute, H5T_NATIVE_INT, header.npartTotal);
+    H5Aclose(hdf5_attribute);
+    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "NumPart_ThisFile");
+    H5Aread(hdf5_attribute, H5T_NATIVE_INT, header.npart);
+    H5Aclose(hdf5_attribute);
+
+    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "MassTable");
+    H5Aread(hdf5_attribute, H5T_NATIVE_DOUBLE, header.mass);
     H5Aclose(hdf5_attribute);
 
     H5Gclose(hdf5_headergrp);

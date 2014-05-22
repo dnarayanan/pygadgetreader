@@ -15,30 +15,48 @@ E-mail: rthompsonj@gmail.com
     
     
 ## Summary ##
-This module contains a function for reading in particle data from Gadget (type 1) binary files, TIPSY binary files, TIPSY aux/envira/future files, PStarGroupFinder property files (galprop), and Gadget/TIPSY header files.  These functions are described below in the following sections.
+This module contains a function for reading SPH particle data into python.  The relevant functions are described in the following sections.  It currently supports these file types:
+
+	- Gadget binaries (type 1)
+	- TIPSY Binaries  (bin,aux,envira,future)
+	- HDF5 Gadget outputs
+	- PStarGroupFinder property files
 
 ## REQUIREMENTS ##
     - python2.7.x (not tested with other versions)
     - numpy
     - c compiler
     - mercurial
+    - HDF5 for HDF5-read support
 
 ## Obtaining the code ##
-The easiest way to download the code and stay up to date is to clone a version from bitbucket to your local computer:
+The easiest way to download the code and stay up to date is to clone a version from bitbucket to your local computer via Mercurial (hg).  The repository is hosted here:
 
     https://bitbucket.org/rthompson/pygadgetreader
 
-If you do not have access to this repository simply send me an email and I will be happy to grant access rights.
 
 ## Customization ##
-Before we build the module, there are a few additional parameters that you may want to adjust, both located in *modules/vars.h*.  These must be enabled/disabled before compilation; by default they are both commented out:
+Before we build the module, there are a few additional parameters that you may want to adjust.  
+
+1) In order to enable HDF5 support you must modify *setup.py* and indicate the location of your HDF5 installation. To enable HDF5 support you must set *HDF5_PRESENT* to 1, and modify *HDF5INCL* & *HDF5LIB* to point to your HDF5 installation.
+
+	HDF5_PRESENT = 1
+	HDF5INCL     = "/Users/bob/local/hdf5/include"
+	HDF5LIB      = "/Users/bob/local/hdf5/lib"
+	
+2) *pygadgetreader* allows the user to specify at compile time the default type of file one will be reading in.  These options must be set before compilation, and by default they are commented out; they are located in *modules/vars.h*.
 
     //#define KENCODE		//default = off, only uncomment this if you are using K.Nagamine's Gadget.
     //#define TIPSY			//default = off, uncomment this to read TIPSY files by default
+    //#define ENABLE_HDF5	//default = off, uncomment if you want HDF5 support
+    //define HDF5_DEFAULT	//default = off, uncomment this to read HDF5 files by default
     
-KENCODE defines a different *skips.h* file to allow for the proper reading of his gadget snapshots.  If your version of gadget has a different block structure you are more than welcome to define your own *skips.h* file to suit your needs.  If you have any questions regarding this proceedure feel free to email me.
+KENCODE is mainly legacy support for Gadget Binary type 1 files, and defines a differnet *skips.h* file to allow for the proper reading of a different block format.  If your version of gadget has a different block structure you are more than welcome to define your own *skips.h* file to suit your needs.  If you have any questions regarding this proceedure feel free to email me.
 
 TIPSY allows for the omission of tipsy=1 in your read commands (below).  By uncommenting this the code will automatically try and read TIPSY files by default; one can still read GADGET files via passing tipsy=0 to the read commands.
+
+ENABLE_HDF5 tells the code to include <hdf5.h> during compilation.  This is needed if you want HDF5 support. 
+HDF5_DEFAULT allows for the omission of hdf5=1 in your read commands (below).  By uncommenting this the code will automatically try and read HDF5 files by default; one can still read GADGET files via passing hdf5=0 to the read commands.
 
 ## Installation ##
 Once the code is downloaded there are two methods of installation depending on your access rights.  If you have write access to your python distribution, then the preferred method is to execute the following commands:
@@ -64,6 +82,7 @@ All functions have a few universal arguments:
     nth_particle=1		//only reads in ever Nth particle (readsnap() only)
     tipsy=0				//reads in tipsy binary format
     future=0			//specifies a specific future file (TIPSY ONLY)
+    hdf5=0				//reads in HDF5 binary format
     debug=0				//prints out debug statements for reading
     supress_output=0	//supresses output messages
 	numfiles=1			//depreciated, now read from the header
@@ -185,6 +204,7 @@ This function does the bulk of the work.  It reads data blocks from the snapshot
 			      (u - returns temperature in K), Mass (returns Msun), and Sigma (returns g/cm^2).
 		   tipsy: Must be set to 1 if reading in tipsy binary/aux/envira files.
 		  future: integer value for the future file.
+		  	hdf5: Must be set to 1 if reading in HDF5 binary files.
 		   debug: Shows debug information
 	nth_Particle: Allows the user to read in a subset of data rather than the full dataset
 			  
