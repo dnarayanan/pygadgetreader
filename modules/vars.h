@@ -319,6 +319,18 @@ int read_header()
     hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Flag_Metals");
     H5Aread(hdf5_attribute, H5T_NATIVE_INT, &header.flag_metals);
     H5Aclose(hdf5_attribute);
+    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Flag_fH2");
+    H5Aread(hdf5_attribute, H5T_NATIVE_INT, &header.fH2);
+    H5Aclose(hdf5_attribute);
+    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Flag_Potential");
+    H5Aread(hdf5_attribute, H5T_NATIVE_INT, &header.potential);
+    H5Aclose(hdf5_attribute);
+    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Flag_DelayTime");
+    H5Aread(hdf5_attribute, H5T_NATIVE_INT, &header.delaytime);
+    H5Aclose(hdf5_attribute);
+    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "Flag_TMax");
+    H5Aread(hdf5_attribute, H5T_NATIVE_INT, &header.tmax);
+    H5Aclose(hdf5_attribute);
 
     hdf5_attribute = H5Aopen_name(hdf5_headergrp, "NumPart_Total");
     H5Aread(hdf5_attribute, H5T_NATIVE_INT, header.npartTotal);
