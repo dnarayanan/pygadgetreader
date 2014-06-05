@@ -104,14 +104,16 @@ readhead(PyObject *self, PyObject *args, PyObject *keywds)
   char* Value;
   int value;
 
+  int supress;
+
   j=0;
   NumFiles=1;
   Units=0;
   Debug=0;
   HDF5_FILE = 0;
   
-  static char *kwlist[]={"file","value","numfiles","tipsy","debug","hdf5",NULL};
-  if(!PyArg_ParseTupleAndKeywords(args,keywds,"ss|iiii",kwlist,&filename,&Value,&NumFiles,&Tipsy,&Debug,&HDF5_FILE)){
+  static char *kwlist[]={"file","value","numfiles","tipsy","debug","hdf5","supress_output",NULL};
+  if(!PyArg_ParseTupleAndKeywords(args,keywds,"ss|iiiii",kwlist,&filename,&Value,&NumFiles,&Tipsy,&Debug,&HDF5_FILE,&supress)){
     PyErr_Format(PyExc_TypeError,"incorrect input!  must provide filename and value of interest - see readme.txt");
     //return NULL;
   }
@@ -362,8 +364,10 @@ readrockstar(PyObject *self, PyObject *args, PyObject *keywds)
   Debug = 0;
   Supress = 0;
 
-  static char *kwlist[]={"file","data","debug","supress_output",NULL};
-  if(!PyArg_ParseTupleAndKeywords(args,keywds,"ss|ii",kwlist,&filename,&Values,&Debug,&Supress)){
+  int dummy;
+
+  static char *kwlist[]={"file","data","debug","supress_output","tipsy","hdf5",NULL};
+  if(!PyArg_ParseTupleAndKeywords(args,keywds,"ss|iiii",kwlist,&filename,&Values,&Debug,&Supress,&dummy,&dummy)){
     PyErr_Format(PyExc_TypeError,"wrong input!  must provide filename - see readme.txt");
   }
 

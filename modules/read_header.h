@@ -93,6 +93,10 @@ int read_header()
     else
       header.flag_tmax = 0;
 
+    hdf5_attribute = H5Aopen_name(hdf5_headergrp, "NumFilesPerSnapshot");
+    H5Aread(hdf5_attribute, H5T_NATIVE_INT, &header.num_files);
+    H5Aclose(hdf5_attribute);
+    
     hdf5_attribute = H5Aopen_name(hdf5_headergrp, "NumPart_Total");
     H5Aread(hdf5_attribute, H5T_NATIVE_INT, header.npartTotal);
     H5Aclose(hdf5_attribute);
