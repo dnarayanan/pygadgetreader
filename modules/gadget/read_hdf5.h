@@ -10,7 +10,7 @@
 #include <hdf5.h>
 
 void read_gadget_HDF5(){
-  int i;
+  int i,j,k;
   int ndim;
   unsigned int n;
   unsigned int pc = 0;
@@ -124,11 +124,10 @@ void read_gadget_HDF5(){
     return;
   }
 
-
   //pos or vel
   if(values == 0 || values == 1){
-    for(int i=0; i<header.npart[type];i++)
-      for(int j=0; j<3; j++)
+    for(i=0; i<header.npart[type];i++)
+      for(j=0; j<3; j++)
 	posvel[i][j] = 0.0;
     
     ndim = 2;
@@ -161,7 +160,7 @@ void read_gadget_HDF5(){
       H5Dread(hdf5_dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, simdata);    
     }
     else if(header.mass[type]>0){
-      for(int i=0;i<header.npart[type];i++)
+      for(i=0;i<header.npart[type];i++)
 	simdata[i] = header.mass[type];
       bypass = 1;
     }
@@ -218,8 +217,8 @@ void read_gadget_HDF5(){
     npy_intp dims[1]={nread_total};
     array   = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
     hdf5_dataset = H5Dopen1(hdf5_grp, "Metallicity");
-    for(int i=0; i<header.npart[type]; i++)
-      for(int j=0; j<header.flag_metals; j++)
+    for(i=0; i<header.npart[type]; i++)
+      for(j=0; j<header.flag_metals; j++)
 	metalarray[i][j] = 0.0;
     H5Dread(hdf5_dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, metalarray);
   }
@@ -230,8 +229,8 @@ void read_gadget_HDF5(){
     array   = (PyArrayObject *)PyArray_SimpleNew(ndim,dims,PyArray_DOUBLE);
     //simdata = (float*)malloc(header.npart[type]*sizeof(float));
     hdf5_dataset = H5Dopen1(hdf5_grp, "Metallicity");
-    for(int i=0; i<header.npart[type]; i++)
-      for(int j=0; j<header.flag_metals; j++)
+    for(i=0; i<header.npart[type]; i++)
+      for(j=0; j<header.flag_metals; j++)
 	metalarray[i][j] = 0.0;
     H5Dread(hdf5_dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, metalarray);
   }
@@ -276,13 +275,13 @@ void read_gadget_HDF5(){
 	  MDATA(array,pc) = simdata[n];
 	else if(values==11 && header.flag_metals > 1){
 	  Z_tmp = 0.0;
-	  for(int k=0; k<header.flag_metals; k++)
+	  for(k=0; k<header.flag_metals; k++)
 	    Z_tmp += metalarray[n][k];
 	  Z_tmp *= METALFACTOR;
 	  MDATA(array,pc) = Z_tmp;
 	}
 	else if(values==14 && header.flag_metals > 1){
-	  for(int k=0; k<header.flag_metals; k++)
+	  for(k=0; k<header.flag_metals; k++)
 	    DATA(array,n,k) = metalarray[n][k];
 	}
 	
