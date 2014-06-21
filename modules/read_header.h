@@ -6,7 +6,7 @@
 #include <Python.h>
 #include <numpy/arrayobject.h>
 
-#ifdef ENABLE_HDF5
+#ifdef HAVE_HDF5
 #include <hdf5.h>
 #endif
 
@@ -20,7 +20,7 @@ int read_header()
     sprintf(infile,"%s",filename);
   */
 
-#ifdef ENABLE_HDF5
+#ifdef HAVE_HDF5
   if(HDF5_FILE){
     int status = 0;
 

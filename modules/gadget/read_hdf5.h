@@ -1,4 +1,4 @@
-#ifdef ENABLE_HDF5
+#ifdef HAVE_HDF5
 
 #include <stdlib.h>
 #include <stdio.h>

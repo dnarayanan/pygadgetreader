@@ -1,9 +1,11 @@
+
+//DEPRECIATED!!!!  NO TOUCHING!!!
 /* -- enable this if you are in Ken's group --*/
-//#define KENCODE
+//#define ALTBLOCK
 /*--------------------------------------------*/
 
 /* -- enable this to read tipsy by default  --*/
-//#define TIPSY
+//#define TIPSY_DEFAULT
 /*--------------------------------------------*/
 
 //#define ENABLE_HDF5
@@ -37,7 +39,7 @@
 #define UnitVelocity_in_cm_per_s 1.e5
 #define SOLARMASS 1.989e33
 
-#ifndef KENCODE  //romeel's group
+#ifndef ALTBLOCK  //romeel's group
 //#define METALFACTOR 0.0189/0.0147
 float METALFACTOR = 0.0189/0.0147;
 int NMETALS = 4;
@@ -47,7 +49,7 @@ float METALFACTOR = 1.;
 int NMETALS = 1;
 #endif
 
-#ifdef TIPSY
+#ifdef TIPSY_DEFAULT
 int Tipsy = 1;
 #else
 int Tipsy = 0;
@@ -73,7 +75,7 @@ unsigned int nread_total;
 
 PyArrayObject *array;
 
-#ifndef KENCODE
+#ifndef ALTBLOCK
 struct io_header
 {
   unsigned int      npart[6];

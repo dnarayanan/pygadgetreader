@@ -9,14 +9,14 @@
 #include "modules/funcs.h"
 #include "modules/vars.h"
 #include "modules/read_header.h"
-#ifndef KENCODE
+#ifndef ALTBLOCK
 #include "modules/skips.h"
 #else
-#include "modules/skips_ken.h"
+#include "modules/skips_altblock.h"
 #endif
 #include "modules/director.h"
 
-//#ifdef ENABLE_HDF5
+//#ifdef HAVE_HDF5
 //#include <hdf5.h>
 //#endif
 
@@ -35,7 +35,7 @@
 #include "modules/gadget/read_potential.h"
 #include "modules/gadget/read_nrec.h"
 
-#ifdef ENABLE_HDF5
+#ifdef HAVE_HDF5
 // HDF5 GADGET
 #include "modules/gadget/read_hdf5.h"
 #endif
@@ -118,14 +118,14 @@ readhead(PyObject *self, PyObject *args, PyObject *keywds)
     //return NULL;
   }
 
-#ifndef ENABLE_HDF5
+#ifndef HAVE_HDF5
   if(HDF5_FILE==1){
-    printf("selected HDF5 when HDF5 is not enabled, please uncomment '#define ENABLE_HDF5' in modules/vars.h\n");
+    printf("selected HDF5 when HDF5 is not enabled, please uncomment '#define HAVE_HDF5' in modules/vars.h\n");
     PyErr_Format(PyExc_IndexError,"HDF5 NOT ENABLED");
     return NULL;
   }
 #endif
-#if defined(HDF5_DEFAULT) && defined(ENABLE_HDF5)
+#if defined(HDF5_DEFAULT) && defined(HAVE_HDF5)
   HDF5_FILE = 1;
 #endif
 
@@ -209,14 +209,14 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
     //return NULL;
   }
 
-#ifndef ENABLE_HDF5
+#ifndef HAVE_HDF5
   if(HDF5_FILE==1){
-    printf("selected HDF5 when HDF5 is not enabled, please uncomment '#define ENABLE_HDF5' in modules/vars.h\n");
+    printf("selected HDF5 when HDF5 is not enabled, please set the proper HDF5INCL and HDF5LIB dirs in setup.py\n")
     PyErr_Format(PyExc_IndexError,"HDF5 NOT ENABLED");
     return NULL;
   }
 #endif
-#if defined(HDF5_DEFAULT) && defined(ENABLE_HDF5)
+#if defined(HDF5_DEFAULT) && defined(HAVE_HDF5)
   HDF5_FILE = 1;
 #endif
 
@@ -290,7 +290,7 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
   printer();
 
   if(HDF5_FILE){
-#ifdef ENABLE_HDF5
+#ifdef HAVE_HDF5
     read_gadget_HDF5();
 #endif
   }

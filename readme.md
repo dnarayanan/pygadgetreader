@@ -25,7 +25,7 @@ This module contains a function for reading SPH particle data into python.  The 
 ## REQUIREMENTS ##
     - python2.7.x (not tested with other versions)
     - numpy
-    - c compiler
+    - C compiler
     - mercurial
     - HDF5 for HDF5-read support
 
@@ -36,27 +36,29 @@ The easiest way to download the code and stay up to date is to clone a version f
 
 
 ## Customization ##
-Before we build the module, there are a few additional parameters that you may want to adjust.  
+Before we build the module, there are a few additional parameters that you may want to adjust in `setup.py`.
 
-1) In order to enable HDF5 support you must modify *setup.py* and indicate the location of your HDF5 installation. To enable HDF5 support you must set *HDF5_PRESENT* to 1, and modify *HDF5INCL* & *HDF5LIB* to point to your HDF5 installation.
+1. `pygadgetreader` allows the user to specify at compile time the default type of file one will be reading in.  This option must be set before compilation; by default the code attempts to read in `GADGET` type-1 binaries.  To change the default behavior select *one* of the following (1=selected):
 
-	HDF5_PRESENT = 1
-	HDF5INCL     = "/Users/bob/local/hdf5/include"
-	HDF5LIB      = "/Users/bob/local/hdf5/lib"
-	
-2) *pygadgetreader* allows the user to specify at compile time the default type of file one will be reading in.  These options must be set before compilation, and by default they are commented out; they are located in *modules/vars.h*.
-
-    //#define KENCODE		//default = off, only uncomment this if you are using K.Nagamine's Gadget.
-    //#define TIPSY			//default = off, uncomment this to read TIPSY files by default
-    //#define ENABLE_HDF5	//default = off, uncomment if you want HDF5 support
-    //define HDF5_DEFAULT	//default = off, uncomment this to read HDF5 files by default
+        GADGET_DEFAULT = 1
+        TIPSY_DEFAULT  = 0
+        HDF5_DEFAULT   = 0
     
-KENCODE is mainly legacy support for Gadget Binary type 1 files, and defines a differnet *skips.h* file to allow for the proper reading of a different block format.  If your version of gadget has a different block structure you are more than welcome to define your own *skips.h* file to suit your needs.  If you have any questions regarding this proceedure feel free to email me.
+    *note:* the code is configured for my specific simulations, but this can be customized.  In order to change the block-ordering you must edit `modules/skips_altblock.h` and adjust for your simulations, then set the following option in `setup.py`:
 
-TIPSY allows for the omission of tipsy=1 in your read commands (below).  By uncommenting this the code will automatically try and read TIPSY files by default; one can still read GADGET files via passing tipsy=0 to the read commands.
 
-ENABLE_HDF5 tells the code to include <hdf5.h> during compilation.  This is needed if you want HDF5 support. 
-HDF5_DEFAULT allows for the omission of hdf5=1 in your read commands (below).  By uncommenting this the code will automatically try and read HDF5 files by default; one can still read GADGET files via passing hdf5=0 to the read commands.
+        ALTBLOCK = 1
+
+2. In order to enable HDF5 support you must indicate the location of your HDF5 installation. Point *HDF5INCL* & *HDF5LIB* to your respective `HDF5` `include` and `lib` directories.  When running `setup.py` the code will check if those directories exist before attempting to compile.  As an example:
+
+	    HDF5INCL     = "/Users/bob/local/hdf5/include"
+	    HDF5LIB      = "/Users/bob/local/hdf5/lib"
+	
+-----
+	
+`TIPSY_DEFAULT` allows for the omission of `tipsy=1` in your read commands (below).  By uncommenting this the code will automatically try and read `TIPSY` files by default; one can still read `GADGET` files via passing `tipsy=0` to the read commands.
+
+`HDF5_DEFAULT` allows for the omission of `hdf5=1` in your read commands (below).  By uncommenting this the code will automatically try and read `HDF5` files by default; one can still read `GADGET` files via passing `hdf5=0` to the read commands.
 
 ## Installation ##
 Once the code is downloaded there are two methods of installation depending on your access rights.  If you have write access to your python distribution, then the preferred method is to execute the following commands:

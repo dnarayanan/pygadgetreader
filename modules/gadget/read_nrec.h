@@ -22,8 +22,8 @@ void gadget_readnrec()
   char* blocklabel = "NREC";
 
   //no NREC in Ken's code
-#ifdef KENCODE
-  PyErr_Format(PyExc_IndexError,"KENCODE DEFINED, no NREC");
+#ifdef ALTBLOCK
+  PyErr_Format(PyExc_IndexError,"ALTBLOCK DEFINED, no NREC");
   return;
 #endif
 

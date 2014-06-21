@@ -1,5 +1,5 @@
 
-#ifdef KENCODE
+#ifdef ALTBLOCK
 
 #include <stdlib.h>
 #include <stdio.h>
