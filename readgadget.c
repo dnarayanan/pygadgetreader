@@ -169,12 +169,12 @@ readhead(PyObject *self, PyObject *args, PyObject *keywds)
     else if(strcmp(Value,f_cooling)==0) return Py_BuildValue("i",header.flag_cooling);
     else if(strcmp(Value,f_age)==0)     return Py_BuildValue("i",header.flag_stellarage);
     else if(strcmp(Value,f_metals)==0)  return Py_BuildValue("i",header.flag_metals);
-    else if(strcmp(Value,gascount)==0)  return Py_BuildValue("i",header.npartTotal[0]);
-    else if(strcmp(Value,dmcount)==0)   return Py_BuildValue("i",header.npartTotal[1]);
-    else if(strcmp(Value,diskcount)==0) return Py_BuildValue("i",header.npartTotal[2]);
-    else if(strcmp(Value,bulgecount)==0)return Py_BuildValue("i",header.npartTotal[3]);
-    else if(strcmp(Value,starcount)==0) return Py_BuildValue("i",header.npartTotal[4]);
-    else if(strcmp(Value,bndrycount)==0)return Py_BuildValue("i",header.npartTotal[5]);
+    else if(strcmp(Value,gascount)==0)  return Py_BuildValue("I",header.npartTotal[0]);
+    else if(strcmp(Value,dmcount)==0)   return Py_BuildValue("I",header.npartTotal[1]);
+    else if(strcmp(Value,diskcount)==0) return Py_BuildValue("I",header.npartTotal[2]);
+    else if(strcmp(Value,bulgecount)==0)return Py_BuildValue("I",header.npartTotal[3]);
+    else if(strcmp(Value,starcount)==0) return Py_BuildValue("I",header.npartTotal[4]);
+    else if(strcmp(Value,bndrycount)==0)return Py_BuildValue("I",header.npartTotal[5]);
     else if(strcmp(Value,f_fh2)==0)     return Py_BuildValue("i",header.flag_fH2);
     else if(strcmp(Value,f_tmax)==0)    return Py_BuildValue("i",header.flag_tmax);
     else if(strcmp(Value,f_pot)==0)     return Py_BuildValue("i",header.flag_potential);
