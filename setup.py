@@ -28,7 +28,7 @@ if GADGET_DEFAULT + TIPSY_DEFAULT + HDF5_DEFAULT > 1:
 if GADGET_DEFAULT + TIPSY_DEFAULT + HDF5_DEFAULT == 0:
     print 'no file selected, defaulting to GADGET'
 
-INCLDIRS,LIBDIRS,LIBS = [],[],[]
+INCLDIRS,LIBDIRS,LIBS,MACROS = [],[],[],[]
 
 ## check for HDF5
 HAVE_HDF5 = 0
@@ -37,12 +37,12 @@ if os.path.isdir(HDF5INCL) and os.path.isdir(HDF5LIB):
     INCLDIRS.append(HDF5INCL)
     LIBDIRS.append(HDF5LIB)
     LIBS.append('hdf5')
+    MACROS.append(('HAVE_HDF5',HAVE_HDF5))
 else:
     if HDF5_DEFAULT:
         print 'could not find HDF5 dirs!'
         sys.exit()
 
-MACROS = [('HAVE_HDF5',HAVE_HDF5)]
 if HDF5_DEFAULT:
     MACROS.append(('HDF5_DEFAULT',HDF5_DEFAULT))
 elif TIPSY_DEFAULT:

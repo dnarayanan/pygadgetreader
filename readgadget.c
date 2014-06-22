@@ -211,7 +211,7 @@ readsnap(PyObject *self, PyObject *args, PyObject *keywds)
 
 #ifndef HAVE_HDF5
   if(HDF5_FILE==1){
-    printf("selected HDF5 when HDF5 is not enabled, please set the proper HDF5INCL and HDF5LIB dirs in setup.py\n")
+    printf("selected HDF5 when HDF5 is not enabled, please set the proper HDF5INCL and HDF5LIB dirs in setup.py\n");
     PyErr_Format(PyExc_IndexError,"HDF5 NOT ENABLED");
     return NULL;
   }
