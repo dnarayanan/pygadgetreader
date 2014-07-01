@@ -120,13 +120,13 @@ class Header(object):
 
         ## assign dictionary
         self.nparticles = np.sum(self.npart)
-        self.vals = {'npart':self.npart,
-                     'ngas':self.npart[0],
-                     'ndm':self.npart[1],
-                     'ndisk':self.npart[2],
-                     'nbulge':self.npart[3],
-                     'nstar':self.npart[4],
-                     'nbndry':self.npart[5],
+        self.vals = {'npart':self.npartTotal,
+                     'ngas':self.npartTotal[0],
+                     'ndm':self.npartTotal[1],
+                     'ndisk':self.npartTotal[2],
+                     'nbulge':self.npartTotal[3],
+                     'nstar':self.npartTotal[4],
+                     'nbndry':self.npartTotal[5],
                      'mass':self.mass,
                      'time':self.time,
                      'nfiles':self.nfiles,
