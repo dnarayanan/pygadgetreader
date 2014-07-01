@@ -121,6 +121,77 @@ void rockstar_halos(int values)
   }
   */
 
+  printf("int64_t: %d\n",sizeof(int64_t));
+
+  printf("%d\n",rs_halos[0].id);
+  for(i=0; i<6; i++)
+    printf(" %f\n",rs_halos[0].pos[i]);
+  for(i=0;i<3;i++)
+    printf(" %f\n",rs_halos[0].corevel[i]);
+  for(i=0;i<3;i++)
+    printf(" %f\n",rs_halos[0].bulkvel[i]);
+  
+  printf("\n");
+
+  printf("%e\n%f\n%f\n%f\n%f\n%f\n%f\n%f\n%f\n%f\n",
+	 rs_halos[0].m,
+	 rs_halos[0].r,
+	 rs_halos[0].child_r,
+	 rs_halos[0].vmax_r,
+	 rs_halos[0].mgrav,
+	 rs_halos[0].vmax,
+	 rs_halos[0].rvmax,
+	 rs_halos[0].rs,
+	 rs_halos[0].klypin_rs,
+	 rs_halos[0].vrms);
+
+  printf("\n");
+	 
+  for(i=0;i<3;i++)
+    printf(" %f\n",rs_halos[0].J[i]);
+  
+  printf("%f\n%f\n",
+	 rs_halos[0].energy,
+	 rs_halos[0].spin);
+
+  for(i=0;i<4;i++)
+    printf(" %f\n",rs_halos[0].alt_m[i]);
+
+  printf("\n");
+
+  printf("%f\n%f\n%f\n%f\n",
+	 rs_halos[0].Xoff,
+	 rs_halos[0].Voff,
+	 rs_halos[0].b_to_a,
+	 rs_halos[0].c_to_a);
+
+  for(i=0;i<3;i++)
+    printf("%f\n",rs_halos[0].A[i]);
+  printf("%f\n%f\n",
+	 rs_halos[0].b_to_a2,
+	 rs_halos[0].c_to_a2);
+  for(i=0;i<3;i++)
+    printf("%f\n",rs_halos[0].A2[i]);
+
+  printf("%f\n%f\n%f\n%f\n",
+	 rs_halos[0].bullock_spin,
+	 rs_halos[0].kin_to_pot,
+	 rs_halos[0].m_pe_b,
+	 rs_halos[0].m_pe_d);
+
+  printf("\n");
+
+  printf("%d\n%d\n%d\n%d\n%d\n%d\n%f\n%f\n%f\n",
+	 rs_halos[0].num_p,
+	 rs_halos[0].num_child_particles,
+	 rs_halos[0].p_start,
+	 rs_halos[0].desc,
+	 rs_halos[0].flags,
+	 rs_halos[0].n_core,
+	 rs_halos[0].min_pos_err,
+	 rs_halos[0].min_vel_err,
+	 rs_halos[0].min_bulkvel_err);
+
   //assign values to the correct retrun array
   int pc = 0;
   if(values==0){
