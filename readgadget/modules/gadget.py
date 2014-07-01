@@ -1,6 +1,6 @@
 import sys
 import numpy as np
-from common import METALFACTOR,headerTypes
+from common import METALFACTOR,headerTypes,GasProps
 
 
 
@@ -257,3 +257,34 @@ def gadget_readage(f,h):
     errorcheck(skip1,skip2,'age')
 
     return age
+
+
+
+def gadget_read(f,h,p):
+    """Main driver for reading gadget binaries"""
+    if h.reading == 'pos' or h.reading == 'vel':
+        arr = gadget_readposvel(f,h,p)
+    elif h.reading == 'pid':
+        arr = gadget_readpid(f,h,p)
+    elif h.reading == 'mass':
+        arr = gadget_readmass(f,h,p)
+    elif h.reading in GasProps:
+        if p != 0: 
+            print('WARNING!! you requested ParticleType%d for %s, returning GAS instead' 
+                  % (p,h.reading))
+        arr = gadget_readgasprop(f,h)
+    elif h.reading == 'metallicity':
+        arr = gadget_readmetals(f,h,p)
+    elif h.reading == 'metalarray':
+        arr = gadget_readmetals(f,h,p,single=0)
+    elif h.reading == 'pot':
+        arr = gadget_readpotentials(f,h,p)
+    elif h.reading == 'age':
+        arr = gadget_readage(f,h)
+    else:
+        print 'no clue what to read =('
+        arr = np.zeros(0)
+    
+    if h.reading != 'pid':
+        arr = arr.astype(np.float64)
+    return arr

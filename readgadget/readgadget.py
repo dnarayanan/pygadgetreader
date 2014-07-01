@@ -1,6 +1,8 @@
 from modules.common import *
 import modules.header as HEAD
-from modules.director import *
+import modules.gadget as gadget
+import modules.tipsy as tipsy
+import modules.hdf5 as hdf5
 import numpy as np
 import sys
 
@@ -30,34 +32,19 @@ def readsnap(snap,data,ptype,**kwargs):
             f = h.f
             initUnits(h)
 
-        if h.gadget_file:
-            g.skipblocks(f,h,d)
-        if d == 'pos' or d == 'vel':
-            arr = readposvel(f,h,p)
-        elif d == 'pid':
-            arr = readpid(f,h,p)
-        elif d == 'mass':
-            arr = readmass(f,h,p)
-        elif d in GasProps:
-            if p != 0: 
-                print 'WARNING!! you requested ParticleType%d for %s, returning GAS instead' % (p,d)
-            arr = readgasprop(f,h)
-        elif d == 'metallicity':
-            arr = readmetals(f,h,p)
-        elif d == 'metalarray':
-            arr = readmetals(f,h,p,single=0)
-        elif d == 'pot':
-            arr = readpotentials(f,h,p)
-        elif d == 'age':
-            arr = readage(f,h)
-        else:
-            print 'no %s block!!! (requested %s)' % (d,data)
-            sys.exit()
+        if h.hdf5_file:
+            arr = hdf5.hdf5_read(f,h,p)
+        elif h.tipsy_file:
+            arr = tipsy.tipsy_read(f,h,p)
+        elif h.gadget_file:
+            gadget.skipblocks(f,h,d)
+            arr = gadget.gadget_read(f,h,p)
 
         f.close()
 
         if i > 0:
-            return_arr = np.concatenate((return_arr,arr))
+            if len(arr) > 0:
+                return_arr = np.concatenate((return_arr,arr))
         else:
             return_arr = arr
 
