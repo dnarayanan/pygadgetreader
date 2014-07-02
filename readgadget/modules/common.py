@@ -140,6 +140,7 @@ headerTypes['f_metals']      = 'flag_metals'
 
 
 ## default data types
+# the VALUE here is the important part
 dataTypes = {'pos':'pos',
              'vel':'vel',
              'pid':'pid',
@@ -168,6 +169,7 @@ dataTypes['fH2']        = 'fh2'
 dataTypes['FH2']        = 'fh2'
 dataTypes['metals']     = 'metalarray'
 
+## values used for output logging
 dataNames = {'pos':'Positions',
              'vel':'Velocities',
              'pid':'Particle IDs',
@@ -191,9 +193,9 @@ dataDefaultUnits = {'sfr':'[Msun/yr]'}
 dataUnits = {'vel':'[km/s, peculiar]',
              'mass':'[Msun/h]',
              'u':'[Kelvin]',
-             'rho':'[g/cm^3 h^2]',
+             'rho':'[h^2 g/cm^3, physical]',
              'sfr':'[Msun/yr]',
-             'sigma':'[g/cm^2 h]'}
+             'sigma':'[h g/cm^2, physical]'}
 
 
 ## properties that redirect to readgasprops()

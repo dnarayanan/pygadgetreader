@@ -3,7 +3,7 @@ try:
 except ImportError:
     from distutils.core import setup
 
-setup(name='PyGadgetReader',
+setup(name='pyGadgetReader',
       version='1.0',
       description='module to read all sorts of gadget files',
       author='Robert Thompson',

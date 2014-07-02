@@ -1,0 +1,3 @@
+###pyGadgetReader
+
+Readme in progress...
