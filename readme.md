@@ -15,7 +15,7 @@ E-Mail: rthompsonj@gmail.com
  * [readsnap()](#readsnap) 
  * [readrockstar()](#readrockstar) 
 
-## <a id="sum"></a>Summary
+## Summary
 Do you *love* running simulations but *hate* fighting with the different flavors of output?  If so, you've come to the right place!  `pyGadgetReader` is designed to take the headache out of reading your `GADGET` simulation data; it plays the role of interpreter between the binary snapshot & `python`.  The module currently supports the following data types:
 
 - **Gadget** type1-binary (single/multi-part)
@@ -28,12 +28,12 @@ Do you *love* running simulations but *hate* fighting with the different flavors
 
 - **Rockstar** binary outputs
 
-## <a id="req"></a>Requirements
+## Requirements
 * python 2.7.x
 * numpy
 * h5py
 
-## <a id="obt"></a>Obtaining
+## Obtaining
 The easiest way to download the code and stay up to date is to clone a version from [bitbucket](https://bitbucket.org/rthompson/pygadgetreader) to your local computer via Mercurial (hg):
 
 ~~~Bash
@@ -41,7 +41,7 @@ The easiest way to download the code and stay up to date is to clone a version f
 ~~~
 
 
-## <a id="cust"></a>Customization
+## Customization
 Before building the module, there are a few customizations you may want to tinker with.  These can all be found in *`readgadget/modules/common.py`*.
 
 1. **UNITS:**  The code currently assumes that your `Gadget` length units are `Kpc/h`, mass units are 10^(10)`Msun/h`, and velocity units are `km/s`.  This can be changed by modifying the *`UnitLength_in_cm`*, *`UnitMass_in_g`*, and *`UnitVelocity_in_cm_per_s`* respectively.  I plan to make this a run-time option in the near future. (*note: has NO impact on TIPSY files as of now*)
@@ -65,7 +65,7 @@ Before building the module, there are a few customizations you may want to tinke
 ...
 ~~~
 
-## <a id="inst"></a>Installation
+## Installation
 Once the code is downloaded there are two methods of installation depending on your access rights.  If you have write access to your python distribution, then the preferred method is to execute the following commands:
 
 ~~~Bash
@@ -84,7 +84,7 @@ export PYTHONPATH
 #### NOTE for uninstalling previous versions:
 If you had previously installed my `C` version of `pyGadgetReader` you should *remove* it before trying to use the code as there may be some naming conflicts.  First you need to find out *where* python, a point in the general direction is typing `which python` in your terminal, this will return your installation directory.  Next you need to locate your `site-packages` directory which is usually under python's `lib` directory.  Once there you are looking for anything in the form of `readgadget.so`, once this is found remove it.
 
-## <a id="usage"></a>Usage
+## Usage
 **IMPORTANT:** When using `pyGadgetReader`, **do NOT include** the snapshot extension or number prefix (for multi-part).  As an example, if your snapshot is named `'snap_N128L16_005.0.hdf5'`, you would only pass `'snap_N128L16_005'` to the functions below.
 
 To gain access to the following functions, place this at the top of your python script:
@@ -94,7 +94,7 @@ from readgadget import *
 ~~~
 
 
-### <a id="readhead"></a>readhead()
+### readhead()
 This function reads in the header and returns values of interest.  The values it can read in are as follows:
 
 	 time	       - scale factor of the snapshot
@@ -138,7 +138,7 @@ This function reads in the header and returns values of interest.  The values it
 
 
 
-### <a id="readsnap"></a>readsnap()
+### readsnap()
 This function does the heavy lifting.  It reads data blocks from the snapshot and returns the requested data for a a specified particle type.
 
 	   Supported data blocks are:
@@ -200,7 +200,7 @@ This function does the heavy lifting.  It reads data blocks from the snapshot an
 		gtemp=readsnap('snap_005','u','gas',units=1)
 
 
-### <a id="readrockstar"></a>readrockstar()
+### readrockstar()
 This function reads rockstar binary data.  
 
 	   Current supported return data types:
