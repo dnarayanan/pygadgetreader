@@ -95,4 +95,7 @@ def tipsy_read(f,h,ptype):
     else:
         arr = tipsy_binread(f,h,ptype)
     
+    if h.reading != 'pid':
+      arr = arr.astype(np.float64)
+
     return arr

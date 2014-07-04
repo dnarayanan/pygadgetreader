@@ -263,4 +263,4 @@ class Header(object):
         self.flag_tmax   = 1
         self.flag_delaytime = 1
 
-        print self.npart
+        #print self.npart
