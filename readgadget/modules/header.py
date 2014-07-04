@@ -18,6 +18,11 @@ class Header(object):
         self.UnitLength_in_cm = c.UnitLength_in_cm
         self.UnitVelocity_in_cm_per_s = c.UnitVelocity_in_cm_per_s
         
+        ## debug?
+        self.debug = False
+        if 'debug' in args[0] and args[0]['debug'] == 1:
+            self.debug = True
+
         ## supress output?
         self.supress = False
         if 'supress_output' in args[0] and args[0]['supress_output'] == 1:

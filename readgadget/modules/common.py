@@ -199,8 +199,9 @@ dataUnits = {'vel':'[km/s, peculiar]',
 
 
 ## properties that redirect to readgasprops()
-GasProps  = ['u','rho','ne','nh','hsml','sfr',
-             'delaytime','fh2','sigma','tmax','nspawn']
+GasProps     = ['u','rho','ne','nh','hsml','sfr',
+                'delaytime','fh2','sigma']
+GasStarProps = ['tmax','nspawn']
 
 
 RecognizedOptions = ['units','hdf5','tipsy','supress_output','blockordering','debug']

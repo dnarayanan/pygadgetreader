@@ -17,7 +17,10 @@ HDF5_NAMES = {'pos':'Coordinates',
               'age':'StellarFormationTime',
               'pot':'Potential',
               'fh2':'FractionH2',
-              'sigma':'Sigma'}
+              'sigma':'Sigma',
+              'tmax':'TemperatureMax',
+              'delaytime':'DelayTime',
+              'nspawn':'NstarsSpawn'}
 
 
 def hdf5_general(f,h,ptype):

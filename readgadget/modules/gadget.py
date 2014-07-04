@@ -1,11 +1,13 @@
 import sys
 import numpy as np
-from common import METALFACTOR,headerTypes,GasProps
+from common import METALFACTOR,headerTypes,GasProps,GasStarProps
 
 
 
 def skip(f):
-    return np.fromfile(f,dtype=np.uint32,count=1)[0]
+    skipval = np.fromfile(f,dtype=np.uint32,count=1)
+    #print skipval
+    return skipval[0]
 
 def errorcheck(s1,s2,block):
     if s1!=s2:
@@ -47,14 +49,20 @@ def skipblocks(f,h,val):
 
     
     for key,items in h.BLOCKORDER.iteritems():
-        if val == key: return
-    
+        if val == key: 
+            if h.debug:
+                print 'returning for key %s' % key
+            return
+
+        if val == 'metalarray' and key == 'metallicity': return
+
         multi = 1
         if key == 'pos' or key == 'vel':
             multi = 3
         if key == 'metallicity' or key == 'metalarray':
             multi = h.flag_metals
 
+        if h.debug: print 'skipping %s' % key
         if key == 'mass':
             skipmasses()
         elif len(items) == 1:
@@ -212,6 +220,17 @@ def gadget_readgasprop(f,h):
 
     return gasprop*h.convert
 
+def gadget_readgasstarprop(f,h,ptype):
+    skip1 = skip(f)
+    if ptype == 4:
+        f.seek(4 * h.npart[0],1)
+    gasstarprop = np.fromfile(f,dtype=np.float32,count=h.npart[ptype])
+    if ptype == 0:
+        f.seek(4 * h.npart[4],1)
+    skip2 = skip(f)
+    errorcheck(skip1,skip2,'gas-star prop')
+    return gasstarprop*h.convert
+
 def gadget_readmetals(f,h,ptype,single=1):
     skip1 = skip(f)
     if ptype == 4:
@@ -233,7 +252,6 @@ def gadget_readmetals(f,h,ptype,single=1):
         metals = newZ
         newZ   = None
     elif h.flag_metals > 1:
-        print np.shape(metals)
         metals = metals.reshape(h.npart[ptype],h.flag_metals)
 
     return metals
@@ -262,6 +280,7 @@ def gadget_readage(f,h):
 
 def gadget_read(f,h,p):
     """Main driver for reading gadget binaries"""
+
     if h.reading == 'pos' or h.reading == 'vel':
         arr = gadget_readposvel(f,h,p)
     elif h.reading == 'pid':
@@ -273,6 +292,8 @@ def gadget_read(f,h,p):
             print('WARNING!! you requested ParticleType%d for %s, returning GAS instead' 
                   % (p,h.reading))
         arr = gadget_readgasprop(f,h)
+    elif h.reading in GasStarProps:
+        arr = gadget_readgasstarprop(f,h,p)
     elif h.reading == 'metallicity':
         arr = gadget_readmetals(f,h,p)
     elif h.reading == 'metalarray':

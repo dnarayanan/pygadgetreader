@@ -59,7 +59,7 @@ def readsnap(snap,data,ptype,**kwargs):
                             printer = '%s %s' % (printer,dataUnits[d])
                 else:
                     if d in dataDefaultUnits:
-                        printer = '%s %s' % (printer,defaultDataUnits[d])
+                        printer = '%s %s' % (printer,dataDefaultUnits[d])
                     else:
                         printer = '%s in code units' % printer
             
