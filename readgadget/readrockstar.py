@@ -126,7 +126,25 @@ def compileReturnArray(RS,data):
 
 
 def readrockstar(binfile,data,**kwargs):
-    """read rockstar binary file"""
+    """read rockstar binary file
+
+    Parameters
+    ----------
+    binfile : string
+        path to rockstar binary file.  Do NOT include file extention or leading number
+    data : string
+        requested data, see readme for details
+
+    Examples
+    --------
+    >>> halo_mass = readrockstar('/Users/bob/halos_020','m')
+    >>> halo_mass
+    array([  7.25643648e+08,   5.70148608e+08,   3.97376288e+08,
+         3.66277274e+09,   1.99379231e+10,   5.01039648e+08,
+         ...,
+         1.58950515e+09,   2.10782208e+09,   8.41401088e+09,
+         4.14653504e+08], dtype=float32)
+    """
     RS_DATA = []
     for j in range(0,5000):
         b = '%s.%d.bin' % (binfile,j)

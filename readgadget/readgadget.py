@@ -7,14 +7,57 @@ import numpy as np
 import sys
 
 def readhead(snap,data,**kwargs):
-    """Read and return desired header info"""
+    """Read and return desired header info
+    
+    Parameters
+    ----------
+    snap : string
+        path to your snapshot EXCLUDING file extension (if any)
+    data : string
+        requested header information.  see readme for details.
+
+    Notes
+    -----
+    If your snapshot happens to have a file extension, do NOT pass it to pyGadgetReader.  
+    It will attempt to automatically detect your file type
+
+    Examples
+    --------
+    >>> h = readhead('/Users/bob/snap_020','h')
+    >>> h
+    0.7
+    """
     h = HEAD.Header(snap,data,0,kwargs)
     h.f.close()
     return h.vals[headerTypes[data]]
 
 
 def readsnap(snap,data,ptype,**kwargs):
-    """Read and return desired snapshot data"""
+    """Read and return desired snapshot data
+    
+    Parameters
+    ----------
+    snap : string
+        path to your snapshot EXCLUDING file extension (if any)
+    data : string
+        requested data type.  see readme for details.
+    ptype : string or int
+        particle type requested.  Can be of type string, or integers 0-5
+    
+    Notes
+    -----
+    If your snapshot happens to have a file extension, do NOT pass it to pyGadgetReader.  
+    It will attempt to automatically detect your file type
+
+    Examples
+    --------
+    >>> pos  = readsnap('/Users/bob/snap_020','pos','gas')
+    >>> pos
+    array([[ 7160.86572266,  6508.62304688,  5901.06054688],
+       [ 7161.45166016,  6585.53466797,  5931.87451172],
+       ...,
+       [ 7512.12158203,  7690.34179688,  8516.99902344]])
+    """
     pollOptions(kwargs,data,ptype)
 
     d = dataTypes[data]
