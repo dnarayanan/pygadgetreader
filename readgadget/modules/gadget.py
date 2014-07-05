@@ -195,7 +195,9 @@ def gadget_readmass(f,h,ptype):
         errorcheck(skip1,skip2,'mass')
         return mass*h.convert
     else:
-        return
+        mass = np.zeros(h.npart[ptype],dtype=np.float32)
+        mass.fill(h.mass[ptype])
+        return mass
 
 def gadget_readgasprop(f,h):
     skip1   = skip(f)
