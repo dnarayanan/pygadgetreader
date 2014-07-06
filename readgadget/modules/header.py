@@ -18,6 +18,11 @@ class Header(object):
         self.UnitLength_in_cm = c.UnitLength_in_cm
         self.UnitVelocity_in_cm_per_s = c.UnitVelocity_in_cm_per_s
         
+        ## return double array? (instead of float)
+        self.double = False
+        if 'double' in args[0] and args[0]['double'] == 1:
+            self.double = True
+
         ## debug?
         self.debug = False
         if 'debug' in args[0] and args[0]['debug'] == 1:
@@ -126,7 +131,7 @@ class Header(object):
         if self.debug:
             tmptxt = 'reading %s' % self.snap
             if self.nfiles > 1:
-                tmptxt = '%s (%d/%d files)' % (tmptxt,filenum,self.nfiles)
+                tmptxt = '%s (%d/%d files)' % (tmptxt,filenum+1,self.nfiles)
             print tmptxt
 
         ## assign dictionary

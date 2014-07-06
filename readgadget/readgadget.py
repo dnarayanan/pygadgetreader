@@ -75,6 +75,10 @@ def readsnap(snap,data,ptype,**kwargs):
             f = h.f
             initUnits(h)
 
+        if h.npart[p] == 0:
+            print 'no %s particles present!' % pNames[p]
+            sys.exit()
+
         if h.hdf5_file:
             arr = hdf5.hdf5_read(f,h,p)
         elif h.tipsy_file:
@@ -93,11 +97,11 @@ def readsnap(snap,data,ptype,**kwargs):
 
             if not h.supress:
                 ## print statement
-                printer = 'Returning %s' % dataNames[d]
+                printer = 'Returning %s %s' % (pNames[p],dataNames[d])
                 if h.units:
                     if d in dataUnits:
                         if d == 'u':
-                            printer = 'Returning Temperature %s' % (dataUnits[d])
+                            printer = 'Returning %s Temperature %s' % (pNames[p],dataUnits[d])
                         else:
                             printer = '%s %s' % (printer,dataUnits[d])
                 else:
@@ -108,6 +112,9 @@ def readsnap(snap,data,ptype,**kwargs):
             
                 print printer
 
+    if h.double and h.reading != 'pid':
+        return_arr = return_arr.astype(np.float64)
+                                    
     return return_arr
 
 

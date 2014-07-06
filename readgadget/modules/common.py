@@ -89,6 +89,8 @@ pTypes = {0:0,1:1,2:2,3:3,4:4,5:5,
 # account for different names
 pTypes['star'] = 4
 
+pNames = {0:'GAS',1:'DM',2:'DISK',3:'BULGE',4:'STAR',5:'BNDRY'}
+
 ## default header returns (corresponds to h.vals[KEY])
 headerTypes = {'npart':'npart',
                'ngas':'ngas',
@@ -204,7 +206,7 @@ GasProps     = ['u','rho','ne','nh','hsml','sfr',
 GasStarProps = ['tmax','nspawn']
 
 
-RecognizedOptions = ['units','hdf5','tipsy','supress_output','blockordering','debug']
+RecognizedOptions = ['units','hdf5','tipsy','supress_output','blockordering','debug','double']
 def pollOptions(KWARGS,data,ptype):
     """warn user if option is unrecognized"""
     for key,items in KWARGS.iteritems():

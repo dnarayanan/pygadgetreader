@@ -90,7 +90,4 @@ def hdf5_read(f,h,p):
     else:
         arr = hdf5_general(f,h,p)
 
-    if h.reading != 'pid':
-        arr = arr.astype(np.float64)
-
     return arr

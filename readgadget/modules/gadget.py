@@ -308,6 +308,4 @@ def gadget_read(f,h,p):
         print 'no clue what to read =('
         arr = np.zeros(0)
     
-    if h.reading != 'pid':
-        arr = arr.astype(np.float64)
     return arr
