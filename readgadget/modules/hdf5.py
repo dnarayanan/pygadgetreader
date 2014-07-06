@@ -11,7 +11,7 @@ HDF5_NAMES = {'pos':'Coordinates',
               'hsml':'SmoothingLength',
               'ne':'ElectronAbundance',
               'nh':'NeutralHydrogenAbundance',
-              'sfr':'StarForamtionRate',
+              'sfr':'StarFormationRate',
               'metallicity':'Metallicity',
               'metalarray':'Metallicity',
               'age':'StellarFormationTime',
@@ -27,8 +27,10 @@ def hdf5_general(f,h,ptype):
 
     if ('PartType%d' % ptype) in f:
         if HDF5_NAMES[h.reading] in f['PartType%d' % ptype]:
+            if h.debug: print 'reading PartType%d/%s' % (ptype,HDF5_NAMES[h.reading])
             arr = f['PartType%d/%s' % (ptype,HDF5_NAMES[h.reading])]
         else:
+            if h.debug: print 'could not locate PartType%d/%s' % (ptype,HDF5_NAMES[h.reading])
             arr = np.zeros(h.npart[ptype])
 
         if h.units and h.reading == 'u':
@@ -36,6 +38,7 @@ def hdf5_general(f,h,ptype):
             import common as common
             h.convert = common.getTfactor(np.asarray(ne),h)
     else:
+        if h.debug: print 'coult not find PartType%d' % ptype
         arr = np.zeros(0)
 
     return np.asarray(arr)*h.convert
@@ -48,9 +51,11 @@ def hdf5_readmass(f,h,ptype):
         if HDF5_NAMES[h.reading] in f['PartType%d' % ptype]:
             arr = f['PartType%d/%s' % (ptype,HDF5_NAMES[h.reading])]
         else:
+            if h.debug: print 'could not locate PartType%d/%s' % (ptype,HDF5_NAMES[h.reading])
             arr = np.zeros(h.npart[ptype])
             arr.fill(h.mass[ptype])
     else:
+        if h.debug: print 'coult not find PartType%d' % ptype
         arr = np.zeros(0)
 
     return np.asarray(arr)*h.convert
