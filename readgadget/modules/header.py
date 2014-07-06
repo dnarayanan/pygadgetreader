@@ -123,6 +123,12 @@ class Header(object):
         elif self.tipsy_file:
             self.read_tipsy_header()
 
+        if self.debug:
+            tmptxt = 'reading %s' % self.snap
+            if self.nfiles > 1:
+                tmptxt = '%s (%d/%d files)' % (tmptxt,filenum,self.nfiles)
+            print tmptxt
+
         ## assign dictionary
         self.nparticles = np.sum(self.npart)
         self.vals = {'npart':self.npartTotal,
