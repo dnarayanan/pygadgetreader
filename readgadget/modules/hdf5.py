@@ -37,7 +37,7 @@ def hdf5_general(f,h,ptype):
             ne = f['PartType0/%s' % (HDF5_NAMES['ne'])]
             import common as common
             h.convert = common.getTfactor(np.asarray(ne,dtype=np.float32),h)
-            h.convert = h.convert.astype(np.float32)
+            #h.convert = h.convert.astype(np.float32)
     else:
         if h.debug: print 'coult not find PartType%d' % ptype
         arr = np.zeros(0,dtype=np.float32)
