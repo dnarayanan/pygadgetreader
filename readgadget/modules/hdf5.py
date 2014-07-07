@@ -31,7 +31,7 @@ def hdf5_general(f,h,ptype):
             arr = f['PartType%d/%s' % (ptype,HDF5_NAMES[h.reading])]
         else:
             if h.debug: print 'could not locate PartType%d/%s' % (ptype,HDF5_NAMES[h.reading])
-            arr = np.zeros(h.npart[ptype])
+            arr = np.zeros(h.npart[ptype],dtype=np.float32)
 
         if h.units and h.reading == 'u':
             ne = f['PartType0/%s' % (HDF5_NAMES['ne'])]
@@ -39,7 +39,7 @@ def hdf5_general(f,h,ptype):
             h.convert = common.getTfactor(np.asarray(ne),h)
     else:
         if h.debug: print 'coult not find PartType%d' % ptype
-        arr = np.zeros(0)
+        arr = np.zeros(0,dtype=np.float32)
 
     return np.asarray(arr)*h.convert
 
@@ -52,11 +52,11 @@ def hdf5_readmass(f,h,ptype):
             arr = f['PartType%d/%s' % (ptype,HDF5_NAMES[h.reading])]
         else:
             if h.debug: print 'could not locate PartType%d/%s' % (ptype,HDF5_NAMES[h.reading])
-            arr = np.zeros(h.npart[ptype])
+            arr = np.zeros(h.npart[ptype],dtype=np.float32)
             arr.fill(h.mass[ptype])
     else:
         if h.debug: print 'coult not find PartType%d' % ptype
-        arr = np.zeros(0)
+        arr = np.zeros(0,dtype=np.float32)
 
     return np.asarray(arr)*h.convert
 
@@ -72,14 +72,14 @@ def hdf5_readmetals(f,h,ptype,single=1):
                 arr = np.asarray(metals)
         else:
             if single:
-                arr = np.zeros(h.npart[ptype])
+                arr = np.zeros(h.npart[ptype],dtype=np.float32)
             else:
                 arr = np.zeros((h.npart[ptype],h.flag_metals))
     else:
         if single:
-            arr = np.zeros(0)
+            arr = np.zeros(0,dtype=np.float32)
         else:
-            arr = np.zeros((0,h.flag_metals))
+            arr = np.zeros((0,h.flag_metals),dtype=np.float32)
 
     return arr
 
