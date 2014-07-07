@@ -246,6 +246,9 @@ def initUnits(h):
                                    h.UnitTime_in_s**2)
         elif h.reading == 'mass':
             convert = h.UnitMass_in_g
+        
+    if h.reading == 'pid':
+        convert = 1
     h.convert = convert
 
 
