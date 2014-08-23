@@ -58,12 +58,12 @@ def readsnap(snap,data,ptype,**kwargs):
        ...,
        [ 7512.12158203,  7690.34179688,  8516.99902344]])
     """
-    pollOptions(kwargs,data,ptype)
+    h   = HEAD.Header(snap,0,kwargs)
+    d,p = pollOptions(h,kwargs,data,ptype)
+    h.reading = d
 
-    d = dataTypes[data]
-    p = pTypes[ptype]
+    #print 'reading %s.%s' % (snap,h.extension)
 
-    h = HEAD.Header(snap,d,0,kwargs)
     f = h.f
     initUnits(h)
     
@@ -71,7 +71,7 @@ def readsnap(snap,data,ptype,**kwargs):
 
     for i in range(0,h.nfiles):
         if i > 0:
-            h = HEAD.Header(snap,d,i,kwargs)
+            h = HEAD.Header(snap,i,kwargs)
             f = h.f
             initUnits(h)
 
@@ -94,25 +94,9 @@ def readsnap(snap,data,ptype,**kwargs):
                 return_arr = np.concatenate((return_arr,arr))
         else:
             return_arr = arr
+            gadgetPrinter(h,d,p)
 
-            if not h.supress:
-                ## print statement
-                printer = 'Returning %s %s' % (pNames[p],dataNames[d])
-                if h.units:
-                    if d in dataUnits:
-                        if d == 'u':
-                            printer = 'Returning %s Temperature %s' % (pNames[p],dataUnits[d])
-                        else:
-                            printer = '%s %s' % (printer,dataUnits[d])
-                else:
-                    if d in dataDefaultUnits:
-                        printer = '%s %s' % (printer,dataDefaultUnits[d])
-                    else:
-                        printer = '%s in code units' % printer
-            
-                print printer
-
-    if h.double and h.reading != 'pid':
+    if h.double and h.reading != 'pid' and h.reading != 'ParticleIDs':
         return_arr = return_arr.astype(np.float64)
                                     
     return return_arr

@@ -194,6 +194,7 @@ def gadget_readmass(f,h,ptype):
         skip2 = skip(f)
         errorcheck(skip1,skip2,'mass')
         return mass*h.convert
+        #return mass.astype(np.float64)*h.convert
     else:
         mass = np.zeros(h.npart[ptype],dtype=np.float32)
         mass.fill(h.mass[ptype])

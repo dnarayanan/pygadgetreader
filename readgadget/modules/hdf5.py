@@ -26,9 +26,17 @@ HDF5_NAMES = {'pos':'Coordinates',
 def hdf5_general(f,h,ptype):
 
     if ('PartType%d' % ptype) in f:
-        if HDF5_NAMES[h.reading] in f['PartType%d' % ptype]:
+        if h.reading not in HDF5_NAMES:
+            if h.reading in f['PartType%d' % ptype]:
+                arr = f['PartType%d/%s' % (ptype,h.reading)]
+            else:
+                print 'ERROR!  could not find "%s" in PartType%d' % (h.reading,ptype)
+                arr = np.zeros(0,dtype=np.float32)
+
+        elif HDF5_NAMES[h.reading] in f['PartType%d' % ptype]:
             if h.debug: print 'reading PartType%d/%s' % (ptype,HDF5_NAMES[h.reading])
             arr = f['PartType%d/%s' % (ptype,HDF5_NAMES[h.reading])]
+
         else:
             if h.debug: print 'could not locate PartType%d/%s' % (ptype,HDF5_NAMES[h.reading])
             arr = np.zeros(h.npart[ptype],dtype=np.float32)

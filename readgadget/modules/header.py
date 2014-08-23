@@ -3,12 +3,12 @@ import os,sys
 import common as c
 
 class Header(object):
-    def __init__(self,snap,reading,filenum, *args):
+    def __init__(self,snap,filenum, *args):
         snap_passed = snap
         self.snap_passed = snap
         self.args = args[0]
 
-        self.reading     = reading
+        #self.reading     = reading
         self.hdf5_file   = False
         self.tipsy_file  = False
         self.gadget_file = False
@@ -97,14 +97,14 @@ class Header(object):
                     snap = '%s.hdf5' % (snap_passed)
                     if os.path.isfile(snap):
                         self.hdf5_file = True
-                        if not self.supress: 
+                        if self.debug: 
                             print 'detected HDF5 file'
                     else:
                         snap = '%s.%d.hdf5' % (snap_passed,filenum)
                         if os.path.isfile(snap):
                             self.hdf5_file = True
                             if filenum == 0:
-                                if not self.supress: 
+                                if self.debug: 
                                     print 'detected HDF5 file'
 
                         ## if HDF5 not found, search for TIPSY
@@ -112,7 +112,7 @@ class Header(object):
                             snap = '%s.bin' % (snap_passed)
                             if os.path.isfile(snap):
                                 self.tipsy_file = True
-                                if not self.supress: 
+                                if self.debug:
                                     print 'detected TIPSY file'
                             else:
                                 print 'could not locate file'
@@ -125,14 +125,20 @@ class Header(object):
         ## read header
         if self.hdf5_file:
             self.read_hdf5_header()
+            self.extension = 'hdf5'
         elif self.tipsy_file:
             self.read_tipsy_header()
+            self.extension = 'bin/aux'
+        else:
+            self.extension = ''
 
-        if self.debug:
+        if not self.supress or self.debug:
             tmptxt = 'reading %s' % self.snap
             if self.nfiles > 1:
                 tmptxt = '%s (%d/%d files)' % (tmptxt,filenum+1,self.nfiles)
-            print tmptxt
+                print tmptxt
+            elif self.debug:
+                print tmptxt
 
         ## assign dictionary
         self.nparticles = np.sum(self.npart)

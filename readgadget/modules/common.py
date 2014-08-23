@@ -207,22 +207,33 @@ GasStarProps = ['tmax','nspawn']
 
 
 RecognizedOptions = ['units','hdf5','tipsy','supress_output','blockordering','debug','double']
-def pollOptions(KWARGS,data,ptype):
+def pollOptions(h,KWARGS,data,ptype):
     """warn user if option is unrecognized"""
     for key,items in KWARGS.iteritems():
         if key not in RecognizedOptions:
             print 'WARNING!! option not recognized: %s' % key
 
+    d = data
+    p = ptype
+
     kill = 0
     if data not in dataTypes:
-        print 'ERROR! %s not a recognized data request' % data
-        kill = 1
+        if not h.hdf5_file:
+          print 'ERROR! %s not a recognized data request' % data
+          kill = 1
+    else:
+        d = dataTypes[d]
+
     if ptype not in pTypes:
         print 'ERROR! %s not a recognized particle type' % ptype
         kill = 1
+    else:
+        p = pTypes[p]
+
     if kill:
         sys.exit()
 
+    return d,p
 
 def initUnits(h):
     """initialize conversion factors"""
@@ -259,3 +270,29 @@ def getTfactor(Ne,h):
     conversion = (MeanWeight / BOLTZMANN * (GAMMA - 1.0) * 
                   h.UnitEnergy_in_cgs / h.UnitMass_in_g)
     return conversion
+
+
+def gadgetPrinter(h,d,p):
+
+    printer = ''
+
+    if d not in dataNames and h.hdf5_file:
+        printer = 'Returning %s %s' % (pNames[p],d)
+    else:
+        printer = 'Returning %s %s' % (pNames[p],dataNames[d])
+
+        if h.units:
+            if d in dataUnits:
+                if d == 'u':
+                    printer = 'Returning %s Temperature %s' % (pNames[p],dataUnits[d])
+                else:
+                    printer = '%s %s' % (printer, dataUnits[d])
+            else:
+                if d in dataDefaultUnits:
+                    printer = '%s %s' % (printer,dataDefaultUnits[d])
+                else:
+                    printer = '%s in code units' % printer
+    if h.supress:
+        return
+    else:
+        print printer
