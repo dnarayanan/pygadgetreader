@@ -8,10 +8,10 @@ import numpy as np
 DB    = 1
 UNITS = 1
 
-G1  = 1
+G1  = 0
 G1M = 0
-G2  = 0
-G2M = 0
+G2  = 1
+G2M = 1
 H5  = 0
 H5M = 0
 
@@ -47,7 +47,7 @@ if G1M:
 if G2:
     print ''
     print 'GADGET TYPE 2'
-    snap = '%s/gadget/g2/snap_lowres_000' % bd
+    snap = '%s/gadget/g2/snap_lowres_030' % bd
     #rho = readsnap(snap,'RH','gas',units=UNITS,debug=DB)
     rho = readsnap(snap,'rho','gas',units=UNITS,debug=DB)
     u   = readsnap(snap,'u','gas',units=UNITS)
@@ -60,7 +60,7 @@ if G2:
 if G2M:
     print ''
     print 'GADGET TYPE 2-MULTI'
-    snap = '%s/gadget/g2/multi/snap_lowres_002' % bd
+    snap = '%s/gadget/g2/multi/snap_lowres_030' % bd
     rho = readsnap(snap,'rho','gas',units=UNITS,debug=DB)
     u   = readsnap(snap,'u','gas',units=UNITS)
     fig=figure()

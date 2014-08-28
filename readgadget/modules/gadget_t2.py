@@ -17,7 +17,8 @@ TYPE2NAMES = {
     'metallicity':'Z   ',
     'pot':'POT ',
     'fh2':'fH2 ',
-    'sigma':'Sigm'
+    'sigma':'Sigm',
+    'age':'AGE '
 }
 
 def findBlock(f,h):
