@@ -218,9 +218,14 @@ def pollOptions(h,KWARGS,data,ptype):
 
     kill = 0
     if data not in dataTypes:
-        if not h.hdf5_file:
+        if h.fileType != 'hdf5' and h.fileType != 'gadget2':
           print 'ERROR! %s not a recognized data request' % data
           kill = 1
+        if h.fileType == 'gadget2':
+            if len(d) < 4:
+                d += ' '*(4-len(d))
+            elif len(d) > 4:
+                d = d[0:4]
     else:
         d = dataTypes[d]
 
@@ -239,7 +244,7 @@ def initUnits(h):
     """initialize conversion factors"""
     convert = 1.0
 
-    if h.units and not h.tipsy_file:
+    if h.units and h.fileType != 'tipsy':
         if h.reading == 'rho':
             if h.boxsize > 0. and h.OmegaLambda > 0:
                 convert = ((1.0 + h.redshift)**3 * 
@@ -276,7 +281,7 @@ def gadgetPrinter(h,d,p):
 
     printer = ''
 
-    if d not in dataNames and h.hdf5_file:
+    if d not in dataNames and (h.fileType == 'hdf5' or h.fileType == 'gadget2'):
         printer = 'Returning %s %s' % (pNames[p],d)
     else:
         printer = 'Returning %s %s' % (pNames[p],dataNames[d])

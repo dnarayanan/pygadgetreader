@@ -1,6 +1,7 @@
 from modules.common import *
 import modules.header as HEAD
 import modules.gadget as gadget
+import modules.gadget_t2 as gadget_t2
 import modules.tipsy as tipsy
 import modules.hdf5 as hdf5
 import numpy as np
@@ -73,19 +74,21 @@ def readsnap(snap,data,ptype,**kwargs):
         if i > 0:
             h = HEAD.Header(snap,i,kwargs)
             f = h.f
+            h.reading = d
             initUnits(h)
 
         if h.npart[p] == 0:
             print 'no %s particles present!' % pNames[p]
             sys.exit()
 
-        if h.hdf5_file:
+        if h.fileType == 'hdf5':
             arr = hdf5.hdf5_read(f,h,p)
-        elif h.tipsy_file:
+        elif h.fileType == 'tipsy':
             arr = tipsy.tipsy_read(f,h,p)
-        elif h.gadget_file:
-            gadget.skipblocks(f,h,d)
-            arr = gadget.gadget_read(f,h,p)
+        elif h.fileType == 'gadget':
+            arr = gadget.gadget_read(f,h,p,d)
+        elif h.fileType == 'gadget2':
+            arr = gadget_t2.gadget_type2_read(f,h,p)
 
         f.close()
 

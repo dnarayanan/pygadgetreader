@@ -1,17 +1,15 @@
 import numpy as np
 import os,sys
 import common as c
+import struct
 
 class Header(object):
     def __init__(self,snap,filenum, *args):
-        snap_passed = snap
         self.snap_passed = snap
-        self.args = args[0]
+        self.args        = args[0]
+        self.fileType    = ''
 
         #self.reading     = reading
-        self.hdf5_file   = False
-        self.tipsy_file  = False
-        self.gadget_file = False
 
         ## make these modifiable at some point
         self.UnitMass_in_g = c.UnitMass_in_g
@@ -49,88 +47,26 @@ class Header(object):
             print 'cannot select tipsy and hdf5!!'
             sys.exit()
 
-        ## find file name
-        if 'hdf5' in args[0] and args[0]['hdf5'] == 1:
-            snap = '%s.hdf5' % snap_passed
-            if os.path.isfile(snap):
-                self.hdf5_file = True
-            else:
-                snap = '%s.%d.hdf5' % (snap_passed,filenum)
-                if os.path.isfile(snap):
-                    self.hdf5_file = True
-                else:
-                    print 'could not locate HDF5 file!'
-                    sys.exit()
-        elif 'tipsy' in args[0] and args[0]['tipsy'] == 1:
-            snap = '%s.bin' % snap_passed
-            if os.path.isfile(snap):
-                self.tipsy_file = True
-            else:
-                print 'could not locate TIPSY file!'
-                sys.exit()
-
-        ## auto detect routine only if extension not specified
-        else:
-
-            ## verify gadget binary
-            if os.path.isfile(snap):
-                self.snap = snap
-                s1,s2 = self.read_gadget_header()
-                if s1 == 256 and s2 == 256:
-                    self.gadget_file = True
-                else:
-                    print 'could not locate GADGET binary!'
-            else:
-                snap = '%s.%d' % (snap_passed,filenum)
-                if os.path.isfile(snap):
-                    self.snap = snap
-                    s1,s2 = self.read_gadget_header()
-                    if s1 == 256 and s2 == 256:
-                        self.gadget_file = True
-                    else:
-                        print 'could not locate GADGET binary!'
-
-        
-
-                ## if gadget binary not found, search for HDF5
-                else:
-                    snap = '%s.hdf5' % (snap_passed)
-                    if os.path.isfile(snap):
-                        self.hdf5_file = True
-                        if self.debug: 
-                            print 'detected HDF5 file'
-                    else:
-                        snap = '%s.%d.hdf5' % (snap_passed,filenum)
-                        if os.path.isfile(snap):
-                            self.hdf5_file = True
-                            if filenum == 0:
-                                if self.debug: 
-                                    print 'detected HDF5 file'
-
-                        ## if HDF5 not found, search for TIPSY
-                        else:
-                            snap = '%s.bin' % (snap_passed)
-                            if os.path.isfile(snap):
-                                self.tipsy_file = True
-                                if self.debug:
-                                    print 'detected TIPSY file'
-                            else:
-                                print 'could not locate file'
-                                sys.exit()
-
-        #print self.hdf5_file,self.tipsy_file,self.gadget_file
-                    
-        self.snap = snap
+        ## detect file type
+        self.snap = self.detectFileType(args,filenum)
 
         ## read header
-        if self.hdf5_file:
+        if self.fileType == 'gadget':
+            s1,s2 = self.read_gadget_header()
+            if s1 == 256 and s2 == 256:
+                self.extension = ''
+            else:
+                print 'found GADGET file, but header is off...%d vs %d' % (s1,s2)
+                sys.exit()
+        elif self.fileType == 'hdf5':
             self.read_hdf5_header()
             self.extension = 'hdf5'
-        elif self.tipsy_file:
+        elif self.fileType == 'tipsy':
             self.read_tipsy_header()
             self.extension = 'bin/aux'
         else:
-            self.extension = ''
+            print 'should not be here...'
+            sys.exit()
 
         if not self.supress or self.debug:
             tmptxt = 'reading %s' % self.snap
@@ -168,10 +104,21 @@ class Header(object):
                      'flag_tmax':self.flag_tmax}
 
     def read_gadget_header(self):
-        """read gadget type-1 binary header"""
+        """read gadget type-1 & 2 binary header"""
         import gadget as g
         f = open(self.snap,'rb')
         self.f = f
+
+        ## test for type 2 binaries
+        if np.fromfile(f,dtype=np.uint32,count=1)[0] == 8:
+            NAME = struct.unpack('4s',f.read(4))[0]
+            np.fromfile(f,dtype=np.uint32,count=1)
+            np.fromfile(f,dtype=np.uint32,count=1)
+            self.fileType = 'gadget2'
+            if self.debug: print 'detected TYPE 2 gadget binary'
+        else:
+            f.seek(0)
+
         skip1 = g.skip(f)
 
         self.npart       = np.fromfile(f,dtype=np.uint32,count=6)
@@ -197,7 +144,10 @@ class Header(object):
         self.flag_tmax            = np.fromfile(f,dtype=np.int32,count=1)[0]
         self.flag_delaytime       = np.fromfile(f,dtype=np.int32,count=1)[0]
         
-        bytes_left = 256 + 4 - f.tell()
+        bl = 256
+        if self.fileType == 'gadget2':
+            bl += 4 + 4 + 4 + 4
+        bytes_left = bl + 4 - f.tell()
         f.seek(bytes_left,1)
         
         skip2 = g.skip(f)
@@ -285,4 +235,68 @@ class Header(object):
         self.flag_tmax   = 1
         self.flag_delaytime = 1
 
-        #print self.npart
+
+    def detectFileType(self,args,filenum):
+        
+        ## first check to see if the user specified which type
+        if 'hdf5' in args[0] and args[0]['hdf5'] == 1:
+            snap = '%s.hdf5' % self.snap_passed
+            if os.path.isfile(snap):
+                self.fileType = 'hdf5'
+                return snap
+            else:
+                snap = '%s.%d.hdf5' % (self.snap_passed,filenum)
+                if os.path.isfile(snap):
+                    self.fileType = 'hdf5'
+                    return snap
+                else:
+                    print 'could not locate HDF5 file!'
+                    sys.exit()
+        elif 'tipsy' in args[0] and args[0]['tipsy'] == 1:
+            snap = '%s.bin' % self.snap_passed
+            if os.path.isfile(snap):
+                self.fileType = 'tipsy'
+                return snap
+            else:
+                print 'could not locate TIPSY file!'
+                sys.exit()
+
+
+        ## auto detection routine
+
+        # GADGET BINARY
+        snap = self.snap_passed
+        if os.path.isfile(snap):
+            if self.debug: print 'detected GADGET file'
+            self.fileType = 'gadget'
+            return snap
+        else:
+            snap = '%s.%d' % (self.snap_passed,filenum)
+            if os.path.isfile(snap):
+                if self.debug: print 'detected GADGET multi-part file'
+                self.fileType = 'gadget'
+                return snap
+
+        # HDF5 
+        snap = '%s.hdf5' % self.snap_passed
+        if os.path.isfile(snap):
+            if self.debug: print 'detected HDF5 file'
+            self.fileType = 'hdf5'
+            return snap
+        else:
+            snap = '%s.%d.hdf5' % (self.snap_passed,filenum)
+            if os.path.isfile(snap):
+                if self.debug: print 'detected HDF5 multi-part file'
+                self.fileType = 'hdf5'
+                return snap
+            
+        # TIPSY
+        snap = '%s.bin' % self.snap_passed
+        if os.path.isfile(snap):
+            if self.debug: print 'detected TIPSY file'
+            self.fileType = 'tipsy'
+            return snap
+
+        print 'COULD NOT FIND FILE %s' % self.snap_passed
+        sys.exit()
+            

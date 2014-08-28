@@ -281,8 +281,10 @@ def gadget_readage(f,h):
 
 
 
-def gadget_read(f,h,p):
+def gadget_read(f,h,p,d):
     """Main driver for reading gadget binaries"""
+
+    skipblocks(f,h,d)
 
     if h.reading == 'pos' or h.reading == 'vel':
         arr = gadget_readposvel(f,h,p)
