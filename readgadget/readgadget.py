@@ -28,7 +28,7 @@ def readhead(snap,data,**kwargs):
     >>> h
     0.7
     """
-    h = HEAD.Header(snap,data,0,kwargs)
+    h = HEAD.Header(snap,0,kwargs)
     h.f.close()
     return h.vals[headerTypes[data]]
 
