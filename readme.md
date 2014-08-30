@@ -14,11 +14,12 @@ E-Mail: rthompsonj@gmail.com
  * [readhead()](#readhead)
  * [readsnap()](#readsnap) 
  * [readrockstar()](#readrockstar) 
+ * [readfofspecial()](#readfofspecial)
 
 ## Summary
 Do you *love* running simulations but *hate* fighting with the different flavors of output?  If so, you've come to the right place!  `pyGadgetReader` is designed to take the headache out of reading your `GADGET` simulation data; it plays the role of interpreter between the binary snapshot & `python`.  The module currently supports the following data types:
 
-- **Gadget** type1-binary (single/multi-part)
+- **Gadget** types 1 & 2 binaries (single/multi-part)
 - **HDF5** outputs (single/multi-part)
 - **TIPSY** binaries (bin/aux)
 
@@ -27,10 +28,11 @@ Do you *love* running simulations but *hate* fighting with the different flavors
 `pyGadgetReader` also supports the following non-GADGET files:
 
 - **Rockstar** binary outputs
+- **FoF Special** catalogue & indexlist binaries
 
 ## Requirements
 * python 2.7.x
-* numpy
+* numpy 1.7.x
 * h5py
 
 ## Obtaining
@@ -42,13 +44,13 @@ The easiest way to download the code and stay up to date is to clone a version f
 
 
 ## Customization
-Before building the module, there are a few customizations you may want to tinker with.  These can all be found in *`readgadget/modules/common.py`*.
+Before building the module, there are a few customizations you *may* want to tinker with.  These can all be found in *`readgadget/modules/common.py`*.
 
 1. **UNITS:**  The code currently assumes that your `Gadget` length units are `Kpc/h`, mass units are 10^(10)`Msun/h`, and velocity units are `km/s`.  This can be changed by modifying the *`UnitLength_in_cm`*, *`UnitMass_in_g`*, and *`UnitVelocity_in_cm_per_s`* respectively.  I plan to make this a run-time option in the near future. (*note: has NO impact on TIPSY files as of now*)
 
 2. **METALFACTOR:**  If your metal field contains multiple species `(flag_metals > 1)`, this factor is multiplied to their sum to determine the overall particle's `metallicity`.
 
-3. **BLOCKORDERING:** When dealing with `Gadget` type-1 binaries, the block-ordering can be a pain in the neck.  Custom fields can be added the snapshot causing all of your previous readers to start returning bad data; not anymore!  I've tried to design a system where the user can easily customize their block ordering.  `pyGadgetReader` currently has 2 defaults - `BLOCKORDERING0` and `BLOCKORDERING1` which pertain to two different groups who have different block orderings.  The default is set via the `DEFAULT_BLOCKORDERING` variable, which is used in conjunction with the `BLOCKORDERING` dictionary defined farther down in the file.
+3. **BLOCKORDERING:** When dealing with `Gadget` type-1 binaries, the block-ordering can be a pain in the neck.  Custom fields can be added the snapshot causing all of your previous readers to start returning bad data; not anymore!  I've tried to design a system where the user can easily customize their block ordering.  `pyGadgetReader` currently has 2 default options - `BLOCKORDERING0` and `BLOCKORDERING1`.  The default is set via the `DEFAULT_BLOCKORDERING` variable, which is used in conjunction with the `BLOCKORDERING` dictionary defined farther down in the file.
 
     If you require a custom block ordering, use one of the already present block orderings as a template.  The first step is creating a new `OrderedDict` named something along the lines of `BLOCKORDERING3`.  Each entry in the `OrderedDict` represents a data block, and must contain both a KEY and a VALUE.  Once your new block ordering is defined, you should add it to the `BLOCKORDERING` dictionary with an appropriate name.  You can also set it as default via the `DEFAULT_BLOCKORDERING` variable if you so wish.
 
@@ -73,7 +75,7 @@ Once the code is downloaded there are two methods of installation depending on y
 	> python setup.py install   ## this installs the module, may require sudo
 ~~~
 
-If you do *not* have write access to your python install, we need to modify the environment variable `PYTHONPATH` to point to the pyGadgetReader directory.  Add these two lines to your `.bashrc/.bash_profile` (or respective shell file):
+If you do *not* have write access to your python install, we need to modify your environment variable `PYTHONPATH` to point to the pyGadgetReader directory.  Add these two lines to your `.bashrc/.bash_profile` (or respective shell file):
 
 ~~~Bash
 PYTHONPATH=/path/to/pyGadgetReader:$PYTHONPATH
@@ -85,7 +87,7 @@ export PYTHONPATH
 If you had previously installed my `C` version of `pyGadgetReader` you should *remove* it before trying to use the code as there may be some naming conflicts.  First you need to find out *where* python, a point in the general direction is typing `which python` in your terminal, this will return your installation directory.  Next you need to locate your `site-packages` directory which is usually under python's `lib` directory.  Once there you are looking for anything in the form of `readgadget.so`, once this is found remove it.
 
 ## Usage
-**IMPORTANT:** When using `pyGadgetReader`, **do NOT include** the snapshot extension or number prefix (for multi-part).  As an example, if your snapshot is named `'snap_N128L16_005.0.hdf5'`, you would only pass `'snap_N128L16_005'` to the functions below.
+**IMPORTANT:** When using `pyGadgetReader`, **do NOT include** the snapshot extension or number prefix (for multi-part).  As an example, if your snapshot is named `'snap_N128L16_005.0.hdf5'`, you would only pass `'snap_N128L16_005'` to the below functions.
 
 To gain access to the following functions, place this at the top of your python script:
 
@@ -99,8 +101,8 @@ This function reads in the header and returns values of interest.  The values it
 
 	 time	       - scale factor of the snapshot
 	 redshift      - redshift of the snapshot
-	 boxsize       - boxsize if present in units of kpc/h
-	 O0	       	   - Omega_0 (Omega_dm+Omega_m)
+	 boxsize       - boxsize if present (typically in kpc/h)
+	 O0	       	   - Omega_0 (Omega_dm+Omega_b)
 	 Ol	       	   - Omega_Lambda
 	 h	       	   - hubble parameter
 	 gascount      - total # of gas   particles [type 0]
@@ -114,9 +116,10 @@ This function reads in the header and returns values of interest.  The values it
 	 f_cooling     - Cooling flag			 	 0=off 1=on 
 	 f_age	       - Stellar Age tracking flag	 0=off 1=on
 	 f_metals      - Metal tracking flag  		 0=off 1=on
+	 nparts        - list of particle counts [0,1,2,3,4,5]
 
 
-    Definition:   readhead('a','b',hdf5=0,tipsy=0,debug=0)
+    Definition:   readhead('a','b',debug=0)
 
 	      Parameters
 	      ----------
@@ -127,8 +130,7 @@ This function reads in the header and returns values of interest.  The values it
 	      
 	      Optional
 	      --------
-		   hdf5:   hdf5 file?
-		   tipsy:  tipsy file?
+		   debug: output debugging info
 
     Example:
 	      z = readhead('snap_001','redshift')  
@@ -267,6 +269,31 @@ This function reads rockstar binary data.
                     [i,0] = particle ID,
 				    [i,1] = halo ID
 
+
+### readfofspecial()
+This function reads FoF_Special binary outputs (indexlists & catalogues).  It returns a `Group` class, or a list of `Group` classes, all of which have **three** attributes:
+
+	 index         - group index
+	 npart_total   - total number of group particles
+	 indexes       - indexes of all particles belonging to group
+
+    Definition:   readfofspecial('a',b,c)
+
+	      Parameters
+	      ----------
+	      a : Group catalogue directory.  
+	      	  Must be input as a string and enclosed in ' ' - see examples.
+	      b : Snapshot number (int)
+		  c : halo or halos of interest
+			  This can either be an int, or a list of ints.
+	      
+    Example:
+	      grp10 = readfofspecial('/path/to/catalogues', 12, 10)
+				- this will return a single 'Group' class containing
+     			  the above attributes for group 10 in snapshot 12
+		   grps = readfofspecial('/path/to/catalogues', 12, [10,16])
+				- this will return a list of 'Group' classes containing
+     			  the above attributes for groups 10 & 16 in snapshot 12
 ****
 
 Any comments or suggestions feel free to contact me:
