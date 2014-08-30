@@ -201,6 +201,7 @@ This function does the heavy lifting.  It reads data blocks from the snapshot an
 		 grho=readsnap('snap_005','rho','gas',units=1)
 		gtemp=readsnap('snap_005','u','gas',units=1)
 
+**note for HDF5 and Gadget-Type2 files**: *you can pass arbitrary block requests in for `b` above, this allows you to pull custom data blocks out without having to alter the source.*
 
 ### readrockstar()
 This function reads rockstar binary data.  
