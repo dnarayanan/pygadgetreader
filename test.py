@@ -9,9 +9,9 @@ DB    = 1
 UNITS = 1
 
 G1  = 0
-G1M = 0
-G2  = 1
-G2M = 1
+G1M = 1
+G2  = 0
+G2M = 0
 H5  = 0
 H5M = 0
 
@@ -37,6 +37,8 @@ if G1M:
     print ''
     print 'GADGET TYPE 1-MULTI'
     snap = '%s/gadget/g1/multi/snap_N64L10_006' % bd
+    npart = readsnap(snap,'npartThis')
+    print npart
     rho = readsnap(snap,'rho','gas',units=UNITS,debug=DB)
     u   = readsnap(snap,'u','gas',units=UNITS)
     fig=figure()

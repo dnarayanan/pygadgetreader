@@ -89,7 +89,12 @@ pTypes = {0:0,1:1,2:2,3:3,4:4,5:5,
 # account for different names
 pTypes['star'] = 4
 
-pNames = {0:'GAS',1:'DM',2:'DISK',3:'BULGE',4:'STAR',5:'BNDRY'}
+pNames = {0:'GAS  ',
+          1:'DM   ',
+          2:'DISK ',
+          3:'BULGE',
+          4:'STAR ',
+          5:'BNDRY'}
 
 ## default header returns (corresponds to h.vals[KEY])
 headerTypes = {'npart':'npart',
@@ -139,6 +144,7 @@ headerTypes['f_cooling']     = 'flag_cooling'
 headerTypes['f_age']         = 'flag_age'
 headerTypes['f_fh2']         = 'flag_fh2'
 headerTypes['f_metals']      = 'flag_metals'
+headerTypes['npartThis']     = 'npartThis'
 
 
 ## default data types

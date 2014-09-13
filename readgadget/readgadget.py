@@ -78,6 +78,8 @@ def readsnap(snap,data,ptype,**kwargs):
             initUnits(h)
 
         if h.npart[p] == 0:
+            if h.nfiles > 1:
+                continue
             print 'no %s particles present!' % pNames[p]
             sys.exit()
 

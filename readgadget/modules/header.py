@@ -79,6 +79,7 @@ class Header(object):
         ## assign dictionary
         self.nparticles = np.sum(self.npart)
         self.vals = {'npart':self.npartTotal,
+                     'npartThis':self.npartThis,
                      'ngas':self.npartTotal[0],
                      'ndm':self.npartTotal[1],
                      'ndisk':self.npartTotal[2],
@@ -109,6 +110,9 @@ class Header(object):
         f = open(self.snap,'rb')
         self.f = f
 
+        if not hasattr(self,'npartThis'):
+            self.npartThis = []
+
         ## test for type 2 binaries
         if np.fromfile(f,dtype=np.uint32,count=1)[0] == 8:
             NAME = struct.unpack('4s',f.read(4))[0]
@@ -120,6 +124,7 @@ class Header(object):
             f.seek(0)
 
         skip1 = g.skip(f)
+
 
         self.npart       = np.fromfile(f,dtype=np.uint32,count=6)
         self.mass        = np.fromfile(f,dtype=np.float64,count=6)
@@ -144,6 +149,8 @@ class Header(object):
         self.flag_tmax            = np.fromfile(f,dtype=np.int32,count=1)[0]
         self.flag_delaytime       = np.fromfile(f,dtype=np.int32,count=1)[0]
         
+        self.npartThis.append(self.npart)
+
         bl = 256
         if self.fileType == 'gadget2':
             bl += 4 + 4 + 4 + 4
@@ -164,6 +171,10 @@ class Header(object):
         hd = f['Header']
         ha = hd.attrs
 
+        if not hasattr(self,'npartThis'):
+            self.npartThis = []
+
+
         self.npart       = ha['NumPart_ThisFile']
         self.mass        = ha['MassTable']
         self.time        = ha['Time']
@@ -182,6 +193,8 @@ class Header(object):
         self.npartTotalHighWord   = ha['NumPart_Total_HighWord']
         self.flag_entropy         = 1
         self.flag_doubleprecision = ha['Flag_DoublePrecision']
+
+        self.npartThis.append(self.npart)
 
         if 'PartType0/Potential' in f:
             self.flag_potential   = 1
