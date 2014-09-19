@@ -37,7 +37,7 @@ if G1M:
     print ''
     print 'GADGET TYPE 1-MULTI'
     snap = '%s/gadget/g1/multi/snap_N64L10_006' % bd
-    npart = readsnap(snap,'npartThis')
+    npart = readhead(snap,'npartThis')
     print npart
     rho = readsnap(snap,'rho','gas',units=UNITS,debug=DB)
     u   = readsnap(snap,'u','gas',units=UNITS)

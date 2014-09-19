@@ -76,6 +76,9 @@ class Header(object):
             elif self.debug:
                 print tmptxt
 
+        if not hasattr(self,'npartThis'):
+            self.npartThis = []
+
         ## assign dictionary
         self.nparticles = np.sum(self.npart)
         self.vals = {'npart':self.npartTotal,
@@ -109,9 +112,6 @@ class Header(object):
         import gadget as g
         f = open(self.snap,'rb')
         self.f = f
-
-        if not hasattr(self,'npartThis'):
-            self.npartThis = []
 
         ## test for type 2 binaries
         if np.fromfile(f,dtype=np.uint32,count=1)[0] == 8:
