@@ -194,6 +194,8 @@ class Header(object):
         self.flag_entropy         = 1
         self.flag_doubleprecision = ha['Flag_DoublePrecision']
 
+        if not hasattr(self,'npartThis'):
+            self.npartThis = []
         self.npartThis.append(self.npart)
 
         if 'PartType0/Potential' in f:
