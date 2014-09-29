@@ -123,8 +123,10 @@ class Header(object):
         else:
             f.seek(0)
 
-        skip1 = g.skip(f)
+        if not hasattr(self,'npartThis'):
+            self.npartThis = []
 
+        skip1 = g.skip(f)
 
         self.npart       = np.fromfile(f,dtype=np.uint32,count=6)
         self.mass        = np.fromfile(f,dtype=np.float64,count=6)
@@ -194,8 +196,6 @@ class Header(object):
         self.flag_entropy         = 1
         self.flag_doubleprecision = ha['Flag_DoublePrecision']
 
-        if not hasattr(self,'npartThis'):
-            self.npartThis = []
         self.npartThis.append(self.npart)
 
         if 'PartType0/Potential' in f:
