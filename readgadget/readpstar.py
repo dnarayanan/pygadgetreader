@@ -41,6 +41,8 @@ def readpstar(catdir,snapnum,groupIndex,**kwargs):
     for i in range(0,ngroups):
         gpids = []
         spids = []
+        stypes = []
+        pids  = []
 
         nparts = np.fromfile(fcat,dtype=np.uint32,count=1)[0]
         offset = np.fromfile(fcat,dtype=np.uint32,count=1)[0]
@@ -52,7 +54,8 @@ def readpstar(catdir,snapnum,groupIndex,**kwargs):
                 gpids.append(pid)
             elif ptype == 4:
                 spids.append(pid)
-            
+                stypes.append(ptype)
+                
         pmstars = np.fromfile(fprop,dtype=np.float32,count=1)[0]
         mags    = np.fromfile(fprop,dtype=np.float32,count=4)
         pcm     = np.fromfile(fprop,dtype=np.float32,count=3)
@@ -69,6 +72,7 @@ def readpstar(catdir,snapnum,groupIndex,**kwargs):
         GROUPS[i].gmetals=pmgmetals
         GROUPS[i].gpids = gpids
         GROUPS[i].spids = spids
+        GROUPS[i].stypes = stypes
 
     fcat.close()
     fprop.close()
