@@ -8,9 +8,9 @@ import numpy as np
 DB    = 1
 UNITS = 1
 
-G1  = 0
-G1M = 1
-G2  = 0
+G1  = 1
+G1M = 0
+G2  = 1
 G2M = 0
 H5  = 0
 H5M = 0
@@ -25,6 +25,8 @@ if G1:
     print 'GADGET TYPE 1'
     snap = '%s/gadget/g1/snap_N128L16_037' % bd
     z   = readhead(snap,'redshift')
+    h = readhead(snap,'header')
+    gpid = readsnap(snap,'pid','gas')
     rho = readsnap(snap,'rho','gas',units=UNITS,debug=DB)
     u   = readsnap(snap,'u','gas',units=UNITS)
     fig=figure()

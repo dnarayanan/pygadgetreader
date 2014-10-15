@@ -1,7 +1,8 @@
 from modules.common import *
+from modules.names import *
 import modules.header as HEAD
-import modules.gadget as gadget
-import modules.gadget_t2 as gadget_t2
+import modules.gadget1 as gadget1
+import modules.gadget2 as gadget2
 import modules.tipsy as tipsy
 import modules.hdf5 as hdf5
 import numpy as np
@@ -30,7 +31,10 @@ def readhead(snap,data,**kwargs):
     """
     h = HEAD.Header(snap,0,kwargs)
     h.f.close()
-    return h.vals[headerTypes[data]]
+    pollHeaderOptions(h,data)
+    if data == 'header' or data == 'Header':
+        return h.header_vals
+    return h.header_vals[headerTypes[data]]
 
 
 def readsnap(snap,data,ptype,**kwargs):
@@ -77,7 +81,7 @@ def readsnap(snap,data,ptype,**kwargs):
             h.reading = d
             initUnits(h)
 
-        if h.npart[p] == 0:
+        if h.npartThisFile[p] == 0:
             if h.nfiles > 1:
                 continue
             print 'no %s particles present!' % pNames[p]
@@ -87,10 +91,10 @@ def readsnap(snap,data,ptype,**kwargs):
             arr = hdf5.hdf5_read(f,h,p)
         elif h.fileType == 'tipsy':
             arr = tipsy.tipsy_read(f,h,p)
-        elif h.fileType == 'gadget':
-            arr = gadget.gadget_read(f,h,p,d)
+        elif h.fileType == 'gadget1':
+            arr = gadget1.gadget_read(f,h,p,d)
         elif h.fileType == 'gadget2':
-            arr = gadget_t2.gadget_type2_read(f,h,p)
+            arr = gadget2.gadget_type2_read(f,h,p)
 
         f.close()
 
