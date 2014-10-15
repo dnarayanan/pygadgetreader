@@ -64,8 +64,8 @@ headerTypes['f_metals']      = 'flag_metals'
 headerTypes['npartThis']     = 'npartThisFile'
 headerTypes['nparts']        = 'npartTotal'
 headerTypes['npart']         = 'npartTotal'
-headerTypes['header']        = ''
-headerTypes['Header']        = ''
+headerTypes['header']        = ' '
+headerTypes['Header']        = ' '
 
 
 ## default data types

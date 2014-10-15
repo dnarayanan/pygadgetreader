@@ -40,36 +40,36 @@ auxstarstruct  = np.dtype([('metalarray',np.float32,(NMETALS,)),
 def tipsy_binread(f,h,ptype):
     """read tipsy binfile"""
     if ptype == 0:
-        data = np.fromfile(f,dtype=gasstruct,count=h.npart[0])
+        data = np.fromfile(f,dtype=gasstruct,count=h.npartThisFile[0])
     elif ptype == 1:
-        f.seek((4*6 + 4*3 + 4*3) * h.npart[0],1)
-        data = np.fromfile(f,dtype=dmstruct,count=h.npart[1])
+        f.seek((4*6 + 4*3 + 4*3) * h.npartThisFile[0],1)
+        data = np.fromfile(f,dtype=dmstruct,count=h.npartThisFile[1])
     elif ptype == 4:
-        f.seek((4*6 + 4*3 + 4*3) * h.npart[0],1)
-        f.seek((4*3 + 4*3 + 4*3) * h.npart[1],1)
-        data = np.fromfile(f,dtype=starstruct,count=h.npart[4])
+        f.seek((4*6 + 4*3 + 4*3) * h.npartThisFile[0],1)
+        f.seek((4*3 + 4*3 + 4*3) * h.npartThisFile[1],1)
+        data = np.fromfile(f,dtype=starstruct,count=h.npartThisFile[4])
     return data[:][h.reading]
 
 def tipsy_auxread(f,h,ptype):
     """read tipsy aux file"""
     if ptype == 0:
-        data = np.fromfile(f,dtype=auxgasstruct,count=h.npart[0])
+        data = np.fromfile(f,dtype=auxgasstruct,count=h.npartThisFile[0])
     elif ptype == 4:
-        f.seek((4*NMETALS + 6*4) * h.npart[0],1)
-        data = np.fromfile(f,dtype=auxstarstruct,count=h.npart[4])
+        f.seek((4*NMETALS + 6*4) * h.npartThisFile[0],1)
+        data = np.fromfile(f,dtype=auxstarstruct,count=h.npartThisFile[4])
     return data[:][h.reading]
 
 
 def tipsy_pids(f,h,ptype):
     """read tipsy particle IDs"""
     if ptype == 0:
-        pids = np.fromfile(f,dtype=np.int32,count=h.npart[0])
+        pids = np.fromfile(f,dtype=np.int32,count=h.npartThisFile[0])
     elif ptype == 1:
-        f.seek(4 * h.npart[0],1)
-        pids = np.fromfile(f,dtype=np.int32,count=h.npart[1])
+        f.seek(4 * h.npartThisFile[0],1)
+        pids = np.fromfile(f,dtype=np.int32,count=h.npartThisFile[1])
     elif ptype == 4:
-        f.seek(4*h.npart[0] + 4*h.npart[1],1)
-        pids = np.fromfile(f,dtype=np.int32,count=h.npart[4])
+        f.seek(4*h.npartThisFile[0] + 4*h.npartThisFile[1],1)
+        pids = np.fromfile(f,dtype=np.int32,count=h.npartThisFile[4])
     return pids
 
 def tipsy_read(f,h,ptype):
