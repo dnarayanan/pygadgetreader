@@ -13,7 +13,17 @@ UnitMass_in_g            = 1.989e43
 UnitVelocity_in_cm_per_s = 1.0e5
 
 
-RecognizedOptions = ['units','hdf5','tipsy','supress_output','blockordering','debug','double']
+RecognizedOptions = ['units',
+                     'hdf5',
+                     'tipsy',
+                     'single',
+                     'suppress',
+                     'suppress_output',
+                     'supress_output',
+                     'blockordering',
+                     'debug',
+                     'double',
+                     'nth']
 def pollOptions(h,KWARGS,data,ptype):
     """warn user if option is unrecognized"""
     for key,items in KWARGS.iteritems():
@@ -110,7 +120,7 @@ def gadgetPrinter(h,d,p):
                     printer = '%s %s' % (printer,dataDefaultUnits[d])
                 else:
                     printer = '%s in code units' % printer
-    if h.supress:
+    if h.suppress:
         return
     else:
         print printer

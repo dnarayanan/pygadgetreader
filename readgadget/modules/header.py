@@ -51,6 +51,16 @@ class Header(object):
                             'flag_tmax':self.flag_tmax}
 
     def setVars(self):
+        ## nth particle ##
+        self.nth = 1
+        if 'nth' in self.args and self.args['nth'] > 1:
+            self.nth = self.args['nth']
+
+        ## single file read?  ignore multi-part ##
+        self.singleFile = False
+        if 'single' in self.args and self.args['single'] == 1:
+            self.singleFile = True
+
         ## debug? ##
         self.debug = False
         if 'debug' in self.args and self.args['debug'] == 1:
@@ -66,9 +76,11 @@ class Header(object):
             self.BLOCKORDER = gbo.BLOCKORDERING[self.args['blockordering']]
 
         ## supress output? ##
-        self.supress = False
-        if 'supress_output' in self.args and self.args['supress_output'] == 1:
-            self.supress = True
+        self.suppress = False
+        if( ('supress_output' in self.args and self.args['supress_output'] == 1) or
+            ('suppress_output' in self.args and self.args['suppress_output'] == 1) or
+            ('suppress' in self.args and self.args['suppress'] == 1) ):
+            self.suppress = True
 
         ## return double array? ##
         self.double = False
@@ -92,6 +104,17 @@ class Header(object):
         snap  = self.snap_passed
         fn    = self.filenum
         FTYPE = None
+
+        ## only for reading single (from multi-part)
+        if self.singleFile:
+            if '.hdf5' in snap:
+                FTYPE = 'hdf5'
+            elif '.bin' in snap:
+                FTYPE = 'tipsy'
+            else:
+                FTYPE = 'gadget'
+            self.snap = snap
+            return FTYPE
 
         ## strip extensions
         if '.0.hdf5' in snap:

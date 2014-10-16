@@ -98,12 +98,23 @@ def readsnap(snap,data,ptype,**kwargs):
 
         f.close()
 
+        ## return nth value
+        if h.nth > 1:
+            arr = arr[0::h.nth]
+
+        ## put arrays together
         if i > 0:
             if len(arr) > 0:
                 return_arr = np.concatenate((return_arr,arr))
         else:
             return_arr = arr
             gadgetPrinter(h,d,p)
+            if h.nth > 1 and not h.suppress:
+                print 'selecting every %d particles' % h.nth
+
+        ## if requesting a single file, break out of loop
+        if h.singleFile:
+            break
 
     if h.double and h.reading != 'pid' and h.reading != 'ParticleIDs':
         return_arr = return_arr.astype(np.float64)
