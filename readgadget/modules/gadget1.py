@@ -79,7 +79,7 @@ def skipblocks(f,h,val):
         elif len(items) == 1:
             skiptypes(items[0],key,multiplier=multi)
         elif len(items) > 1:
-            if h.vals[headerTypes[items[1]]]:
+            if h.header_vals[headerTypes[items[1]]]:
                 skiptypes(items[0],key,multiplier=multi)
     return    
 

@@ -11,7 +11,7 @@ pNames = {0:'GAS  ',
           4:'STAR ',
           5:'BNDRY'}
 
-## default header returns (corresponds to h.vals[KEY])
+## default header returns (corresponds to h.header_vals[KEY])
 headerTypes = {'npartThisFile':'npartThisFile',
                'npartTotal':'npartTotal',
                'ngas':'ngas',
