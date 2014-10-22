@@ -119,7 +119,7 @@ def gadget_readpid(f,h,ptype):
 
 def gadget_readmass(f,h,ptype):
     mb_exists = 0
-    for i in range(0,len(h.npart)):
+    for i in range(0,len(h.npartThisFile)):
         if h.massTable[i] == 0 and h.npartThisFile[i] > 0:
             mb_exists = 1
             break
