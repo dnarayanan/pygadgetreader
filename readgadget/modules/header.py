@@ -1,202 +1,249 @@
 import numpy as np
 import os,sys
 import common as c
+import gadget_blockordering as gbo
 import struct
 
+
 class Header(object):
-    def __init__(self,snap,filenum, *args):
+    def __init__(self,snap, filenum, *args):
         self.snap_passed = snap
+        self.filenum     = filenum
         self.args        = args[0]
-        self.fileType    = ''
 
-        #self.reading     = reading
-
-        ## make these modifiable at some point
-        self.UnitMass_in_g = c.UnitMass_in_g
-        self.UnitLength_in_cm = c.UnitLength_in_cm
-        self.UnitVelocity_in_cm_per_s = c.UnitVelocity_in_cm_per_s
+        self.setVars()
+        fileType = self.detectFileType()
         
-        ## return double array? (instead of float)
-        self.double = False
-        if 'double' in args[0] and args[0]['double'] == 1:
-            self.double = True
+        if fileType == 'gadget':  
+            self.read_gadget_header()
+            if not hasattr(self,'BLOCKORDER'):
+                self.BLOCKORDER = gbo.BLOCKORDERING[gbo.DEFAULT_BLOCKORDERING]
+        elif fileType == 'hdf5':  self.read_hdf5_header()
+        elif fileType == 'tipsy': self.read_tipsy_header()
 
-        ## debug?
-        self.debug = False
-        if 'debug' in args[0] and args[0]['debug'] == 1:
-            self.debug = True
-
-        ## supress output?
-        self.supress = False
-        if 'supress_output' in args[0] and args[0]['supress_output'] == 1:
-            self.supress = True
-
-        ## allow for different block orderings on the fly
-        self.BLOCKORDER = c.BLOCKORDERING[c.DEFAULT_BLOCKORDERING]
-        if 'blockordering' in args[0]:
-            self.BLOCKORDER = c.BLOCKORDERING[args[0]['blockordering']]
-
-        ## unit conversions?
-        self.units = False
-        if 'units' in args[0] and args[0]['units'] == 1:
-            self.units = True
-
-        ## make sure user has not selected tipsy & hdf5
-        if ('hdf5' in args[0]  and args[0]['hdf5']  == 1 and
-            'tipsy' in args[0] and args[0]['tipsy'] == 1):
-            print 'cannot select tipsy and hdf5!!'
-            sys.exit()
-
-        ## detect file type
-        self.snap = self.detectFileType(args,filenum)
-
-        ## read header
-        if self.fileType == 'gadget':
-            s1,s2 = self.read_gadget_header()
-            if s1 == 256 and s2 == 256:
-                self.extension = ''
-            else:
-                print 'found GADGET file, but header is off...%d vs %d' % (s1,s2)
-                sys.exit()
-        elif self.fileType == 'hdf5':
-            self.read_hdf5_header()
-            self.extension = 'hdf5'
-        elif self.fileType == 'tipsy':
-            self.read_tipsy_header()
-            self.extension = 'bin/aux'
-        else:
-            print 'should not be here...'
-            sys.exit()
-
-        if not self.supress or self.debug:
-            tmptxt = 'reading %s' % self.snap
-            if self.nfiles > 1:
-                tmptxt = '%s (%d/%d files)' % (tmptxt,filenum+1,self.nfiles)
-                print tmptxt
-            elif self.debug:
-                print tmptxt
-
-        if not hasattr(self,'npartThis'):
-            self.npartThis = []
+        for i in range(0,5):
+            if self.npartTotalHW[i] > 0:
+                self.npartTotal[i] += (self.npartTotalHW[i] << 32)
 
         ## assign dictionary
-        self.nparticles = np.sum(self.npart)
-        self.vals = {'npart':self.npartTotal,
-                     'npartThis':self.npartThis,
-                     'ngas':self.npartTotal[0],
-                     'ndm':self.npartTotal[1],
-                     'ndisk':self.npartTotal[2],
-                     'nbulge':self.npartTotal[3],
-                     'nstar':self.npartTotal[4],
-                     'nbndry':self.npartTotal[5],
-                     'mass':self.mass,
-                     'time':self.time,
-                     'nfiles':self.nfiles,
-                     'redshift':self.redshift,
-                     'boxsize':self.boxsize,
-                     'O0':self.Omega0,
-                     'Ol':self.OmegaLambda,
-                     'h':self.HubbleParam,
-                     'flag_cooling':self.flag_cool,
-                     'flag_sfr':self.flag_sfr,
-                     'flag_fb':self.flag_fb,
-                     'flag_fh2':self.flag_fH2,
-                     'flag_age':self.flag_age,
-                     'flag_metals':self.flag_metals,
-                     'flag_potential':self.flag_potential,
-                     'flag_delaytime':self.flag_delaytime,
-                     'flag_tmax':self.flag_tmax}
+        self.header_vals = {'npartThisFile':self.npartThisFile,
+                            'npartTotal':self.npartTotal,
+                            'npartTotalHW':self.npartTotalHW,
+                            'ngas':self.npartTotal[0],'ndm':self.npartTotal[1],
+                            'ndisk':self.npartTotal[2],'nbulge':self.npartTotal[3],
+                            'nstar':self.npartTotal[4],'nbndry':self.npartTotal[5],
+                            'massTable':self.massTable,
+                            'time':self.time,
+                            'nfiles':self.nfiles,
+                            'redshift':self.redshift,
+                            'boxsize':self.boxsize,
+                            'O0':self.Omega0,
+                            'Ol':self.OmegaLambda,
+                            'h':self.HubbleParam,
+                            'flag_cooling':self.flag_cool,
+                            'flag_sfr':self.flag_sfr,
+                            'flag_fb':self.flag_fb,
+                            'flag_fh2':self.flag_fH2,
+                            'flag_age':self.flag_age,
+                            'flag_metals':self.flag_metals,
+                            'flag_potential':self.flag_potential,
+                            'flag_delaytime':self.flag_delaytime,
+                            'flag_tmax':self.flag_tmax}
+
+    def setVars(self):
+        ## nth particle ##
+        self.nth = 1
+        if 'nth' in self.args and self.args['nth'] > 1:
+            self.nth = self.args['nth']
+
+        ## single file read?  ignore multi-part ##
+        self.singleFile = False
+        if 'single' in self.args and self.args['single'] == 1:
+            self.singleFile = True
+
+        ## debug? ##
+        self.debug = False
+        if 'debug' in self.args and self.args['debug'] == 1:
+            self.debug = True
+
+        ## unit conversions? ##
+        self.units = False
+        if 'units' in self.args and self.args['units'] == 1:
+            self.units = True
+        
+        ## allow for different block ordering on the fly ##
+        if 'blockordering' in self.args:
+            self.BLOCKORDER = gbo.BLOCKORDERING[self.args['blockordering']]
+
+        ## supress output? ##
+        self.suppress = False
+        if( ('supress_output' in self.args and self.args['supress_output'] == 1) or
+            ('suppress_output' in self.args and self.args['suppress_output'] == 1) or
+            ('suppress' in self.args and self.args['suppress'] == 1) ):
+            self.suppress = True
+
+        ## return double array? ##
+        self.double = False
+        if 'double' in self.args and self.args['double'] == 1:
+            self.double = True
+
+        self.UnitMass_in_g = c.UnitMass_in_g
+        self.UnitLength_in_cm = c.UnitLength_in_cm
+        self.UnitVelocity_in_cm_per_s = c.UnitVelocity_in_cm_per_s        
+        
+        if 'UnitMass_in_g' in self.args:
+            self.UnitMass_in_g = self.args['UnitMass_in_g']
+        if 'UnitLength_in_cm' in self.args:
+            self.UnitLength_in_cm = self.args['UnitLength_in_cm']
+        if 'UnitVelocity_in_cm_per_s' in self.args:
+            self.UnitVelocity_in_cm_per_s = self.args['UnitVelocity_in_cm_per_s']
+
+
+
+    def detectFileType(self):
+        snap  = self.snap_passed
+        fn    = self.filenum
+        FTYPE = None
+
+        ## only for reading single (from multi-part)
+        if self.singleFile:
+            if '.hdf5' in snap:
+                FTYPE = 'hdf5'
+            elif '.bin' in snap:
+                FTYPE = 'tipsy'
+            else:
+                FTYPE = 'gadget'
+            self.snap = snap
+            return FTYPE
+
+        ## strip extensions
+        if '.0.hdf5' in snap:
+            snap = snap[:-7]
+        elif '.hdf5' in snap:
+            snap = snap[:-5]
+        elif '.bin' in snap:
+            snap = snap[:-4]
+        elif snap[-2:] == '.0':
+            snap = snap[:-2]            
+
+        ## detect file type ##
+
+        # gadget
+        if os.path.isfile(snap):
+            FTYPE = 'gadget'
+            self.snap = snap
+        elif os.path.isfile('%s.%d' % (snap,fn)):
+            FTYPE = 'gadget'
+            self.snap = '%s.%d' % (snap,fn)
+
+        # hdf5
+        elif os.path.isfile('%s.hdf5' % snap):
+            FTYPE = 'hdf5'
+            self.snap = '%s.hdf5' % snap
+        elif os.path.isfile('%s.%d.hdf5' % (snap,fn)):
+            FTYPE = 'hdf5'
+            self.snap = '%s.%d.hdf5' % (snap,fn)
+            
+        # tipsy
+        elif os.path.isfile('%s.bin' % snap):
+            FTYPE = 'tipsy'
+            self.snap = '%s.bin' % snap
+
+        else:
+            print 'Could not determine file type by extension!'
+            sys.exit
+
+        return FTYPE
 
     def read_gadget_header(self):
-        """read gadget type-1 & 2 binary header"""
-        import gadget as g
+        import gadget1 as g
         f = open(self.snap,'rb')
         self.f = f
 
-        ## test for type 2 binaries
+        ## test for type 2 ##
         if np.fromfile(f,dtype=np.uint32,count=1)[0] == 8:
             NAME = struct.unpack('4s',f.read(4))[0]
             np.fromfile(f,dtype=np.uint32,count=1)
             np.fromfile(f,dtype=np.uint32,count=1)
             self.fileType = 'gadget2'
-            if self.debug: print 'detected TYPE 2 gadget binary'
         else:
             f.seek(0)
-
-        if not hasattr(self,'npartThis'):
-            self.npartThis = []
+            self.fileType = 'gadget1'
 
         skip1 = g.skip(f)
-
-        self.npart       = np.fromfile(f,dtype=np.uint32,count=6)
-        self.mass        = np.fromfile(f,dtype=np.float64,count=6)
-        self.time        = np.fromfile(f,dtype=np.float64,count=1)[0]
-        self.redshift    = np.fromfile(f,dtype=np.float64,count=1)[0]
-        self.flag_sfr    = np.fromfile(f,dtype=np.int32,count=1)[0]
-        self.flag_fb     = np.fromfile(f,dtype=np.int32,count=1)[0]
-        self.npartTotal  = np.fromfile(f,dtype=np.uint32,count=6)
-        self.flag_cool   = np.fromfile(f,dtype=np.int32,count=1)[0]
-        self.nfiles      = np.fromfile(f,dtype=np.int32,count=1)[0]
-        self.boxsize     = np.fromfile(f,dtype=np.float64,count=1)[0]
-        self.Omega0      = np.fromfile(f,dtype=np.float64,count=1)[0]
-        self.OmegaLambda = np.fromfile(f,dtype=np.float64,count=1)[0]
-        self.HubbleParam = np.fromfile(f,dtype=np.float64,count=1)[0]
-        self.flag_age    = np.fromfile(f,dtype=np.int32,count=1)[0]
-        self.flag_metals = np.fromfile(f,dtype=np.int32,count=1)[0]
-        self.npartTotalHighWord   = np.fromfile(f,dtype=np.uint32,count=6)
+        self.npartThisFile = np.fromfile(f,dtype=np.uint32,count=6)
+        self.massTable     = np.fromfile(f,dtype=np.float64,count=6)
+        self.time          = np.fromfile(f,dtype=np.float64,count=1)[0]
+        self.redshift      = np.fromfile(f,dtype=np.float64,count=1)[0]
+        self.flag_sfr      = np.fromfile(f,dtype=np.int32,count=1)[0]
+        self.flag_fb       = np.fromfile(f,dtype=np.int32,count=1)[0]
+        self.npartTotal    = np.fromfile(f,dtype=np.uint32,count=6)
+        self.flag_cool     = np.fromfile(f,dtype=np.int32,count=1)[0]
+        self.nfiles        = np.fromfile(f,dtype=np.int32,count=1)[0]
+        self.boxsize       = np.fromfile(f,dtype=np.float64,count=1)[0]
+        self.Omega0        = np.fromfile(f,dtype=np.float64,count=1)[0]
+        self.OmegaLambda   = np.fromfile(f,dtype=np.float64,count=1)[0]
+        self.HubbleParam   = np.fromfile(f,dtype=np.float64,count=1)[0]
+        self.flag_age      = np.fromfile(f,dtype=np.int32,count=1)[0]
+        self.flag_metals   = np.fromfile(f,dtype=np.int32,count=1)[0]
+        self.npartTotalHW  = np.fromfile(f,dtype=np.uint32,count=6)
         self.flag_entropy         = np.fromfile(f,dtype=np.int32,count=1)[0]
         self.flag_doubleprecision = np.fromfile(f,dtype=np.int32,count=1)[0]
         self.flag_potential       = np.fromfile(f,dtype=np.int32,count=1)[0]
         self.flag_fH2             = np.fromfile(f,dtype=np.int32,count=1)[0]
         self.flag_tmax            = np.fromfile(f,dtype=np.int32,count=1)[0]
         self.flag_delaytime       = np.fromfile(f,dtype=np.int32,count=1)[0]
-        
-        self.npartThis.append(self.npart)
-
         bl = 256
         if self.fileType == 'gadget2':
             bl += 4 + 4 + 4 + 4
         bytes_left = bl + 4 - f.tell()
         f.seek(bytes_left,1)
-        
         skip2 = g.skip(f)
         g.errorcheck(skip1,skip2,'header')
-        #if skip1 != 256 or skip2 != 256:
-        #    print 'not a gadget header!! %d vs %d' % (skip1,skip2)
-        return skip1,skip2
-        
+
+        ## determine data type ##
+        if self.fileType == 'gadget2':
+            f.seek(4 + 4 + 4 + 4,1)
+        nbytes = np.fromfile(f,dtype=np.uint32,count=1)[0]
+        ntot   = np.sum(self.npartThisFile)
+        if nbytes / (ntot * 4 * 3) == 1:
+            self.dataType = np.float32
+        elif nbytes / (ntot * 8 * 3) == 1:
+            self.dataType = np.float64
+        else:
+            print 'could not determine data type!'
+            sys.exit()
+        f.seek(-4,1)
+        if self.fileType == 'gadget2':
+            f.seek(-16,1)
+
+        return
+
     def read_hdf5_header(self):
-        """read HDF5 header"""
+        self.fileType = 'hdf5'
         import h5py as h5py
         f = h5py.File(self.snap,'r')
         self.f = f
+
         hd = f['Header']
         ha = hd.attrs
 
-        if not hasattr(self,'npartThis'):
-            self.npartThis = []
-
-
-        self.npart       = ha['NumPart_ThisFile']
-        self.mass        = ha['MassTable']
-        self.time        = ha['Time']
-        self.redshift    = ha['Redshift']
-        self.flag_sfr    = ha['Flag_Sfr']
-        self.flag_fb     = ha['Flag_Feedback']
-        self.npartTotal  = ha['NumPart_Total']
-        self.flag_cool   = ha['Flag_Cooling']
-        self.nfiles      = ha['NumFilesPerSnapshot']
-        self.boxsize     = ha['BoxSize']
-        self.Omega0      = ha['Omega0']
-        self.OmegaLambda = ha['OmegaLambda']
-        self.HubbleParam = ha['HubbleParam']
-        self.flag_age    = ha['Flag_StellarAge']
-        self.flag_metals = ha['Flag_Metals']
-        self.npartTotalHighWord   = ha['NumPart_Total_HighWord']
-        self.flag_entropy         = 1
-        self.flag_doubleprecision = ha['Flag_DoublePrecision']
-
-        self.npartThis.append(self.npart)
+        self.npartThisFile = ha['NumPart_ThisFile']
+        self.massTable     = ha['MassTable']
+        self.time          = ha['Time']
+        self.redshift      = ha['Redshift']
+        self.flag_sfr      = ha['Flag_Sfr']
+        self.flag_fb       = ha['Flag_Feedback']
+        self.npartTotal    = ha['NumPart_Total']
+        self.flag_cool     = ha['Flag_Cooling']
+        self.nfiles        = ha['NumFilesPerSnapshot']
+        self.boxsize       = ha['BoxSize']
+        self.Omega0        = ha['Omega0']
+        self.OmegaLambda   = ha['OmegaLambda']
+        self.HubbleParam   = ha['HubbleParam']
+        self.flag_age      = ha['Flag_StellarAge']
+        self.flag_metals   = ha['Flag_Metals']
+        self.npartTotalHW  = ha['NumPart_Total_HighWord']
 
         if 'PartType0/Potential' in f:
             self.flag_potential   = 1
@@ -214,10 +261,11 @@ class Header(object):
             self.flag_delaytime   = 1
         else:
             self.flag_delaytime   = 0
-            
+
+        return
 
     def read_tipsy_header(self):
-        """read TISPY header"""
+        self.fileType = 'tipsy'
         f = open(self.snap,'rb')
         self.f    = f
         self.time = np.fromfile(f,dtype=np.float64,count=1)[0]
@@ -228,90 +276,26 @@ class Header(object):
         nstar     = np.fromfile(f,dtype=np.int32,count=1)[0]
         alignment = np.fromfile(f,dtype=np.float32,count=1)
         
-        self.npart       = [ngas,ndark,0,0,nstar,0]
-        self.npartTotal  = [ngas,ndark,0,0,nstar,0]
-        self.mass        = [0.,0.,0.,0.,0.,0.]
-        self.redshift    = 1.0 / self.time - 1.0
-        self.flag_sfr    = 1
-        self.flag_fb     = 1
-        self.flag_cool   = 1
-        self.nfiles      = 1
-        self.boxsize     = 0.0
-        self.Omega0      = 0.0
-        self.OmegaLambda = 0.0
-        self.HubbleParam = 0.0
-        self.flag_age    = 1
-        self.flag_metals = 1
-        self.npartTotalHighWord = [0,0,0,0,0,0]
-        self.flag_entropy = 0
+        self.npartThisFile = [ngas,ndark,0,0,nstar,0]
+        self.npartTotal    = [ngas,ndark,0,0,nstar,0]
+        self.massTable     = [0.,0.,0.,0.,0.,0.]
+        self.redshift      = 1.0 / self.time - 1.0
+        self.flag_sfr      = 1
+        self.flag_fb       = 1
+        self.flag_cool     = 1
+        self.nfiles        = 1
+        self.boxsize       = 0.0
+        self.Omega0        = 0.0
+        self.OmegaLambda   = 0.0
+        self.HubbleParam   = 0.0
+        self.flag_age      = 1
+        self.flag_metals   = 1
+        self.npartTotalHW  = [0,0,0,0,0,0]
+        self.flag_entropy  = 0
         self.flag_doubleprecision = 0
         self.flag_potential = 1
         self.flag_fH2    = 0
         self.flag_tmax   = 1
         self.flag_delaytime = 1
 
-
-    def detectFileType(self,args,filenum):
-        
-        ## first check to see if the user specified which type
-        if 'hdf5' in args[0] and args[0]['hdf5'] == 1:
-            snap = '%s.hdf5' % self.snap_passed
-            if os.path.isfile(snap):
-                self.fileType = 'hdf5'
-                return snap
-            else:
-                snap = '%s.%d.hdf5' % (self.snap_passed,filenum)
-                if os.path.isfile(snap):
-                    self.fileType = 'hdf5'
-                    return snap
-                else:
-                    print 'could not locate HDF5 file!'
-                    sys.exit()
-        elif 'tipsy' in args[0] and args[0]['tipsy'] == 1:
-            snap = '%s.bin' % self.snap_passed
-            if os.path.isfile(snap):
-                self.fileType = 'tipsy'
-                return snap
-            else:
-                print 'could not locate TIPSY file!'
-                sys.exit()
-
-
-        ## auto detection routine
-
-        # GADGET BINARY
-        snap = self.snap_passed
-        if os.path.isfile(snap):
-            if self.debug: print 'detected GADGET file'
-            self.fileType = 'gadget'
-            return snap
-        else:
-            snap = '%s.%d' % (self.snap_passed,filenum)
-            if os.path.isfile(snap):
-                if self.debug: print 'detected GADGET multi-part file'
-                self.fileType = 'gadget'
-                return snap
-
-        # HDF5 
-        snap = '%s.hdf5' % self.snap_passed
-        if os.path.isfile(snap):
-            if self.debug: print 'detected HDF5 file'
-            self.fileType = 'hdf5'
-            return snap
-        else:
-            snap = '%s.%d.hdf5' % (self.snap_passed,filenum)
-            if os.path.isfile(snap):
-                if self.debug: print 'detected HDF5 multi-part file'
-                self.fileType = 'hdf5'
-                return snap
-            
-        # TIPSY
-        snap = '%s.bin' % self.snap_passed
-        if os.path.isfile(snap):
-            if self.debug: print 'detected TIPSY file'
-            self.fileType = 'tipsy'
-            return snap
-
-        print 'COULD NOT FIND FILE %s' % self.snap_passed
-        sys.exit()
-            
+        return

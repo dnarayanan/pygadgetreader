@@ -1,7 +1,9 @@
+## FOR GADGET TYPE 2 BINARY FILES ##
+
 import sys
 import struct
 import numpy as np
-import gadget as g
+import gadget1 as g
 
 TYPE2NAMES = {
     'pos':'POS ',
@@ -52,19 +54,6 @@ def findBlock(f,h):
     g.errorcheck(s1,s2,NAME)
     return 0
 
-"""
-def gadget_general(f,h,ptype):
-    skip1 = np.fromfile(f,dtype=np.uint32,count=1)[0]
-    for i in range(0,ptype):
-        f.seek(4 * h.npart[i],1)
-    vals = np.fromfile(f,dtype=np.float32,count=h.npart[ptype])
-    for i in range(ptype+1,len(h.npart)):
-        f.seek(4 * h.npart[i],1)
-    skip2 = np.fromfile(f,dtype=np.uint32,count=1)[0]
-    g.errorcheck(skip1,skip2,"generic")
-    return vals
-"""
-
 def gadget_general(f,h,ptype):
     skip1 = np.fromfile(f,dtype=np.uint32,count=1)[0]
     
@@ -73,39 +62,40 @@ def gadget_general(f,h,ptype):
     gsOnly  = 0.
     allPart = 0.
 
-    if h.npart[0] > 0:
-        gOnly   = skip1 / (4. * h.npart[0])
-    if h.npart[4] > 0:
-        sOnly   = skip1 / (4. * h.npart[4])
-    if h.npart[0] > 0 or h.npart[4] > 0:
-        gsOnly  = skip1 / (4. * h.npart[0] + 4. * h.npart[1])
-    allPart = skip1 / (4. * np.sum(h.npart)) 
+    if h.npartThisFile[0] > 0:
+        gOnly   = skip1 / (np.dtype(h.dataType).itemsize * h.npartThisFile[0])
+    if h.npartThisFile[4] > 0:
+        sOnly   = skip1 / (np.dtype(h.dataType).itemsize * h.npartThisFile[4])
+    if h.npartThisFile[0] > 0 or h.npartThisFile[4] > 0:
+        gsOnly  = skip1 / (np.dtype(h.dataType).itemsize * h.npartThisFile[0] + 
+                           np.dtype(h.dataType).itemsize * h.npartThisFile[1])
+    allPart = skip1 / (np.dtype(h.dataType).itemsize * np.sum(h.npartThisFile)) 
 
     if gOnly == 1.0:
         if ptype != 0:
             print 'block is only present for gas!'
             return
-        vals = np.fromfile(f,dtype=np.float32,count=h.npart[ptype])
+        vals = np.fromfile(f,dtype=h.dataType,count=h.npartThisFile[ptype])
     elif sOnly == 1.0:
         if ptype != 4:
             print 'block is only present for stars!'
             return
-        vals = np.fromfile(f,dtype=np.float32,count=h.npart[ptype])
+        vals = np.fromfile(f,dtype=h.dataType,count=h.npartThisFile[ptype])
     elif gsOnly == 1.0:
         if ptype != 0 and ptype != 4:
             print 'block is only present for gas & stars!'
             return
         if ptype == 4:
-            f.seek(4 * h.npart[0],1)
-        vals = np.fromfile(f,dtype=np.float32,count=h.npart[ptype])
+            f.seek(np.dtype(h.dataType).itemsize * h.npartThisFile[0],1)
+        vals = np.fromfile(f,dtype=h.dataType,count=h.npartThisFile[ptype])
         if ptype == 0:
-            f.seek(4 * h.npart[4],1)
+            f.seek(np.dtype(h.dataType).itemsize * h.npartThisFile[4],1)
     elif allPart == 1.0:
         for i in range(0,ptype):
-            f.seek(4 * h.npart[i],1)
-        vals = np.fromfile(f,dtype=np.float32,count=h.npart[ptype])
+            f.seek(np.dtype(h.dataType).itemsize * h.npartThisFile[i],1)
+        vals = np.fromfile(f,dtype=h.dataType,count=h.npartThisFile[ptype])
         for i in range(ptype+1,len(h.npart)):
-            f.seek(4 * h.npart[i],1)
+            f.seek(np.dtype(h.dataType).itemsize * h.npartThisFile[i],1)
         
     skip2 = np.fromfile(f,dtype=np.uint32,count=1)[0]
     g.errorcheck(skip1,skip2,"generic read")
