@@ -126,9 +126,9 @@ This function reads in the header and returns values of interest.  The values it
 	 
  	 npartThisFile - list of particle counts in a single file
 	                 (you MUST pass the full snapshot name for this one, 
-	                  otherwise it will return for file .0)
+	                  otherwise it will return data from file .0)
 
-    Definition:   readhead('a','b',debug=0)
+    Definition:   readhead('a','b',debug=0,single=0)
 
 	      Parameters
 	      ----------
@@ -140,6 +140,7 @@ This function reads in the header and returns values of interest.  The values it
 	      Optional
 	      --------
 		   debug: output debugging info
+
 
     Example:
 	      z = readheader('snap_001','redshift')  
@@ -183,8 +184,9 @@ This function does the heavy lifting.  It reads data blocks from the snapshot an
 	   bndry       - Boundary particles
 	   
 
-    Definition:	readsnap('a','b','c',units=0,hdf5=0,tipsy=0,debug=0,
-									 supress_output=0,blockordering='romeel')
+    Definition:	readsnap('a','b','c',units=0,debug=0,suppress=0,
+									 double=0,nth=1,single=0,
+									 blockordering='romeel')
 
 		Parameters
 		----------
@@ -201,7 +203,7 @@ This function does the heavy lifting.  It reads data blocks from the snapshot an
 		     debug: Shows debug information
           suppress: if set to 1 no output is printed to the command line
             double: returns a double array rather than float
- 	           nth: only returns the nth particle
+ 	           nth: only returns the nth particle (useful for random sampling)
  	        single: returns data from 1 part of a multi-part snapshot
  	                (in this case you MUST pass the full snapshot name)
 	 blockordering: allows for the user to specify which block ordering to use

@@ -13,11 +13,11 @@ SUP    = 0
 NTH    = 1
 
 G1  = 0
-G1M = 1
+G1M = 0
 G2  = 0
 G2M = 0
 H5  = 0
-H5M = 0
+H5M = 1
 
 
 bd = '/Users/bob/RAID5/Research/FILETYPES'
@@ -93,6 +93,8 @@ if H5M:
     print ''
     print 'HDF5 MULTI'
     snap = '%s/hdf5/multi/snap_N128L16_037' % bd
+    for i in range(0,4):
+        print readhead('%s.%d.hdf5' % (snap,i),'npartThisFile')
     rho = readsnap(snap,'rho','gas',**pygro)
     u   = readsnap(snap,'u','gas',**pygro)
     fig=figure()
