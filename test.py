@@ -1,7 +1,8 @@
 import sys
 sys.path.insert(0,'../')
 
-from readgadget import *
+#from readgadget import *
+from pygadgetreader import *
 from pylab import *
 import numpy as np
 
