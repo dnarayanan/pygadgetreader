@@ -35,8 +35,8 @@ Do you *love* running simulations but *hate* fighting with the different flavors
 - **P-Star** data files
 
 ## Requirements
-* python 2.7.x
-* numpy 1.7.x
+* python >= 2.7.x
+* numpy >= 1.7.x
 * h5py
 
 ## Obtaining
