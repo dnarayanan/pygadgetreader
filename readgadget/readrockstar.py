@@ -1,4 +1,4 @@
-from modules.common import *
+from .modules.common import *
 import numpy as np
 import os
 
@@ -166,7 +166,7 @@ def compileReturnArray(RS,data):
     ## return halo struct data
     if data in halostruct.names:
         singleval = True
-        print '%s found in halodata' % data
+        print('%s found in halodata' % data)
 
     nhalos = 0
     for i in range(0,len(RS)):

@@ -1,6 +1,6 @@
 import h5py as h5py
 import numpy as np
-from common import METALFACTOR
+from .common import METALFACTOR
 
 HDF5_NAMES = {'pos':'Coordinates',
               'vel':'Velocities',
@@ -30,24 +30,24 @@ def hdf5_general(f,h,ptype):
             if h.reading in f['PartType%d' % ptype]:
                 arr = f['PartType%d/%s' % (ptype,h.reading)]
             else:
-                print 'ERROR!  could not find "%s" in PartType%d' % (h.reading,ptype)
+                print('ERROR!  could not find "%s" in PartType%d' % (h.reading,ptype))
                 arr = np.zeros(0,dtype=np.float32)
 
         elif HDF5_NAMES[h.reading] in f['PartType%d' % ptype]:
-            if h.debug: print 'reading PartType%d/%s' % (ptype,HDF5_NAMES[h.reading])
+            if h.debug: print('reading PartType%d/%s' % (ptype,HDF5_NAMES[h.reading]))
             arr = f['PartType%d/%s' % (ptype,HDF5_NAMES[h.reading])]
 
         else:
-            if h.debug: print 'could not locate PartType%d/%s' % (ptype,HDF5_NAMES[h.reading])
+            if h.debug: print('could not locate PartType%d/%s' % (ptype,HDF5_NAMES[h.reading]))
             arr = np.zeros(h.npartThisFile[ptype],dtype=np.float32)
 
         if h.units and h.reading == 'u':
             ne = f['PartType0/%s' % (HDF5_NAMES['ne'])]
-            import common as common
+            from . import common as common
             h.convert = common.getTfactor(np.asarray(ne,dtype=np.float32),h)
             #h.convert = h.convert.astype(np.float32)
     else:
-        if h.debug: print 'coult not find PartType%d' % ptype
+        if h.debug: print('coult not find PartType%d' % ptype)
         arr = np.zeros(0,dtype=np.float32)
 
     return np.asarray(arr)*h.convert
@@ -60,11 +60,11 @@ def hdf5_readmass(f,h,ptype):
         if HDF5_NAMES[h.reading] in f['PartType%d' % ptype]:
             arr = f['PartType%d/%s' % (ptype,HDF5_NAMES[h.reading])]
         else:
-            if h.debug: print 'could not locate PartType%d/%s' % (ptype,HDF5_NAMES[h.reading])
+            if h.debug: print('could not locate PartType%d/%s' % (ptype,HDF5_NAMES[h.reading]))
             arr = np.zeros(h.npartThisFile[ptype],dtype=np.float32)
             arr.fill(h.massTable[ptype])
     else:
-        if h.debug: print 'coult not find PartType%d' % ptype
+        if h.debug: print('coult not find PartType%d' % ptype)
         arr = np.zeros(0,dtype=np.float32)
 
     return np.asarray(arr)*h.convert

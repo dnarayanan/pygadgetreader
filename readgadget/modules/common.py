@@ -1,6 +1,6 @@
 import numpy as np
 import sys
-from names import *
+from .names import *
 
 METALFACTOR = 0.0189/0.0147
 H_MASSFRAC  = 0.76
@@ -26,9 +26,9 @@ RecognizedOptions = ['units',
                      'nth']
 def pollOptions(h,KWARGS,data,ptype):
     """warn user if option is unrecognized"""
-    for key,items in KWARGS.iteritems():
+    for key,items in KWARGS.items():
         if key not in RecognizedOptions:
-            print 'WARNING!! option not recognized: %s' % key
+            print('WARNING!! option not recognized: %s' % key)
 
     d = data
     p = ptype
@@ -36,7 +36,7 @@ def pollOptions(h,KWARGS,data,ptype):
     kill = 0
     if data not in dataTypes:
         if h.fileType != 'hdf5' and h.fileType != 'gadget2':
-          print 'ERROR! %s not a recognized data request' % data
+          print('ERROR! %s not a recognized data request' % data)
           kill = 1
         if h.fileType == 'gadget2':
             if len(d) < 4:
@@ -47,7 +47,7 @@ def pollOptions(h,KWARGS,data,ptype):
         d = dataTypes[d]
 
     if ptype not in pTypes:
-        print 'ERROR! %s not a recognized particle type' % ptype
+        print('ERROR! %s not a recognized particle type' % ptype)
         kill = 1
     else:
         p = pTypes[p]
@@ -60,7 +60,7 @@ def pollOptions(h,KWARGS,data,ptype):
 def pollHeaderOptions(h,data):
     """make sure we're returning proper header value"""
     if data not in headerTypes:
-        print 'ERROR! %s not a recognized header value' % data
+        print('ERROR! %s not a recognized header value' % data)
         sys.exit()
 
 def initUnits(h):
@@ -123,4 +123,4 @@ def gadgetPrinter(h,d,p):
     if h.suppress:
         return
     else:
-        print printer
+        print(printer)

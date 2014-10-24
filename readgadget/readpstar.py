@@ -1,4 +1,4 @@
-from modules.common import *
+from .modules.common import *
 import numpy as np
 import os
 

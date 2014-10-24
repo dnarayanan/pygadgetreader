@@ -1,5 +1,5 @@
 import numpy as np
-from common import METALFACTOR
+from .common import METALFACTOR
 import sys
 
 NMETALS = 4

@@ -1,7 +1,7 @@
 import numpy as np
 import os,sys
-import common as c
-import gadget_blockordering as gbo
+from . import common as c
+from . import gadget_blockordering as gbo
 import struct
 
 
@@ -150,13 +150,13 @@ class Header(object):
             self.snap = '%s.bin' % snap
 
         else:
-            print 'Could not determine file type by extension!'
+            print('Could not determine file type by extension!')
             sys.exit
 
         return FTYPE
 
     def read_gadget_header(self):
-        import gadget1 as g
+        from . import gadget1 as g
         f = open(self.snap,'rb')
         self.f = f
 
@@ -211,7 +211,7 @@ class Header(object):
         elif nbytes / (ntot * 8 * 3) == 1:
             self.dataType = np.float64
         else:
-            print 'could not determine data type!'
+            print('could not determine data type!')
             sys.exit()
         f.seek(-4,1)
         if self.fileType == 'gadget2':
