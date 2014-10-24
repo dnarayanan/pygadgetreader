@@ -14,6 +14,7 @@ E-Mail: rthompsonj@gmail.com
  * [readhead()](#readhead)
  * [readsnap()](#readsnap) 
  * [readrockstar()](#readrockstar) 
+ * [readrockstargalaxies()](#readrockstargalaxies)
  * [readfofspecial()](#readfofspecial)
  * [readpstar()](#readpstar)
 
@@ -29,6 +30,7 @@ Do you *love* running simulations but *hate* fighting with the different flavors
 `pyGadgetReader` also supports the following non-GADGET files:
 
 - **Rockstar** binary outputs
+- **Rockstar-Galaxies** binary outputs
 - **FoF Special** catalogue & indexlist binaries
 - **P-Star** data files
 
@@ -46,21 +48,21 @@ The easiest way to download the code and stay up to date is to clone a version f
 
 
 ## Customization
-Before building the module, there are a few customizations you *may* want to tinker with.  These can all be found in *`readgadget/modules/common.py`*.
+Before building the module, there are a few customizations you *may* want to tinker with.  The first two variables can be found in *`readgadget/modules/common.py`*, while the third is located in *`readgadget/modules/gadget_blockordering.py`*.
 
-1. **UNITS:**  The code currently assumes that your **default** `Gadget` length units are `Kpc/h`, mass units are 10^(10)`Msun/h`, and velocity units are `km/s`.  This can be changed by modifying the *`UnitLength_in_cm`*, *`UnitMass_in_g`*, and *`UnitVelocity_in_cm_per_s`* respectively in `readgadget/modules/common.py`.  This can optionally be altered by passing new values through as an option to the `readsnap()` function via `UnitMass_in_g=1.0e10`. (*note: has NO impact on TIPSY files as of now*)
+1. **UNITS:**  The code currently assumes that your **default** `Gadget` length units are `kpc/h`, mass units are 10^(10)`Msun/h`, and velocity units are `km/s`.  This can be changed by modifying the *`UnitLength_in_cm`*, *`UnitMass_in_g`*, and *`UnitVelocity_in_cm_per_s`* respectively in `readgadget/modules/common.py`.  This can optionally be altered by passing new values through as an option to the `readsnap()` function via `UnitMass_in_g=1.0e10`. (*note: has NO impact on TIPSY files as of now*)
 
-2. **METALFACTOR:**  If your metal field contains multiple species `(flag_metals > 1)`, this factor is multiplied to their sum to determine the overall particle's `metallicity`.
+2. **METALFACTOR:**  If your metal field contains multiple species `(flag_metals > 1)`, this factor is multiplied to their sum to determine the particle's overall metallicity.
 
 3. **BLOCKORDERING:** When dealing with `Gadget` **type-1 binaries**, the block-ordering can be a pain in the neck.  Custom fields can be added the snapshot causing all of your previous readers to start returning bad data; not anymore!  I've tried to design a system where the user can easily customize their block ordering.  `pyGadgetReader` currently has 2 default options - `BLOCKORDERING0` and `BLOCKORDERING1`.  The default is set via the `DEFAULT_BLOCKORDERING` variable, which is used in conjunction with the `BLOCKORDERING` dictionary defined farther down in the file.  This can be changed by editing `readgadget/modules/gadget_blockordering.py`.
 
-    If you require a custom block ordering, use one of the already present block orderings as a template.  The first step is creating a new `OrderedDict` named something along the lines of `BLOCKORDERING3`.  Each entry in the `OrderedDict` represents a data block, and must contain both a KEY and a VALUE.  Once your new block ordering is defined, you should add it to the `BLOCKORDERING` dictionary with an appropriate name.  You can also set it as default via the `DEFAULT_BLOCKORDERING` variable if you so wish.
+    If you require a custom block ordering, use one of the already present block orderings as a template.  The first step is creating a new `OrderedDict` named something along the lines of `BLOCKORDERING3`.  Each entry in the `OrderedDict` represents a data block, and must contain both a *KEY* and a *VALUE*.  Once your new block ordering is defined, you should add it to the `BLOCKORDERING` dictionary with an appropriate name.  You can also set it as default via the `DEFAULT_BLOCKORDERING` variable if you so wish.
 
-    **KEY:** This is the name of the block - it MUST be present as a value in the `dataTypes` dictionary defined farther down in `common.py`.
+    **KEY:** This is the name of the block - it MUST be present as a value in the `dataTypes` dictionary defined in `readgadget/modules/names.py`.
 
     **VALUE:** This is a list that contains 2 important pieces of information: 1) what particles this block is present for, and 2) should the code first check for a specific header flag?
 
-	Below are two examples.  The first represents the 'pos' block (which is present in the `dataTypes` dictionary).  The second entry is a list telling the code what particle types have this block, where -1 meaning ALL particle types.  The second represents the 'metallicity' data block; here we have a list of [0,4] telling the code that this block is present for particle types 0 (gas) & 4 (stars), and to check the `flag_metals` flag before attempting a read.  You are more than welcome to omit the flag checker if you know for certain the data block exists.
+	Below are two examples.  The first represents the 'pos' block (which is present in the `dataTypes` dictionary).  The second entry is a list telling the code what particle types have this block, where -1 meaning ALL particle types.  The second represents the 'metallicity' data block; here we have a list of [0,4] telling the code that this block is present for particle types 0 (gas) & 4 (stars), and to check the `flag_metals` flag before attempting a read.  You can omit the flag checker if you know for certain the data block exists.
 
 ~~~python
 ...
@@ -94,11 +96,11 @@ If you had previously installed my `C` version of `pyGadgetReader` you should *r
 To gain access to the following functions, place this at the top of your python script:
 
 ~~~python
-from readgadget import *
+from pyreadgadget import *
 ~~~
 
 
-### readhead()
+### readheader()
 This function reads in the header and returns values of interest.  The values it can read in are as follows:
 
 	 time	       - scale factor of the snapshot
@@ -118,12 +120,15 @@ This function reads in the header and returns values of interest.  The values it
 	 f_cooling     - Cooling flag			 	 0=off 1=on 
 	 f_age	       - Stellar Age tracking flag	 0=off 1=on
 	 f_metals      - Metal tracking flag  		 0=off 1=on
-	 nparts        - list of particle counts [0,1,2,3,4,5]
-	 
+
+	 npartTotal    - list of particle counts [0,1,2,3,4,5]
 	 header		   - returns the entire header as a dictionary
+	 
+ 	 npartThisFile - list of particle counts in a single file
+	                 (you MUST pass the full snapshot name for this one, 
+	                  otherwise it will return data from file .0)
 
-
-    Definition:   readhead('a','b',debug=0)
+    Definition:   readhead('a','b',debug=0,single=0)
 
 	      Parameters
 	      ----------
@@ -136,10 +141,11 @@ This function reads in the header and returns values of interest.  The values it
 	      --------
 		   debug: output debugging info
 
+
     Example:
-	      z = readhead('snap_001','redshift')  
+	      z = readheader('snap_001','redshift')  
 	      		- reads redshift value and assigns it to the z variable	      
-	      h = readhead('snap_005','h') 
+	      h = readheader('snap_005','h') 
 				- reads in the HubbleParam from the snapshot header
 
 
@@ -178,8 +184,9 @@ This function does the heavy lifting.  It reads data blocks from the snapshot an
 	   bndry       - Boundary particles
 	   
 
-    Definition:	readsnap('a','b','c',units=0,hdf5=0,tipsy=0,debug=0,
-									 supress_output=0,blockordering='romeel')
+    Definition:	readsnap('a','b','c',units=0,debug=0,suppress=0,
+									 double=0,nth=1,single=0,
+									 blockordering='romeel')
 
 		Parameters
 		----------
@@ -188,15 +195,17 @@ This function does the heavy lifting.  It reads data blocks from the snapshot an
 		b: Data block you are interested in (see above list)
 		   Must be input as a string and enclosed in ' '
 		c: Particle type you are interested in (see above list)
-		   Must be input as a string and enclosed in ' ', or an int (0-6)
+		   Must be input as a string and enclosed in ' ', or an int (0-5)
 		
 		Optional
 		--------
 		     units: Can either be 0 for code units or 1 for CGS
-			  hdf5: hdf5 file?
-		     tipsy: tipsy file?
 		     debug: Shows debug information
-	supress_output: if set to 1 no output is printed to the command line
+          suppress: if set to 1 no output is printed to the command line
+            double: returns a double array rather than float
+ 	           nth: only returns the nth particle (useful for random sampling)
+ 	        single: returns data from 1 part of a multi-part snapshot
+ 	                (in this case you MUST pass the full snapshot name)
 	 blockordering: allows for the user to specify which block ordering to use
 					(only valid for Gadget type-1 binaries)
 			  
@@ -205,7 +214,7 @@ This function does the heavy lifting.  It reads data blocks from the snapshot an
 		 grho=readsnap('snap_005','rho','gas',units=1)
 		gtemp=readsnap('snap_005','u','gas',units=1)
 
-**note for HDF5 and Gadget-Type2 files**: *you can pass arbitrary block requests in for `b` above, this allows you to pull custom data blocks out without having to alter the source.*
+#### **note for HDF5 and Gadget-Type2 files**: *you can pass arbitrary block requests in for `b` above, this allows you to pull custom data blocks out without having to alter the source.*
 
 ### readrockstar()
 This function reads rockstar binary data.  
@@ -274,6 +283,8 @@ This function reads rockstar binary data.
                     [i,0] = particle ID,
 				    [i,1] = halo ID
 
+### readrockstargalaxies()
+Identical usage as `readrockstar()`, except only to be used on Rockstar-Galaxies binary files.
 
 ### readfofspecial()
 This function reads FoF_Special binary outputs (indexlists & catalogues).  It returns a `Group` class, or a list of `Group` classes, all of which have **three** attributes:

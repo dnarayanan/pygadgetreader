@@ -36,6 +36,29 @@ def readhead(snap,data,**kwargs):
         return h.header_vals
     return h.header_vals[headerTypes[data]]
 
+def readheader(snap,data,**kwargs):
+    """Read and return desired header info
+    
+    Parameters
+    ----------
+    snap : string
+        path to your snapshot EXCLUDING file extension (if any)
+    data : string
+        requested header information.  see readme for details.
+
+    Notes
+    -----
+    If your snapshot happens to have a file extension, do NOT pass it to pyGadgetReader.  
+    It will attempt to automatically detect your file type
+
+    Examples
+    --------
+    >>> h = readhead('/Users/bob/snap_020','h')
+    >>> h
+    0.7
+    """
+    return readhead(snap,data,**kwargs)
+
 
 def readsnap(snap,data,ptype,**kwargs):
     """Read and return desired snapshot data
