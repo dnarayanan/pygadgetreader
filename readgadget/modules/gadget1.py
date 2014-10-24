@@ -2,8 +2,8 @@
 
 import sys
 import numpy as np
-from common import METALFACTOR
-from names import headerTypes,GasProps,GasStarProps
+from .common import METALFACTOR
+from .names import headerTypes,GasProps,GasStarProps
 
 
 def skip(f):
@@ -12,7 +12,7 @@ def skip(f):
 
 def errorcheck(s1,s2,block):
     if s1!=s2:
-        print 'issue with before/after skips - block %s >> %d vs %d' % (block,s1,s2)
+        print('issue with before/after skips - block %s >> %d vs %d' % (block,s1,s2))
         sys.exit()
 
 def skipblocks(f,h,val):
@@ -59,10 +59,10 @@ def skipblocks(f,h,val):
             errorcheck(s1,s2,'mass')
 
     
-    for key,items in h.BLOCKORDER.iteritems():
+    for key,items in h.BLOCKORDER.items():
         if val == key: 
             if h.debug:
-                print 'returning for key %s' % key
+                print('returning for key %s' % key)
             return
 
         if val == 'metalarray' and key == 'metallicity': return
@@ -73,7 +73,7 @@ def skipblocks(f,h,val):
         if key == 'metallicity' or key == 'metalarray':
             multi = h.flag_metals
 
-        if h.debug: print 'skipping %s' % key
+        if h.debug: print('skipping %s' % key)
         if key == 'mass':
             skipmasses()
         elif len(items) == 1:
@@ -105,7 +105,7 @@ def gadget_readpid(f,h,ptype):
     elif skip1 / (8 * ntot) == 1:
         PIDdtype = np.uint64
     else:
-        print 'err, could not determine PID data type! =/'
+        print('err, could not determine PID data type! =/')
         sys.exit()
 
     for i in range(0,ptype):
@@ -167,7 +167,7 @@ def gadget_readgasprop(f,h):
         skip2 = skip(f)
         errorcheck(skip1,skip2,'ne for Temp')
 
-        import common as common
+        from . import common as common
         h.convert = common.getTfactor(ne,h)
 
     return gasprop*h.convert
@@ -257,7 +257,7 @@ def gadget_read(f,h,p,d):
     elif h.reading == 'age':
         arr = gadget_readage(f,h)
     else:
-        print 'no clue what to read =('
+        print('no clue what to read =(')
         arr = np.zeros(0)
     
     return arr

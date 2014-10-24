@@ -3,7 +3,7 @@
 import sys
 import struct
 import numpy as np
-import gadget1 as g
+from . import gadget1 as g
 
 TYPE2NAMES = {
     'pos':'POS ',
@@ -31,6 +31,7 @@ def findBlock(f,h):
         return 2
     blk1 = blk1[0]
     NAME = struct.unpack('4s',f.read(4))[0]
+    NAME = NAME.decode()
     sl   = np.fromfile(f,dtype=np.uint32,count=1)
     blk2 = np.fromfile(f,dtype=np.uint32,count=1)[0]
     g.errorcheck(blk1,blk2,'blk %s' % NAME)
@@ -43,10 +44,10 @@ def findBlock(f,h):
         RETURN = True
 
     if RETURN:
-        if h.debug: print 'returning for block %s' % NAME
+        if h.debug: print('returning for block %s' % NAME)
         return 1
     else:
-        if h.debug: print 'skipping block %s' % NAME
+        if h.debug: print('skipping block %s' % NAME)
 
     s1 = np.fromfile(f,dtype=np.uint32,count=1)[0]
     f.seek(s1, 1)
@@ -68,22 +69,22 @@ def gadget_general(f,h,ptype):
         sOnly   = skip1 / (np.dtype(h.dataType).itemsize * h.npartThisFile[4])
     if h.npartThisFile[0] > 0 or h.npartThisFile[4] > 0:
         gsOnly  = skip1 / (np.dtype(h.dataType).itemsize * h.npartThisFile[0] + 
-                           np.dtype(h.dataType).itemsize * h.npartThisFile[1])
+                           np.dtype(h.dataType).itemsize * h.npartThisFile[4])
     allPart = skip1 / (np.dtype(h.dataType).itemsize * np.sum(h.npartThisFile)) 
 
     if gOnly == 1.0:
         if ptype != 0:
-            print 'block is only present for gas!'
+            print('block is only present for gas!')
             return
         vals = np.fromfile(f,dtype=h.dataType,count=h.npartThisFile[ptype])
     elif sOnly == 1.0:
         if ptype != 4:
-            print 'block is only present for stars!'
+            print('block is only present for stars!')
             return
         vals = np.fromfile(f,dtype=h.dataType,count=h.npartThisFile[ptype])
     elif gsOnly == 1.0:
         if ptype != 0 and ptype != 4:
-            print 'block is only present for gas & stars!'
+            print('block is only present for gas & stars!')
             return
         if ptype == 4:
             f.seek(np.dtype(h.dataType).itemsize * h.npartThisFile[0],1)
@@ -94,7 +95,7 @@ def gadget_general(f,h,ptype):
         for i in range(0,ptype):
             f.seek(np.dtype(h.dataType).itemsize * h.npartThisFile[i],1)
         vals = np.fromfile(f,dtype=h.dataType,count=h.npartThisFile[ptype])
-        for i in range(ptype+1,len(h.npart)):
+        for i in range(ptype+1,len(h.npartThisFile)):
             f.seek(np.dtype(h.dataType).itemsize * h.npartThisFile[i],1)
         
     skip2 = np.fromfile(f,dtype=np.uint32,count=1)[0]
@@ -109,8 +110,8 @@ def gadget_type2_read(f,h,p):
         stat = findBlock(f,h)
         
     if stat == 2:
-        print 'end of file =/'
-        print 'scanning did not find block %s' % (h.reading)
+        print('end of file =/')
+        print('scanning did not find block %s' % (h.reading))
         sys.exit()
     
     if h.reading == 'pos' or h.reading == 'vel':

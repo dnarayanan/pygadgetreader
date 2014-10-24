@@ -1,10 +1,10 @@
-from modules.common import *
-from modules.names import *
-import modules.header as HEAD
-import modules.gadget1 as gadget1
-import modules.gadget2 as gadget2
-import modules.tipsy as tipsy
-import modules.hdf5 as hdf5
+from .modules.common import *
+from .modules.names import *
+from .modules import header as HEAD
+from .modules import gadget1 as gadget1
+from .modules import gadget2 as gadget2
+from .modules import tipsy as tipsy
+from .modules import hdf5 as hdf5
 import numpy as np
 import sys
 
@@ -107,7 +107,7 @@ def readsnap(snap,data,ptype,**kwargs):
         if h.npartThisFile[p] == 0:
             if h.nfiles > 1:
                 continue
-            print 'no %s particles present!' % pNames[p]
+            print('no %s particles present!' % pNames[p])
             sys.exit()
 
         if h.fileType == 'hdf5':
@@ -133,7 +133,7 @@ def readsnap(snap,data,ptype,**kwargs):
             return_arr = arr
             gadgetPrinter(h,d,p)
             if h.nth > 1 and not h.suppress:
-                print 'selecting every %d particles' % h.nth
+                print('selecting every %d particles' % h.nth)
 
         ## if requesting a single file, break out of loop
         if h.singleFile:
