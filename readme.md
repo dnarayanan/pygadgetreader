@@ -70,10 +70,8 @@ Before building the module, there are a few customizations you *may* want to tin
 	Below are two examples.  The first represents the 'pos' block (which is present in the `dataTypes` dictionary).  The second entry is a list telling the code what particle types have this block, where -1 meaning ALL particle types.  The second represents the 'metallicity' data block; here we have a list of [0,4] telling the code that this block is present for particle types 0 (gas) & 4 (stars), and to check the `flag_metals` flag before attempting a read.  You can omit the flag checker if you know for certain the data block exists.
 
     ~~~python
-    ...
     ('pos',[-1]),
     ('metallicity',[[0,4],'flag_metals']),
-    ...
     ~~~
 
 ## Installation
