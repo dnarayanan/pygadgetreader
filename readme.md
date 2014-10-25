@@ -1,5 +1,4 @@
 # pyGadgetReader
-
 Author: Robert Thompson
 
 E-Mail: rthompsonj@gmail.com
@@ -17,6 +16,7 @@ E-Mail: rthompsonj@gmail.com
  * [readrockstargalaxies()](#readrockstargalaxies)
  * [readfofspecial()](#readfofspecial)
  * [readpstar()](#readpstar)
+* [Tips](#tips)
 
 ## Summary
 Do you *love* running simulations but *hate* fighting with the different flavors of output?  If so, you've come to the right place!  `pyGadgetReader` is designed to take the headache out of reading your `GADGET` simulation data; it plays the role of interpreter between the binary snapshot & `python`.  The module currently supports the following data types:
@@ -32,7 +32,7 @@ Do you *love* running simulations but *hate* fighting with the different flavors
 - **Rockstar** binary outputs
 - **Rockstar-Galaxies** binary outputs
 - **FoF Special** catalogue & indexlist binaries
-- **P-Star** data files
+- **P-StarGroupFinder** data files
 
 ## Requirements
 * python >= 2.7.x
@@ -55,7 +55,7 @@ To update all you need to do is:
 ## Customization
 Before building the module, there are a few customizations you *may* want to tinker with.  The first two variables can be found in *`readgadget/modules/common.py`*, while the third is located in *`readgadget/modules/gadget_blockordering.py`*.
 
-1. **UNITS:**  The code currently assumes that your **default** `Gadget` length units are `kpc/h`, mass units are 10^(10)`Msun/h`, and velocity units are `km/s`.  This can be changed by modifying the *`UnitLength_in_cm`*, *`UnitMass_in_g`*, and *`UnitVelocity_in_cm_per_s`* respectively in `readgadget/modules/common.py`.  This can optionally be altered by passing new values through as an option to the `readsnap()` function via `UnitMass_in_g=1.0e10`. (*note: has NO impact on TIPSY files as of now*)
+1. **UNITS:**  The code currently assumes that your **default** `Gadget` length units are `kpc/h`, mass units are 10^(10)`Msun/h`, and velocity units are `km/s`.  This can be changed by modifying the *`UnitLength_in_cm`*, *`UnitMass_in_g`*, and *`UnitVelocity_in_cm_per_s`* respectively in `readgadget/modules/common.py`.  This can optionally be altered on a per-call basis by passing new values through as an option to the `readsnap()` function. (*note: has NO impact on TIPSY files as of now*)
 
 2. **METALFACTOR:**  If your metal field contains multiple species `(flag_metals > 1)`, this factor is multiplied to their sum to determine the particle's overall metallicity (default is 0.0189/0.0147 for historical reasons).
 
@@ -126,7 +126,7 @@ This function reads in the header and returns values of interest.  The values it
 	 f_age	       - Stellar Age tracking flag	 0=off 1=on
 	 f_metals      - Metal tracking flag  		 0=off 1=on
 
-	 npartTotal    - list of particle counts [0,1,2,3,4,5]
+	 npartTotal    - list of particle counts (including HighWord)
 	 header		   - returns the entire header as a dictionary
 	 
  	 npartThisFile - list of particle counts in a single file
@@ -208,7 +208,7 @@ This function does the heavy lifting.  It reads data blocks from the snapshot an
 	   dm	       - Type1: Dark Matter
 	   disk	       - Type2: Disk particles
 	   bulge       - Type3: Bulge particles
-	   star/stars  - Type4: Star particles
+	   star        - Type4: Star particles
 	   bndry       - Type5: Boundary particles
 	   
 
@@ -261,12 +261,17 @@ This function does the heavy lifting.  It reads data blocks from the snapshot an
 
 **NOTE** for `HDF5` and `Gadget-Type2` files: *you can pass arbitrary block requests in for `b` above, this allows you to pull custom data blocks out without having to alter the source. As an example:*
 
+	# hdf5
     >>> readsnap('snap_036','ArtificialViscosity',0)
         array([ 0.2,  0.2,  0.2, ...,  0.2, 0.2,  0.21387598], dtype=float32)
+        
+    # gadget type-2 binary (limited to 4 characters)
+    >>> readsnap('snap_036','ABVC',0)
+        array([ 0.38793027,  0.48951781,  0.37891224, ...,  0.2301995], dtype=float32)
 
 
 ## readrockstar()
-This function reads rockstar binary data.  Current supported return data types:
+This function reads `Rockstar` binary data.  **Current supported return data types:**
 
 	   	halos		- All halo data
 	   	particles 	- particle IDs & respective halo membership
@@ -345,35 +350,53 @@ This function reads rockstar binary data.  Current supported return data types:
 			       [105530,    103]])
 
 ## readrockstargalaxies()
-Identical usage as `readrockstar()`, except only to be used on Rockstar-Galaxies binary files.
+Identical usage as `readrockstar()`, except only to be used on `Rockstar-Galaxies` binary files.
 
 ## readfofspecial()
-This function reads FoF_Special binary outputs (indexlists & catalogues).  It returns a `Group` class, or a list of `Group` classes, all of which have **three** attributes:
+This function reads `FoF_Special` binary outputs (indexlists & catalogues).  It returns a `Group` object, or a list of `Group` objects, all of which have **three** attributes:
 
 	 index         - group index
 	 npart_total   - total number of group particles
 	 indexes       - indexes of all particles belonging to group
 
-    Definition:   readfofspecial('a',b,c)
+**DEFINITION:**
+
+    	  readfofspecial(a,b,c)
 
 	      Parameters
 	      ----------
-	      a : Group catalogue directory.  
-	      	  Must be input as a string and enclosed in ' ' - see examples.
-	      b : Snapshot number (int)
-		  c : halo or halos of interest
-			  This can either be an int, or a list of ints.
+	      a : string
+	      	  Group catalogue directory
+		  b : int
+	   	      Snapshot number
+	   	  c : int, list
+	   	  	  halo or halos of interest
+
+		  Returns
+		  -------
+	      group object, list of group objects
 	      
-    Example:
-	      grp10 = readfofspecial('/path/to/catalogues', 12, 10)
-				- this will return a single 'Group' class containing
-     			  the above attributes for group 10 in snapshot 12
-		   grps = readfofspecial('/path/to/catalogues', 12, [10,16])
-				- this will return a list of 'Group' classes containing
-     			  the above attributes for groups 10 & 16 in snapshot 12
+	      Examples
+	      --------
+	      ## returns a single 'Group' object for halo 10
+	      >>> readfofspecial('/path/to/catalogues', 12, 10)
+	      
+	      ## returns a list of 'Group' objects for halos 10, 11, & 32
+	      >>> readfofspecial('/path/to/catalogues', 12, [10,11,32])
+	      
+		  ## returns a list of 'Group' objects for all halos
+		  >>> readfofspecial('/path/to/catalogues', 12, -1)
+		  
+		  ## sample data access ##
+		  >>> halo10 = readfofspecial('/path/to/catalogues', 12, 10)
+		  >>> print halo10.index
+		      10
+		      
+   		  >>> halos  = readfofspecial('/path/to/catalogues', 12, -1)
+		  >>> pcount = [s.npart_total for s in halos]
 
 ## readpstar()
-This function reads FoF_Special binary outputs (indexlists & catalogues).  It returns a `Group` class, or a list of `Group` classes, all of which have **eleven** attributes:
+This function reads `P-StarGroupFinder` binary outputs (indexlists & catalogues).  It returns a `Group` object, or a list of `Group` objects, all of which have **eleven** attributes:
 
 	 index         - group index
 	 npart_total   - total number of group particles
@@ -387,27 +410,58 @@ This function reads FoF_Special binary outputs (indexlists & catalogues).  It re
 	 spids		   - list of star PIDs
 	 stypes		   - 
 
-    Definition:   readpstar('a',b,c)
+**DEFINITION:**
+	
+		  readpstar(a,b,c)
 
 	      Parameters
 	      ----------
-	      a : Group catalogue directory.  
-	      	  Must be input as a string and enclosed in ' ' - see examples.
-	      b : Snapshot number (int)
-		  c : galaxy or galaxies of interest
-			  This can either be an int, or a list of ints.
+	      a : string
+	      	  Group catalogue directory
+	      b : int
+	      	  Snapshot number
+	      c : int, list
+	      	  Galaxy, or list of galaxy indexes
 	      
-    Example:
-	      grp10 = readpstar('/path/to/catalogues', 12, 10)
-				- this will return a single 'Group' class containing
-     			  the above attributes for group 10 in snapshot 12
-		   grps = readpstar('/path/to/catalogues', 12, [10,16])
-				- this will return a list of 'Group' classes containing
-     			  the above attributes for groups 10 & 16 in snapshot 12
+	      Returns
+	      -------
+	      group object, list of group objects
+	      
+	      Examples
+	      --------
+	      ## returns a single 'Group' object for galaxy 10
+	      >>> readpstar('/path/to/catalogues', 12, 10)
+	      
+     	  ## returns a list of 'Group' objects for galaxies 10,11, & 32
+	      >>> readpstar('/path/to/catalogues', 12, [10,11,32])
+	      
+	      ## returns a list of 'Group' objects for all galaxies
+	      >>> readpstar('/path/to/catalogues', 12, -1)
+	      
+	      ## sample data access ##
+		  >>> gal10 = readpstar('/path/to/catalogues', 12, 10)
+		  >>> print gal10.index
+		      10
+		      
+		  >>> galaxies = readpstar('/path/to/catalogues', 12, -1)
+		  >>> masses   = [s.mstar for s in galaxies]
+
+## TIPS
+If you plan on doing multiple reads in a single script, you can pass a common set of options via a dictionary.  As an example:
+
+~~~python
+from pygadgetreader import *
+
+snap  = 'snap_N128L16_036'
+pygro = {'debug':1, 'units':1, 'UnitMass_in_g':1.989e33}
+rho   = readsnap(snap, 'rho', 0, **pygro)
+temp  = readsnap(snap, 'u',   0, **pygro)
+~~~
+This convinient form means that if you need to change the variables passed to each `readsnap()` call you only have to alter the `pygro` dictionary.
+
 ****
 
-
-Any comments or suggestions feel free to contact me:
+If you have any comments or suggestions feel free to contact me.  Enjoy!
 
     Robert Thompson
     rthompsonj@gmail.com
