@@ -6,7 +6,7 @@ E-Mail: rthompsonj@gmail.com
 # Contents
 * [Summary](#markdown-header-summary)
 * [Requirements](#markdown-header-requirements)
-* [Obtaining & Updating](#markdown-header-obtaining)
+* [Obtaining and Updating](#markdown-header-obtaining-and-updating)
 * [Customization](#markdown-header-customization)
 * [Installation](#markdown-header-installtion)
 * [Usage](#markdown-header-usage)
@@ -39,7 +39,7 @@ Do you *love* running simulations but *hate* fighting with the different flavors
 * numpy >= 1.7.x
 * h5py
 
-## Obtaining & Updating
+## Obtaining and Updating
 The easiest way to download the code and stay up to date is to clone a version from [bitbucket](https://bitbucket.org/rthompson/pygadgetreader) to your local computer via Mercurial (hg):
 ~~~Bash
 > hg clone https://bitbucket.org/rthompson/pygadgetreader
