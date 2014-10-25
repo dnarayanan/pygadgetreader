@@ -7,11 +7,11 @@ E-Mail: rthompsonj@gmail.com
 # Contents
 * [Summary](#sum)
 * [Requirements](#req)
-* [Obtaining](#obt)
+* [Obtaining & Updating](#obt)
 * [Customization](#cust)
 * [Installation](#inst)
 * [Usage](#usage)
- * [readhead()](#readhead)
+ * [readheader()](#readheader)
  * [readsnap()](#readsnap) 
  * [readrockstar()](#readrockstar) 
  * [readrockstargalaxies()](#readrockstargalaxies)
@@ -39,20 +39,25 @@ Do you *love* running simulations but *hate* fighting with the different flavors
 * numpy >= 1.7.x
 * h5py
 
-## Obtaining
+## Obtaining & Updating
 The easiest way to download the code and stay up to date is to clone a version from [bitbucket](https://bitbucket.org/rthompson/pygadgetreader) to your local computer via Mercurial (hg):
-
 ~~~Bash
 > hg clone https://bitbucket.org/rthompson/pygadgetreader
 ~~~
 
+To update all you need to do is:
+~~~Bash
+> hg pull
+> hg up
+(reinstall)
+~~~
 
 ## Customization
 Before building the module, there are a few customizations you *may* want to tinker with.  The first two variables can be found in *`readgadget/modules/common.py`*, while the third is located in *`readgadget/modules/gadget_blockordering.py`*.
 
 1. **UNITS:**  The code currently assumes that your **default** `Gadget` length units are `kpc/h`, mass units are 10^(10)`Msun/h`, and velocity units are `km/s`.  This can be changed by modifying the *`UnitLength_in_cm`*, *`UnitMass_in_g`*, and *`UnitVelocity_in_cm_per_s`* respectively in `readgadget/modules/common.py`.  This can optionally be altered by passing new values through as an option to the `readsnap()` function via `UnitMass_in_g=1.0e10`. (*note: has NO impact on TIPSY files as of now*)
 
-2. **METALFACTOR:**  If your metal field contains multiple species `(flag_metals > 1)`, this factor is multiplied to their sum to determine the particle's overall metallicity.
+2. **METALFACTOR:**  If your metal field contains multiple species `(flag_metals > 1)`, this factor is multiplied to their sum to determine the particle's overall metallicity (default is 0.0189/0.0147 for historical reasons).
 
 3. **BLOCKORDERING:** When dealing with `Gadget` **type-1 binaries**, the block-ordering can be a pain in the neck.  Custom fields can be added the snapshot causing all of your previous readers to start returning bad data; not anymore!  I've tried to design a system where the user can easily customize their block ordering.  `pyGadgetReader` currently has 2 default options - `BLOCKORDERING0` and `BLOCKORDERING1`.  The default is set via the `DEFAULT_BLOCKORDERING` variable, which is used in conjunction with the `BLOCKORDERING` dictionary defined farther down in the file.  This can be changed by editing `readgadget/modules/gadget_blockordering.py`.
 
@@ -64,12 +69,12 @@ Before building the module, there are a few customizations you *may* want to tin
 
 	Below are two examples.  The first represents the 'pos' block (which is present in the `dataTypes` dictionary).  The second entry is a list telling the code what particle types have this block, where -1 meaning ALL particle types.  The second represents the 'metallicity' data block; here we have a list of [0,4] telling the code that this block is present for particle types 0 (gas) & 4 (stars), and to check the `flag_metals` flag before attempting a read.  You can omit the flag checker if you know for certain the data block exists.
 
-~~~python
-...
-('pos',[-1]),
-('metallicity',[[0,4],'flag_metals']),
-...
-~~~
+    ~~~python
+    ...
+    ('pos',[-1]),
+    ('metallicity',[[0,4],'flag_metals']),
+    ...
+    ~~~
 
 ## Installation
 Once the code is downloaded there are two methods of installation depending on your access rights.  If you have write access to your python distribution, then the preferred method is to execute the following commands:
@@ -82,7 +87,7 @@ Once the code is downloaded there are two methods of installation depending on y
 If you do *not* have write access to your python install, we need to modify your environment variable `PYTHONPATH` to point to the pyGadgetReader directory.  Add these two lines to your `.bashrc/.bash_profile` (or respective shell file):
 
 ~~~Bash
-PYTHONPATH=/path/to/pyGadgetReader:$PYTHONPATH
+PYTHONPATH=/path/to/pygadgetreader:$PYTHONPATH
 export PYTHONPATH
 ~~~
 
@@ -96,11 +101,11 @@ If you had previously installed my `C` version of `pyGadgetReader` you should *r
 To gain access to the following functions, place this at the top of your python script:
 
 ~~~python
-from pyreadgadget import *
+from pygadgetreader import *
 ~~~
 
 
-### readheader()
+## readheader()
 This function reads in the header and returns values of interest.  The values it can read in are as follows:
 
 	 time	       - scale factor of the snapshot
@@ -128,35 +133,52 @@ This function reads in the header and returns values of interest.  The values it
 	                 (you MUST pass the full snapshot name for this one, 
 	                  otherwise it will return data from file .0)
 
-    Definition:   readhead('a','b',debug=0,single=0)
+**DEFINITION:**
 
-	      Parameters
-	      ----------
-	      a : Input file.  
-	      	  Must be input as a string and enclosed in ' ' - see examples.
-	      b : Value of interest from the above list.  
-	      	  Must be input as a string and enclosed in ' ' - see examples.
-	      
-	      Optional
-	      --------
-		   debug: output debugging info
+		readheader(a,b,debug=0,single=0)
 
+		Parameters
+	   	----------
+	   	a : string
+	   	    Input file
+		b : string
+		    Requested data type (from above list)
 
-    Example:
-	      z = readheader('snap_001','redshift')  
-	      		- reads redshift value and assigns it to the z variable	      
-	      h = readheader('snap_005','h') 
-				- reads in the HubbleParam from the snapshot header
+		Optional
+		--------
+		debug: output debugging info
 
+		Returns
+		-------
+		float, double, int, list, array, dict (depending on request)
 
+		Examples
+		--------
+		>>> readheader('snap_001','redshift')
+			2.3499995966280447
 
-### readsnap()
+		>>> readheader('snap_005','npartTotal')
+			array([  53921,   54480,       0,       0,    3510, 2090342], dtype=uint32)
+		
+		>>> readheader('snap_006','header')
+			{'O0': 0.29999999999999999,
+			 'Ol': 0.69999999999999996,
+ 			 'boxsize': 16000.0,
+			 'h': 0.69999999999999996,
+ 			 'massTable': array([ 0.,  0.00172772,  0.,  0.,  0., 0.01626092]),
+			  ...,
+			 'time': 0.29850749862971743}
+
+## readsnap()
 This function does the heavy lifting.  It reads data blocks from the snapshot and returns the requested data for a a specified particle type.
 
-	   Supported data blocks are:
-
+**SUPPORTED DATA BLOCKS:**
+          
+	  ---------------------
+	  -  STANDARD BLOCKS  -
+  	  ---------------------
 	   pos	       - (all)         Position data
-	   vel	       - (all)         Velocity data in km/s
+	   vel	       - (all)         Velocity data code units
 	   pid	       - (all)         Particle ids
 	   mass	       - (all)         Particle masses
 	   u	       - (gas)         Internal energy
@@ -165,37 +187,48 @@ This function does the heavy lifting.  It reads data blocks from the snapshot an
 	   nh	       - (gas)         Number density of neutral hydrogen
 	   hsml	       - (gas)         Smoothing length of SPH particles
 	   sfr	       - (gas)         Star formation rate in Msun/year
+	   age	       - (stars)       Formation time of stellar particles
+ 	   z	       - (gas & stars) Metallicty of gas/star particles (returns total Z)
+	   potential   - (all)         Potential of particles (if present in output)
+
+	  ---------------------
+	  -  CUSTOM  BLOCKS   -
+  	  ---------------------
 	   delaytime   - (gas)         DelayTime (>0 member of wind)
 	   fH2	       - (gas)         Fractional Abundance of molecular hydrogen
-	   Sigma       - (gas)         Approximate surface density
-	   age	       - (stars)       Formation time of stellar particles
- 	   z	       - (gas & stars) Metallicty of gas & star particles (returns total Z)
+	   Sigma       - (gas)         Approximate surface density	   
 	   tmax        - (gas & stars) Maximum temp
 	   nspawn      - (gas & stars) Number of star particles spawned
-	   potential   - (all)         Potential of particles
 	   zarray      - (gas & stars) NMETALS array [C,O,Si,Fe]
 
-	   Supported particle types (note tipsy only returns gas/dm/star particles):
-	   gas	       - Gas
-	   dm	       - Dark Matter
-	   disk	       - Disk particles
-	   bulge       - Bulge particles
-	   star/stars  - Star particles
-	   bndry       - Boundary particles
+
+**SUPPORTED PARTICLE TYPES:**
+
+	   gas	       - Type0: Gas
+	   dm	       - Type1: Dark Matter
+	   disk	       - Type2: Disk particles
+	   bulge       - Type3: Bulge particles
+	   star/stars  - Type4: Star particles
+	   bndry       - Type5: Boundary particles
 	   
 
-    Definition:	readsnap('a','b','c',units=0,debug=0,suppress=0,
-									 double=0,nth=1,single=0,
-									 blockordering='romeel')
+**DEFINITION:**
+
+        readsnap(a,b,c,units=0,debug=0,suppress=0,
+		    		   double=0,nth=1,single=0,
+			    	   blockordering='romeel',
+				       UnitLength_in_cm = 3.085678e21,
+					   UnitMass_in_g = 1.989e43,
+					   UnitVelocity_in_cm_per_s = 1.0e5)
 
 		Parameters
 		----------
-		a: Input file.
-		   Must be input as a string and enclosed in ' '
-		b: Data block you are interested in (see above list)
-		   Must be input as a string and enclosed in ' '
-		c: Particle type you are interested in (see above list)
-		   Must be input as a string and enclosed in ' ', or an int (0-5)
+		a : string
+			Input File
+		b : string
+			Requested data block (from supported data blocks above)
+		c : string, int
+			Requested particle type (from supported particle types above)
 		
 		Optional
 		--------
@@ -209,17 +242,31 @@ This function does the heavy lifting.  It reads data blocks from the snapshot an
 	 blockordering: allows for the user to specify which block ordering to use
 					(only valid for Gadget type-1 binaries)
 			  
-    Example:
-		DMpos=readsnap('snap_001','pos','dm')
-		 grho=readsnap('snap_005','rho','gas',units=1)
-		gtemp=readsnap('snap_005','u','gas',units=1)
+		Returns
+		-------
+		numpy array
+			  
+		Examples
+		--------
+		>>> readsnap('snap_001','pos','dm')
+			array([[ 7160.68994141,  6526.55810547,  5950.74707031],
+		   		   [ 7097.95166016,  6589.15966797,  5958.44677734],
+   					...,
+			       [ 7929.03466797,  7870.52783203,  8016.08447266]], dtype=float32)
 
-#### **note for HDF5 and Gadget-Type2 files**: *you can pass arbitrary block requests in for `b` above, this allows you to pull custom data blocks out without having to alter the source.*
+		>>> readsnap('snap_005','rho',0,units=1)
+			array([  1.60686842e-09,   3.20981991e-10,   1.59671165e-10, ...,
+      				 4.05850381e-10,   7.22671034e-10,   1.10464858e-11], dtype=float32)
+      				 
 
-### readrockstar()
-This function reads rockstar binary data.  
+**NOTE** for `HDF5` and `Gadget-Type2` files: *you can pass arbitrary block requests in for `b` above, this allows you to pull custom data blocks out without having to alter the source. As an example:*
 
-	   Current supported return data types:
+    >>> readsnap('snap_036','ArtificialViscosity',0)
+        array([ 0.2,  0.2,  0.2, ...,  0.2, 0.2,  0.21387598], dtype=float32)
+
+
+## readrockstar()
+This function reads rockstar binary data.  Current supported return data types:
 
 	   	halos		- All halo data
 	   	particles 	- particle IDs & respective halo membership
@@ -263,30 +310,44 @@ This function reads rockstar binary data.
 		min_vel_err
 		min_bulkvel_err
 
-    Definition:	readrockstar('a','b')
+**DEFINITION:**
+
+		readrockstar(a,b)
 
 		Parameters
 		----------
-		a: Input binary file.
-		   Must be input as a string and enclosed in ' '
-			do NOT include the number or .bin extensions!!
-		b: Data block you are interested in (see above list)
-		   Must be input as a string and enclosed in ' '
+		a : string
+		    Input binary file. Do NOT include the number or .bin extensions!!
+		b : string
+			Data block you are interested in (see above list)
 					  
-    Example:
-	   halodata = readrockstar('halos_0037','halos')
-			      - returns array with ALL of the above halo data
-		halo_cm = readrockstar('halos_0037','pos')
-			      - returns center of mass positions
-   		   PIDs = readrockstar('halos_0037','particles')
-        	      - returns an (N,2) array with:
-                    [i,0] = particle ID,
-				    [i,1] = halo ID
+		Returns
+		-------
+		array, dict
+		
+		Examples
+		--------
+		## returns all halo data
+		>>> readrockstar('halos_037','halos')
+			array([ (0, [7.364242076873779, 6.997755527496338, 7.268182754516602, 19.809770584106445,...
+		
+		## only returns halo position data
+		>>> readrockstar('halos_037','pos')
+			array([[   7.36424208,    6.99775553,    7.26818275,   19.80977058,
+          			-2.92877913,  -95.81005859],...
 
-### readrockstargalaxies()
+		## returns particle data	
+		## [i,0]=particle ID, [i,1]=halo ID
+		>>> readrockstar('halos_037','particles')			
+			array([[ 62336,      0],
+			       [ 63438,      0],
+	       			...,
+			       [105530,    103]])
+
+## readrockstargalaxies()
 Identical usage as `readrockstar()`, except only to be used on Rockstar-Galaxies binary files.
 
-### readfofspecial()
+## readfofspecial()
 This function reads FoF_Special binary outputs (indexlists & catalogues).  It returns a `Group` class, or a list of `Group` classes, all of which have **three** attributes:
 
 	 index         - group index
@@ -310,8 +371,8 @@ This function reads FoF_Special binary outputs (indexlists & catalogues).  It re
 		   grps = readfofspecial('/path/to/catalogues', 12, [10,16])
 				- this will return a list of 'Group' classes containing
      			  the above attributes for groups 10 & 16 in snapshot 12
-****
-### readpstar()
+
+## readpstar()
 This function reads FoF_Special binary outputs (indexlists & catalogues).  It returns a `Group` class, or a list of `Group` classes, all of which have **eleven** attributes:
 
 	 index         - group index
@@ -350,4 +411,3 @@ Any comments or suggestions feel free to contact me:
 
     Robert Thompson
     rthompsonj@gmail.com
-
