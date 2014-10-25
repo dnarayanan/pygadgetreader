@@ -4,7 +4,7 @@ Author: Robert Thompson
 E-Mail: rthompsonj@gmail.com
 
 # Contents
-* [Summary](#sum)
+* [Summary](#summary)
 * [Requirements](#req)
 * [Obtaining & Updating](#obt)
 * [Customization](#cust)
