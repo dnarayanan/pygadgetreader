@@ -5,18 +5,18 @@ E-Mail: rthompsonj@gmail.com
 
 # Contents
 * [Summary](#markdown-header-summary)
-* [Requirements](#req)
-* [Obtaining & Updating](#obt)
-* [Customization](#cust)
-* [Installation](#inst)
-* [Usage](#usage)
- * [readheader()](#readheader)
- * [readsnap()](#readsnap) 
- * [readrockstar()](#readrockstar) 
- * [readrockstargalaxies()](#readrockstargalaxies)
- * [readfofspecial()](#readfofspecial)
- * [readpstar()](#readpstar)
-* [Tips](#tips)
+* [Requirements](#markdown-header-requirements)
+* [Obtaining & Updating](#markdown-header-obtaining)
+* [Customization](#markdown-header-customization)
+* [Installation](#markdown-header-installtion)
+* [Usage](#markdown-header-usage)
+	 * [readheader()](#markdown-header-readheader)
+	 * [readsnap()](#markdown-header-readsnap) 
+	 * [readrockstar()](#markdown-header-readrockstar) 
+	 * [readrockstargalaxies()](#markdown-header-readrockstargalaxies)
+	 * [readfofspecial()](#markdown-header-readfofspecial)
+	 * [readpstar()](#markdown-header-readpstar)
+* [Tips](#markdown-header-tips)
 
 ## Summary
 Do you *love* running simulations but *hate* fighting with the different flavors of output?  If so, you've come to the right place!  `pyGadgetReader` is designed to take the headache out of reading your `GADGET` simulation data; it plays the role of interpreter between the binary snapshot & `python`.  The module currently supports the following data types:
