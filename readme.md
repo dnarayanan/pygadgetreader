@@ -18,7 +18,7 @@ E-Mail: rthompsonj@gmail.com
  * [readpstar()](#readpstar)
 * [Tips](#tips)
 
-## Summary
+# Summary
 Do you *love* running simulations but *hate* fighting with the different flavors of output?  If so, you've come to the right place!  `pyGadgetReader` is designed to take the headache out of reading your `GADGET` simulation data; it plays the role of interpreter between the binary snapshot & `python`.  The module currently supports the following data types:
 
 - **Gadget** types 1 & 2 binaries (single/multi-part)
