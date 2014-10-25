@@ -8,7 +8,7 @@ E-Mail: rthompsonj@gmail.com
 * [Requirements](#markdown-header-requirements)
 * [Obtaining and Updating](#markdown-header-obtaining-and-updating)
 * [Customization](#markdown-header-customization)
-* [Installation](#markdown-header-installtion)
+* [Installation](#markdown-header-installation)
 * [Usage](#markdown-header-usage)
 	 * [readheader()](#markdown-header-readheader)
 	 * [readsnap()](#markdown-header-readsnap) 
