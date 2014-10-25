@@ -21,7 +21,6 @@ E-Mail: rthompsonj@gmail.com
 * [Tips](#markdown-header-tips)
 
 ---
-
 ## Summary
 Do you *love* running simulations but *hate* fighting with the different flavors of output?  If so, you've come to the right place!  `pyGadgetReader` is designed to take the headache out of reading your `GADGET` simulation data; it plays the role of interpreter between the binary snapshot & `python`.  The module currently supports the following data types:
 
@@ -39,14 +38,12 @@ Do you *love* running simulations but *hate* fighting with the different flavors
 - **P-StarGroupFinder** data files
 
 ---
-
 ## Requirements
 * python >= 2.7.x
 * numpy >= 1.7.x
 * h5py
 
 ---
-
 ## Obtaining and Updating
 The easiest way to download the code and stay up to date is to clone a version from [bitbucket](https://bitbucket.org/rthompson/pygadgetreader) to your local computer via Mercurial (hg):
 ~~~Bash
@@ -61,7 +58,6 @@ To update all you need to do is:
 ~~~
 
 ---
-
 ## Customization
 Before building the module, there are a few customizations you *may* want to tinker with.  The first two variables can be found in *`readgadget/modules/common.py`*, while the third is located in *`readgadget/modules/gadget_blockordering.py`*.
 
@@ -79,13 +75,12 @@ Before building the module, there are a few customizations you *may* want to tin
 
 	Below are two examples.  The first represents the 'pos' block (which is present in the `dataTypes` dictionary).  The second entry is a list telling the code what particle types have this block, where -1 meaning ALL particle types.  The second represents the 'metallicity' data block; here we have a list of [0,4] telling the code that this block is present for particle types 0 (gas) & 4 (stars), and to check the `flag_metals` flag before attempting a read.  You can omit the flag checker if you know for certain the data block exists.
 
-    ~~~python
-    ('pos',[-1]),
-    ('metallicity',[[0,4],'flag_metals']),
-    ~~~
+~~~python
+('pos',[-1]),
+('metallicity',[[0,4],'flag_metals']),
+~~~
 
 ---
-
 ## Installation
 Once the code is downloaded there are two methods of installation depending on your access rights.  If you have write access to your python distribution, then the preferred method is to execute the following commands:
 
@@ -106,7 +101,6 @@ export PYTHONPATH
 If you had previously installed my `C` version of `pyGadgetReader` you should *remove* it before trying to use the code as there may be some naming conflicts.  First you need to find out *where* python, a point in the general direction is typing `which python` in your terminal, this will return your installation directory.  Next you need to locate your `site-packages` directory which is usually under python's `lib` directory.  Once there you are looking for anything in the form of `readgadget.so`, once this is found remove it.
 
 ---
-
 ## Usage
 **IMPORTANT:** When using `pyGadgetReader`, **try NOT to include** the snapshot extension or number prefix (for multi-part).  As an example, if your snapshot is named `'snap_N128L16_005.0.hdf5'`, you would only pass `'snap_N128L16_005'` to the below functions.  If the code detects `.hdf5`, `.bin`, or `.0` in the snapname it will attempt to strip the extension.
 
@@ -117,7 +111,6 @@ from pygadgetreader import *
 ~~~
 
 ---
-
 ## readheader()
 This function reads in the header and returns values of interest.  The values it can read in are as follows:
 
@@ -183,7 +176,6 @@ This function reads in the header and returns values of interest.  The values it
 			 'time': 0.29850749862971743}
 
 ---
-
 ## readsnap()
 This function does the heavy lifting.  It reads data blocks from the snapshot and returns the requested data for a a specified particle type.
 
@@ -285,7 +277,6 @@ This function does the heavy lifting.  It reads data blocks from the snapshot an
         array([ 0.38793027,  0.48951781,  0.37891224, ...,  0.2301995], dtype=float32)
 
 ---
-
 ## readrockstar()
 This function reads `Rockstar` binary data.  **Current supported return data types:**
 
@@ -366,12 +357,10 @@ This function reads `Rockstar` binary data.  **Current supported return data typ
 			       [105530,    103]])
 
 ---
-
 ## readrockstargalaxies()
 Identical usage as `readrockstar()`, except only to be used on `Rockstar-Galaxies` binary files.
 
 ---
-
 ## readfofspecial()
 This function reads `FoF_Special` binary outputs (indexlists & catalogues).  It returns a `Group` object, or a list of `Group` objects, all of which have **three** attributes:
 
@@ -416,7 +405,6 @@ This function reads `FoF_Special` binary outputs (indexlists & catalogues).  It 
 		  >>> pcount = [s.npart_total for s in halos]
 
 ---
-
 ## readpstar()
 This function reads `P-StarGroupFinder` binary outputs (indexlists & catalogues).  It returns a `Group` object, or a list of `Group` objects, all of which have **eleven** attributes:
 
@@ -469,7 +457,6 @@ This function reads `P-StarGroupFinder` binary outputs (indexlists & catalogues)
 		  >>> masses   = [s.mstar for s in galaxies]
 
 ---
-
 ## TIPS
 If you plan on doing multiple reads in a single script, you can pass a common set of options via a dictionary.  As an example:
 
@@ -484,7 +471,6 @@ temp  = readsnap(snap, 'u',   0, **pygro)
 This convinient form means that if you need to change the variables passed to each `readsnap()` call you only have to alter the `pygro` dictionary.
 
 ****
-
 If you have any comments or suggestions feel free to contact me.  Enjoy!
 
     Robert Thompson
