@@ -196,7 +196,7 @@ This function does the heavy lifting.  It reads data blocks from the snapshot an
 	   sfr	       - (gas)         Star formation rate in Msun/year
 	   age	       - (stars)       Formation time of stellar particles
  	   z	       - (gas & stars) Metallicty of gas/star particles (returns total Z)
-	   potential   - (all)         Potential of particles (if present in output)
+	   pot   	   - (all)         Potential of particles (if present in output)
 
 	  ---------------------
 	  -  CUSTOM  BLOCKS   -
@@ -239,7 +239,6 @@ This function does the heavy lifting.  It reads data blocks from the snapshot an
 		
 		Optional
 		--------
-		     units: Can either be 0 for code units or 1 for CGS
 		     debug: Shows debug information
           suppress: if set to 1 no output is printed to the command line
             double: returns a double array rather than float
@@ -248,6 +247,14 @@ This function does the heavy lifting.  It reads data blocks from the snapshot an
  	                (in this case you MUST pass the full snapshot name)
 	 blockordering: allows for the user to specify which block ordering to use
 					(only valid for Gadget type-1 binaries)
+
+		     units: Can either be 0 for code units or 1 physical:
+		     		 rho: g/cm^3 (physical if boxsize>0 and OmegaLambda > 0)
+		     	 	 vel: km/s   (peculiar if boxsize>0 and OmegaLambda > 0)
+		     		   u: Kelvin
+		     		mass: g
+					(note that no units include little h, you still need to divide that out)
+
 			  
 		Returns
 		-------
