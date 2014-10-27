@@ -253,7 +253,8 @@ This function does the heavy lifting.  It reads data blocks from the snapshot an
 		     	 	 vel: km/s   (peculiar if boxsize>0 and OmegaLambda > 0)
 		     		   u: Kelvin
 		     		mass: g
-					(note that no units include little h, you still need to divide that out)
+					(returned units do NOT include little h, 
+					 that still needs to be divided out)
 
 			  
 		Returns
