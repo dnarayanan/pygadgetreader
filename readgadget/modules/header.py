@@ -151,7 +151,7 @@ class Header(object):
 
         else:
             print('Could not determine file type by extension!')
-            sys.exit
+            sys.exit()
 
         return FTYPE
 

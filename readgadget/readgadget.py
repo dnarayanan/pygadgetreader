@@ -53,7 +53,7 @@ def readheader(snap,data,**kwargs):
 
     Examples
     --------
-    >>> h = readhead('/Users/bob/snap_020','h')
+    >>> h = readheader('/Users/bob/snap_020','h')
     >>> h
     0.7
     """
