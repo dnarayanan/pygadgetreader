@@ -1,104 +1,14 @@
 from .modules.common import *
 import numpy as np
 import os
-
-halostruct = np.dtype([('id',np.int64),
-                       ('pos',np.float32,(6,)),
-                       ('corevel',np.float32,(3,)),
-                       ('bulkvel',np.float32,(3,)),
-                       ('m',np.float32),
-                       ('r',np.float32),
-                       ('child_r',np.float32),
-                       ('vmax_r',np.float32),
-                       ('mgrav',np.float32),
-                       ('vmax',np.float32),
-                       ('rvmax',np.float32),
-                       ('rs',np.float32),
-                       ('klypin_rs',np.float32),
-                       ('vrms',np.float32),
-                       ('J',np.float32,(3,)),
-                       ('energy',np.float32),
-                       ('spin',np.float32),
-                       ('alt_m',np.float32,(4,)),
-                       ('Xoff',np.float32),
-                       ('Voff',np.float32),
-                       ('b_to_a',np.float32),
-                       ('c_to_a',np.float32),
-                       ('A',np.float32,(3,)),
-                       ('b_to_a2',np.float32),
-                       ('c_to_a2',np.float32),
-                       ('A2',np.float32,(3,)),
-                       ('bullock_spin',np.float32),
-                       ('kin_to_pot',np.float32),
-                       ('m_pe_b',np.float32),
-                       ('m_pe_d',np.float32),
-                       ('dummy1',np.float32),              ## ALIGNMENT
-                       ('num_p',np.int64),
-                       ('num_child_particles',np.int64),
-                       ('p_start',np.int64),
-                       ('desc',np.int64),
-                       ('flags',np.int64),
-                       ('n_core',np.int64),
-                       ('dummy2',np.float32),              ## ALIGNMENT
-                       ('min_pos_err',np.float32),
-                       ('min_vel_err',np.float32),
-                       ('min_bulkvel_err',np.float32)
-                   ])
-
-halogalaxystruct = np.dtype([('id',np.int64),
-                             ('pos',np.float32,(6,)),
-                             ('corevel',np.float32,(3,)),
-                             ('bulkvel',np.float32,(3,)),
-                             ('m',np.float32),
-                             ('r',np.float32),
-                             ('child_r',np.float32),
-                             ('vmax_r',np.float32),
-                             ('mgrav',np.float32),
-                             ('vmax',np.float32),
-                             ('rvmax',np.float32),
-                             ('rs',np.float32),
-                             ('klypin_rs',np.float32),
-                             ('vrms',np.float32),
-                             ('J',np.float32,(3,)),
-                             ('energy',np.float32),
-                             ('spin',np.float32),
-                             ('alt_m',np.float32,(4,)),
-                             ('Xoff',np.float32),
-                             ('Voff',np.float32),
-                             ('b_to_a',np.float32),
-                             ('c_to_a',np.float32),
-                             ('A',np.float32,(3,)),
-                             ('b_to_a2',np.float32),
-                             ('c_to_a2',np.float32),
-                             ('A2',np.float32,(3,)),
-                             ('bullock_spin',np.float32),
-                             ('kin_to_pot',np.float32),
-                             ('m_pe_b',np.float32),
-                             ('m_pe_d',np.float32),
-                             ('dummy1',np.float32),              ## ALIGNMENT
-                             ('num_p',np.int64),
-                             ('num_child_particles',np.int64),
-                             ('p_start',np.int64),
-                             ('desc',np.int64),
-                             ('flags',np.int64),
-                             ('n_core',np.int64),
-                             ('dummy2',np.float32),              ## ALIGNMENT
-                             ('min_pos_err',np.float32),
-                             ('min_vel_err',np.float32),
-                             ('min_bulkvel_err',np.float32),
-                             ('type',np.int32),
-                             ('sm',np.float32),
-                             ('gas',np.float32),
-                             ('bh',np.float32),
-                             ('peak_density',np.float32),
-                             ('av_density',np.float32),
-                         ])
+from .modules.rs_structs import getRSformat
 
 class RockstarFile(object):
     
-    def __init__(self,binfile,data,galaxies):
+    def __init__(self,binfile,data,galaxies,debug):
         self.galaxies = galaxies
         self.binfile  = binfile
+        self.debug    = debug
         self.header()
 
         self.halos()
@@ -112,16 +22,18 @@ class RockstarFile(object):
         self.num_halos     = np.fromfile(f,dtype=np.int64,count=1)[0]
         self.num_particles = np.fromfile(f,dtype=np.int64,count=1)[0]
         #print self.num_halos
+        f.seek(4 + 4 + 8,1)
+        self.format_revision = np.fromfile(f,dtype=np.int32,count=1)[0]
+        if self.debug: print('found HALO_FORMAT_REVISION %d (header)' % self.format_revision)
         bytes_left = 256 - f.tell()
         f.seek(bytes_left,1)
         self.f = f
+
+        self.halostruct = getRSformat(self)
     
     def halos(self):
         #print 'reading %d halos (%d)' % (self.num_halos,self.galaxies)
-        if self.galaxies:
-            self.halodata = np.fromfile(self.f,dtype=halogalaxystruct,count=self.num_halos)
-        else:
-            self.halodata = np.fromfile(self.f,dtype=halostruct,count=self.num_halos)
+        self.halodata = np.fromfile(self.f,dtype=self.halostruct,count=self.num_halos)
         
     def particles(self):
         self.particle_IDs     = np.zeros(self.num_particles,dtype=np.int64)
@@ -164,9 +76,9 @@ def compileReturnArray(RS,data):
         return arr
 
     ## return halo struct data
-    if data in halostruct.names:
+    if data in RS[0].halostruct.names:
         singleval = True
-        print('%s found in halodata' % data)
+        if RS[0].debug: print('%s found in halodata' % data)
 
     nhalos = 0
     for i in range(0,len(RS)):
@@ -181,7 +93,8 @@ def compileReturnArray(RS,data):
     
 
 def readrockstargalaxies(binfile,data,**kwargs):
-    arr = readrockstar(binfile,data,galaxies=1)
+    if 'galaxies' in kwargs: del kwargs['galaxies']
+    arr = readrockstar(binfile,data,galaxies=1,**kwargs)
     return arr
 
 def readrockstar(binfile,data,**kwargs):
@@ -205,15 +118,19 @@ def readrockstar(binfile,data,**kwargs):
          4.14653504e+08], dtype=float32)
     """
     galaxies = 0
-    if 'galaxies' in kwargs:
+    if 'galaxies' in kwargs and kwargs['galaxies']==1:
         galaxies = 1
+
+    debug = 0
+    if 'debug' in kwargs and kwargs['debug']==1:
+        debug = 1
 
     RS_DATA = []
     for j in range(0,5000):
         b = '%s.%d.bin' % (binfile,j)
         if os.path.isfile(b):
-            #print 'reading %s' % b
-            RS_DATA.append(RockstarFile(b,data,galaxies))
+            if debug: print('reading %s' % b)
+            RS_DATA.append(RockstarFile(b,data,galaxies,debug))
         else:
             break
 
