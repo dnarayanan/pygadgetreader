@@ -142,8 +142,6 @@ halogalaxystruct1 = np.dtype([('id',np.int64),
 
 def getRSformat(obj):
 
-    debug =1
-
     if obj.galaxies == 0:
         if obj.format_revision == 0:
             print('OUTDATED ROCKSTAR, PLEASE UPDATE!')

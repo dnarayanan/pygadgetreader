@@ -249,8 +249,8 @@ This function does the heavy lifting.  It reads data blocks from the snapshot an
 					(only valid for Gadget type-1 binaries)
 
 		     units: Can either be 0 for code units or 1 physical:
-		     		 rho: g/cm^3 (physical if boxsize>0 and OmegaLambda > 0)
-		     	 	 vel: km/s   (peculiar if boxsize>0 and OmegaLambda > 0)
+		     		 rho: g/cm^3 (physical if boxsize>0 and OmegaLambda>0)
+		     	 	 vel: km/s   (peculiar if boxsize>0 and OmegaLambda>0)
 		     		   u: Kelvin
 		     		mass: g
 					(returned units do NOT include little h, 
@@ -320,6 +320,7 @@ This function reads `Rockstar` binary data.  **Current supported return data typ
 		kin_to_pot
 		m_pe_b
 		m_pe_d
+		halfmass_radius (only avail with recent versions)
 		num_p
 		num_child_particles
 		p_start
@@ -332,7 +333,7 @@ This function reads `Rockstar` binary data.  **Current supported return data typ
 
 **DEFINITION:**
 
-		readrockstar(a,b)
+		readrockstar(a,b,debug=0,galaxies=0)
 
 		Parameters
 		----------
@@ -341,6 +342,11 @@ This function reads `Rockstar` binary data.  **Current supported return data typ
 		b : string
 			Data block you are interested in (see above list)
 					  
+		Optional
+		--------
+		     debug: Shows debug information
+		  galaxies: Invokes the RS-Galaxies reader if = 1
+					    
 		Returns
 		-------
 		array, dict
