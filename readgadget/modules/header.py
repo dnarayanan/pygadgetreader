@@ -13,7 +13,9 @@ class Header(object):
 
         self.setVars()
         fileType = self.detectFileType()
-        
+        if self.debug:
+            print('detected file type %s' % fileType)
+
         if fileType == 'gadget':  
             self.read_gadget_header()
             if not hasattr(self,'BLOCKORDER'):
