@@ -37,7 +37,8 @@ headerTypes = {'npartThisFile':'npartThisFile',
                'flag_metals':'flag_metals',
                'flag_delaytime':'flag_delaytime',
                'flag_tmax':'flag_tmax',
-               'flag_potential':'flag_potential'}
+               'flag_potential':'flag_potential',
+               'rhocrit':'rhocrit'}
 # account for different names
 headerTypes['mass']          = 'massTable'
 headerTypes['num_files']     = 'nfiles'
@@ -64,6 +65,7 @@ headerTypes['f_metals']      = 'flag_metals'
 headerTypes['npartThis']     = 'npartThisFile'
 headerTypes['nparts']        = 'npartTotal'
 headerTypes['npart']         = 'npartTotal'
+headerTypes['rhoc']          = 'rhocrit'
 headerTypes['header']        = ' '
 headerTypes['Header']        = ' '
 

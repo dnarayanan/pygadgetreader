@@ -27,6 +27,8 @@ class Header(object):
             if self.npartTotalHW[i] > 0:
                 self.npartTotal[i] += (self.npartTotalHW[i] << 32)
 
+        self.calcRhoCrit()
+
         ## assign dictionary
         self.header_vals = {'npartThisFile':self.npartThisFile,
                             'npartTotal':self.npartTotal,
@@ -50,7 +52,16 @@ class Header(object):
                             'flag_metals':self.flag_metals,
                             'flag_potential':self.flag_potential,
                             'flag_delaytime':self.flag_delaytime,
-                            'flag_tmax':self.flag_tmax}
+                            'flag_tmax':self.flag_tmax,
+                            'rhocrit':self.rhocrit}
+
+    def calcRhoCrit(self):
+        H0  = self.HubbleParam * 100.
+        Hz  = H0 * np.sqrt(self.OmegaLambda + self.Omega0 * (1.+self.redshift)**3)
+        Hz /= 3.08567758e19  ## 1/s
+        G   = 6.674e-8       ## cm^3/g/s^2
+
+        self.rhocrit = 3. * Hz**2 / (8. * np.pi * G)
 
     def setVars(self):
         ## nth particle ##

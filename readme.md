@@ -3,6 +3,8 @@ Author: Robert Thompson
 
 E-Mail: rthompsonj@gmail.com
 
+If you use this code for your work please cite [[ascl:1411.001](http://ascl.net/1411.001)]
+
 ---
 
 # Contents
