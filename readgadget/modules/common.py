@@ -84,7 +84,7 @@ def initUnits(h):
             h.UnitEnergy_in_cgs = (h.UnitMass_in_g * h.UnitLength_in_cm**2 / 
                                    h.UnitTime_in_s**2)
         elif h.reading == 'mass':
-            convert = h.UnitMass_in_g
+            convert = h.UnitMass_in_g/1.989e33
         
     if h.reading == 'pid':
         convert = 1
