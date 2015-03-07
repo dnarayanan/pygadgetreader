@@ -42,10 +42,14 @@ def hdf5_general(f,h,ptype):
             arr = np.zeros(h.npartThisFile[ptype],dtype=np.float32)
 
         if h.units and h.reading == 'u':
-            ne = f['PartType0/%s' % (HDF5_NAMES['ne'])]
             from . import common as common
-            h.convert = common.getTfactor(np.asarray(ne,dtype=np.float32),h)
-            #h.convert = h.convert.astype(np.float32)
+            if HDF5_NAMES['ne'] not in f['PartType0']:
+                print('WARNING! ElectronAbundance not found!  Temp estimate approximate')
+                h.convert = common.getTfactorNoNe()
+            else:
+                ne = f['PartType0/%s' % (HDF5_NAMES['ne'])]
+                h.convert = common.getTfactor(np.asarray(ne,dtype=np.float32),h)
+                #h.convert = h.convert.astype(np.float32)
     else:
         if h.debug: print('coult not find PartType%d' % ptype)
         arr = np.zeros(0,dtype=np.float32)

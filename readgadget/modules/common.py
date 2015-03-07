@@ -98,7 +98,10 @@ def getTfactor(Ne,h):
     conversion = (MeanWeight / BOLTZMANN * (GAMMA - 1.0) * 
                   h.UnitEnergy_in_cgs / h.UnitMass_in_g)
     return conversion
-
+def getTfactorNoNe():
+    """calculate temperature conversion factor withOUT Ne"""
+    conversion = (GAMMA-1.0) * (PROTONMASS/BOLTZMANN) * 1.0e5**2
+    return conversion
 
 def gadgetPrinter(h,d,p):
 
