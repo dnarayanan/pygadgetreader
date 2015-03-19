@@ -48,6 +48,28 @@ BLOCKORDERING0 = OrderedDict([
     ('pot',        [-1,'flag_potential'])
 ])
 
+## Ben's block ordering
+BLOCKORDERING2 = OrderedDict([
+    ('pos' ,[-1]),
+    ('vel' ,[-1]),
+    ('pid' ,[-1]),
+    ('mass',[-1]),
+    ('pot',,[-1]),
+    ('u'   ,[0]),
+    ('rho' ,[0]),
+    ('ne'  ,[0]),
+    ('nh'  ,[0]),
+    ('hsml',[0]),
+    ('sfr' ,[0]),
+    ('delaytime',  [0,'flag_delaytime']),
+    ('fh2'  ,      [ 0,'flag_fh2']),
+    ('sigma',      [ 0,'flag_fh2']),
+    ('age' ,       [ 4,'flag_age']),
+    ('metallicity',[[0,4],'flag_metals']),
+    ('tmax',       [[0,4],'flag_tmax']),
+    ('nspawn',     [[0,4]]),
+])
+
 ## Ken's block ordering
 BLOCKORDERING1 = OrderedDict([
     ('pos' ,[-1]),
@@ -69,4 +91,5 @@ BLOCKORDERING1 = OrderedDict([
 
 ## NAME THE BLOCK ORDERINGS ##
 BLOCKORDERING = {'romeel':BLOCKORDERING0,
-                 'ken'   :BLOCKORDERING1}
+                 'ken'   :BLOCKORDERING1,
+                 'ben'   :BLOCKORDERING2}
