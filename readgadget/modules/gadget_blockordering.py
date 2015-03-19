@@ -54,7 +54,7 @@ BLOCKORDERING2 = OrderedDict([
     ('vel' ,[-1]),
     ('pid' ,[-1]),
     ('mass',[-1]),
-    ('pot',,[-1]),
+    ('pot' ,[-1]),
     ('u'   ,[0]),
     ('rho' ,[0]),
     ('ne'  ,[0]),
