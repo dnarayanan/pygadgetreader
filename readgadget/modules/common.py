@@ -75,7 +75,7 @@ def initUnits(h):
             else:
                 convert = h.UnitMass_in_g / h.UnitLength_in_cm**3
         elif h.reading == 'vel':
-            if h.boxsize > 0. and h.Ol > 0:
+            if h.boxsize > 0. and h.OmegaLambda > 0:
                 convert = np.sqrt(h.time)
         elif h.reading == 'sigma':
             convert = h.UnitMass_in_g / h.UnitLength_in_cm**2
