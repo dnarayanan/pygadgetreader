@@ -96,7 +96,7 @@ def readsnap(snap,data,ptype,**kwargs):
     initUnits(h)
     
     #print 'reading %d files...' % (h.nfiles)
-
+    N=0
     for i in range(0,h.nfiles):
         if i > 0:
             h = HEAD.Header(snap,i,kwargs)
@@ -128,13 +128,19 @@ def readsnap(snap,data,ptype,**kwargs):
         ## put arrays together
         if i > 0:
             if len(arr) > 0:
-                return_arr = np.concatenate((return_arr,arr))
+                # return_arr = np.concatenate((return_arr,arr))
+                return_arr[N:N+arr.shape[0]] = arr
         else:
-            return_arr = arr
+            if len(arr.shape) == 1:
+                return_arr = np.zeros(h.npartTotal[p],dtype=arr.dtype)
+            elif len(arr.shape) == 2:
+                return_arr = np.zeros((h.npartTotal[p],arr.shape[1]),dtype=arr.dtype)
+            return_arr[N:N+arr.shape[0]] = arr
             gadgetPrinter(h,d,p)
             if h.nth > 1 and not h.suppress:
                 print('selecting every %d particles' % h.nth)
-
+        N+=arr.shape[0]
+        
         ## if requesting a single file, break out of loop
         if h.singleFile:
             break

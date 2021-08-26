@@ -86,7 +86,7 @@ def initUnits(h):
         elif h.reading == 'mass':
             convert = h.UnitMass_in_g/1.989e33
         
-    if h.reading == 'pid':
+    if h.reading == 'pid' or h.reading == 'HaloID':
         convert = 1
     h.convert = convert
 
