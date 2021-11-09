@@ -126,7 +126,7 @@ def readsnap(snap,data,ptype,**kwargs):
             arr = arr[0::h.nth]
 
         ## put arrays together
-        if i > 0:
+        if N > 0:
             if len(arr) > 0:
                 # return_arr = np.concatenate((return_arr,arr))
                 return_arr[N:N+arr.shape[0]] = arr
