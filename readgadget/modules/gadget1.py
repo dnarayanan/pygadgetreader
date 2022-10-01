@@ -181,7 +181,7 @@ def gadget_readgasstarprop(f,h,ptype):
         f.seek(np.dtype(h.dataType).itemsize * h.npartThisFile[4],1)
     skip2 = skip(f)
     errorcheck(skip1,skip2,'gas-star prop')
-    return gasstarprop*h.convert
+    return gasstarprop
 
 def gadget_readmetals(f,h,ptype,single=1):
     skip1 = skip(f)
@@ -220,9 +220,13 @@ def gadget_readpotentials(f,h,ptype):
 
     return potentials
 
-def gadget_readage(f,h):
+def gadget_readage(f,h,ptype):
     skip1 = skip(f)
-    age   = np.fromfile(f,dtype=h.dataType,count=h.npartThisFile[4])
+    if ptype == 5:
+        f.seek(np.dtype(h.dataType).itemsize * h.npartThisFile[4],1)
+    age   = np.fromfile(f,dtype=h.dataType,count=h.npartThisFile[ptype])
+    if ptype == 4:
+        f.seek(np.dtype(h.dataType).itemsize * h.npartThisFile[5],1)
     skip2 = skip(f)
     errorcheck(skip1,skip2,'age')
 
@@ -255,7 +259,7 @@ def gadget_read(f,h,p,d):
     elif h.reading == 'pot':
         arr = gadget_readpotentials(f,h,p)
     elif h.reading == 'age':
-        arr = gadget_readage(f,h)
+        arr = gadget_readage(f,h,p)
     else:
         print('no clue what to read =(')
         arr = np.zeros(0)
