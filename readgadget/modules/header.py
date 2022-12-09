@@ -22,10 +22,11 @@ class Header(object):
                 self.BLOCKORDER = gbo.BLOCKORDERING[gbo.DEFAULT_BLOCKORDERING]
         elif fileType == 'hdf5':  self.read_hdf5_header()
         elif fileType == 'tipsy': self.read_tipsy_header()
-
-        for i in range(0,5):
-            if self.npartTotalHW[i] > 0:
-                self.npartTotal[i] += (self.npartTotalHW[i] << 32)
+        
+        if (fileType == 'tipsy') or (fileType == 'gadget'):
+            for i in range(0,5):
+                if self.npartTotalHW[i] > 0:
+                    self.npartTotal[i] += (self.npartTotalHW[i] << 32)
 
         self.calcRhoCrit()
 
