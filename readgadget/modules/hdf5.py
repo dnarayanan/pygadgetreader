@@ -79,7 +79,7 @@ def hdf5_readmetals(f,h,ptype,single=1):
     if ('PartType%d' % ptype) in f:
         if HDF5_NAMES[h.reading] in f['PartType%d' % ptype]:
             metals = f['PartType%d/%s' % (ptype,HDF5_NAMES[h.reading])]
-            if (single and h.flag_metals == 11) or (single and h.flag_metals == 12):  ## FROM GIZMO
+            if (single and h.flag_metals == 11) or (single and h.flag_metals == 12) or (single and h.flag_metals == 34):  ## FROM GIZMO and including Chem5
                 arr = metals[:,0]
             elif single and h.flag_metals > 1:
                 arr = np.sum(metals,axis=1) * METALFACTOR

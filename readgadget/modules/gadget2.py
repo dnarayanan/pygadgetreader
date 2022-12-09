@@ -15,12 +15,14 @@ TYPE2NAMES = {
     'ne':'NE  ',
     'nh':'NH  ',
     'hsml':'HSML',
-    'sfr':'SFR',
+    'sfr':'SFR ',
     'metallicity':'Z   ',
+    'Z':'Z   ',
     'pot':'POT ',
     'fh2':'fH2 ',
     'sigma':'Sigm',
-    'age':'AGE '
+    'age':'AGE ',
+    'temp':'TEMP'
 }
 
 def findBlock(f,h):
@@ -61,6 +63,7 @@ def gadget_general(f,h,ptype):
     gOnly   = 0.
     sOnly   = 0.
     gsOnly  = 0.
+    sbOnly  = 0. 
     allPart = 0.
 
     if h.npartThisFile[0] > 0:
@@ -70,6 +73,9 @@ def gadget_general(f,h,ptype):
     if h.npartThisFile[0] > 0 or h.npartThisFile[4] > 0:
         gsOnly  = skip1 / (np.dtype(h.dataType).itemsize * h.npartThisFile[0] + 
                            np.dtype(h.dataType).itemsize * h.npartThisFile[4])
+    if h.npartThisFile[0] > 0 or h.npartThisFile[4] > 0:
+        sbOnly = skip1 / (np.dtype(h.dataType).itemsize * h.npartThisFile[4] +
+                            np.dtype(h.dataType).itemsize * h.npartThisFile[5])
     allPart = skip1 / (np.dtype(h.dataType).itemsize * np.sum(h.npartThisFile)) 
 
     if gOnly == 1.0:
@@ -91,6 +97,15 @@ def gadget_general(f,h,ptype):
         vals = np.fromfile(f,dtype=h.dataType,count=h.npartThisFile[ptype])
         if ptype == 0:
             f.seek(np.dtype(h.dataType).itemsize * h.npartThisFile[4],1)
+    elif sbOnly == 1.0:
+        if ptype != 5 and ptype != 4:
+            print('block is only present for gas & stars!')
+            return
+        if ptype == 5:
+            f.seek(np.dtype(h.dataType).itemsize * h.npartThisFile[4],1)
+        vals = np.fromfile(f,dtype=h.dataType,count=h.npartThisFile[ptype])
+        if ptype == 4:
+            f.seek(np.dtype(h.dataType).itemsize * h.npartThisFile[5],1)
     elif allPart == 1.0:
         for i in range(0,ptype):
             f.seek(np.dtype(h.dataType).itemsize * h.npartThisFile[i],1)
@@ -122,6 +137,10 @@ def gadget_type2_read(f,h,p):
         arr = g.gadget_readmass(f,h,p)
     elif h.reading == 'metallicity':
         arr = g.gadget_readmetals(f,h,p,single=0)
+    elif h.reading == 'age':
+        arr = g.gadget_readage(f,h,p)
+    elif h.reading == 'Z':
+        arr = gadget_readgasstarprop(f,h,p)
     else:
         arr = gadget_general(f,h,p)
         
