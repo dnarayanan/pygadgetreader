@@ -83,8 +83,8 @@ def initUnits(h):
             h.UnitTime_in_s = h.UnitLength_in_cm / h.UnitVelocity_in_cm_per_s
             h.UnitEnergy_in_cgs = (h.UnitMass_in_g * h.UnitLength_in_cm**2 / 
                                    h.UnitTime_in_s**2)
-        elif h.reading == 'mass':
-            convert = h.UnitMass_in_g/1.989e33
+        elif h.reading == 'mass' or h.reading == 'BH_Mass':
+            convert = h.UnitMass_in_g/1.989e33            
         
     if h.reading == 'pid' or h.reading == 'HaloID':
         convert = 1
