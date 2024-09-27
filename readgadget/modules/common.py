@@ -95,6 +95,7 @@ def getTfactor(Ne,h):
     """calculate temperature conversion factor including Ne"""
     MeanWeight = (4.0 / (3.0 * H_MASSFRAC + 1.0 + 4.0 * H_MASSFRAC * Ne) * 
                   PROTONMASS)
+    MeanWeight = MeanWeight.astype('float64')
     conversion = (MeanWeight / BOLTZMANN * (GAMMA - 1.0) * 
                   h.UnitEnergy_in_cgs / h.UnitMass_in_g)
     return conversion
